@@ -1,0 +1,99 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_REGISTRY = credentials('docker-registry')
+        KUBECONFIG_CREDENTIALS = credentials('kubeconfig')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Test API') {
+            steps {
+                dir('apps/api') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Build API') {
+            steps {
+                dir('apps/api') {
+                    sh 'mvn package -DskipTests'
+                }
+            }
+        }
+
+        stage('Test Web') {
+            steps {
+                dir('apps/web') {
+                    sh 'npm ci'
+                    sh 'npm test'
+                }
+            }
+        }
+
+        stage('Build Web') {
+            steps {
+                dir('apps/web') {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            parallel {
+                stage('API Image') {
+                    steps {
+                        script {
+                            def apiImage = docker.build(
+                                "${DOCKER_REGISTRY}/upvote-api:${BUILD_NUMBER}",
+                                "apps/api"
+                            )
+                            apiImage.push()
+                            apiImage.push('latest')
+                        }
+                    }
+                }
+                stage('Web Image') {
+                    steps {
+                        script {
+                            def webImage = docker.build(
+                                "${DOCKER_REGISTRY}/upvote-web:${BUILD_NUMBER}",
+                                "apps/web"
+                            )
+                            webImage.push()
+                            webImage.push('latest')
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl apply -f infra/k8s/'
+                    sh "kubectl set image deployment/api-deployment api=${DOCKER_REGISTRY}/upvote-api:${BUILD_NUMBER} -n upvote"
+                    sh "kubectl set image deployment/web-deployment web=${DOCKER_REGISTRY}/upvote-web:${BUILD_NUMBER} -n upvote"
+                    sh 'kubectl rollout status deployment/api-deployment -n upvote --timeout=120s'
+                    sh 'kubectl rollout status deployment/web-deployment -n upvote --timeout=120s'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executado com sucesso!'
+        }
+        failure {
+            echo 'Pipeline falhou. Verifique os logs.'
+        }
+    }
+}
