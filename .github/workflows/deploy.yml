@@ -23,16 +23,16 @@ jobs:
 
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Autenticar no GCP via Workload Identity Federation
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v2.1.10
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Configurar Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v2.1.4
 
       - name: Autenticar no Artifact Registry
         run: gcloud auth configure-docker "${{ env.REGISTRY }}" --quiet
@@ -50,7 +50,7 @@ jobs:
           docker push "${IMAGE}:latest"
 
       - name: Conectar ao cluster GKE
-        uses: google-github-actions/get-gke-credentials@v2
+        uses: google-github-actions/get-gke-credentials@v2.3.1
         with:
           cluster_name: ${{ env.CLUSTER_NAME }}
           location: ${{ env.REGION }}
