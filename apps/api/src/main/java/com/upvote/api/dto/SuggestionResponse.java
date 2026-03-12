@@ -14,4 +14,5 @@ public record SuggestionResponse(
         String authorName,
         LocalDateTime createdAt,
         boolean votedByCurrentUser
-) {}
+) {
+}

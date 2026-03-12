@@ -9,4 +9,5 @@ public record ProductResponse(
         String slug,
         String widgetColor,
         LocalDateTime createdAt
-) {}
+) {
+}

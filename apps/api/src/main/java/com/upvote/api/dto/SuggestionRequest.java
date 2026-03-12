@@ -9,4 +9,5 @@ public record SuggestionRequest(
         String title,
 
         String description
-) {}
+) {
+}

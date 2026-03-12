@@ -9,5 +9,6 @@ import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findByOrganizationId(UUID organizationId);
+
     Optional<Product> findBySlug(String slug);
 }

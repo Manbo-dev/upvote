@@ -1,6 +1,8 @@
 package com.upvote.api.controller;
 
-import com.upvote.api.dto.*;
+import com.upvote.api.dto.ApiResponse;
+import com.upvote.api.dto.CommentRequest;
+import com.upvote.api.dto.CommentResponse;
 import com.upvote.api.repository.UserRepository;
 import com.upvote.api.service.CommentService;
 import jakarta.validation.Valid;

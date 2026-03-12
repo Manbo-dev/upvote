@@ -8,4 +8,5 @@ public record CommentResponse(
         String content,
         String authorName,
         LocalDateTime createdAt
-) {}
+) {
+}

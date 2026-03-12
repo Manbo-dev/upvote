@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public interface VoteRepository extends JpaRepository<Vote, UUID> {
     Optional<Vote> findBySuggestionIdAndUserId(UUID suggestionId, UUID userId);
+
     boolean existsBySuggestionIdAndUserId(UUID suggestionId, UUID userId);
+
     long countBySuggestionId(UUID suggestionId);
 }

@@ -1,11 +1,17 @@
 package com.upvote.api.controller;
 
-import com.upvote.api.dto.*;
+import com.upvote.api.dto.ApiResponse;
+import com.upvote.api.dto.AuthResponse;
+import com.upvote.api.dto.LoginRequest;
+import com.upvote.api.dto.RegisterRequest;
 import com.upvote.api.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller de autenticação: registro e login
