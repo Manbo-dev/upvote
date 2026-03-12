@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: upvote
+  labels:
+    app: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: europe-west1-docker.pkg.dev/project-38c32df4-c37c-41d9-b5d/upvote/api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            # PostgreSQL (Neon.tech)
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: DB_NAME
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: DB_PASSWORD
+            # JWT
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: JWT_SECRET
+            - name: JWT_EXPIRATION
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: JWT_EXPIRATION
+            # Mail
+            - name: MAIL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: MAIL_HOST
+            - name: MAIL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: MAIL_PORT
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: MAIL_USERNAME
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: MAIL_PASSWORD
+            # CORS
+            - name: CORS_ORIGINS
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: CORS_ORIGINS
+            # RabbitMQ
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq"
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: RABBITMQ_USER
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: RABBITMQ_PASSWORD
+            # Redis
+            - name: SPRING_DATA_REDIS_HOST
+              value: "redis"
+            - name: SPRING_DATA_REDIS_PORT
+              value: "6379"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            failureThreshold: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+  namespace: upvote
+spec:
+  selector:
+    app: api
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer

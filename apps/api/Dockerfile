@@ -1,3 +1,4 @@
+
 # Estágio 1: Build com Maven
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
