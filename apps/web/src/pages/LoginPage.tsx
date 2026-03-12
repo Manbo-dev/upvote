@@ -37,7 +37,7 @@ export default function LoginPage() {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-primary-600">Upvote</h1>
           <p className="mt-2 text-gray-600">
-            Plataforma de feedback de produto
+            João, o melhor lugar para compartilhar e descobrir ideias incríveis!
           </p>
         </div>
 
