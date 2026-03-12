@@ -1,0 +1,84 @@
+name: Deploy API to GKE
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: project-38c32df4-c37c-41d9-b5d
+  REGION: europe-west1
+  CLUSTER_NAME: upvote-cluster
+  NAMESPACE: upvote
+  REPO_NAME: upvote
+  IMAGE_NAME: api
+  REGISTRY: europe-west1-docker.pkg.dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Autenticar no GCP via Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Configurar Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Autenticar no Artifact Registry
+        run: gcloud auth configure-docker "${{ env.REGISTRY }}" --quiet
+
+      - name: Build e push da imagem Docker
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}"
+          docker build \
+            --platform linux/amd64 \
+            -t "${IMAGE}:${{ github.sha }}" \
+            -t "${IMAGE}:latest" \
+            -f apps/api/Dockerfile \
+            apps/api
+          docker push "${IMAGE}:${{ github.sha }}"
+          docker push "${IMAGE}:latest"
+
+      - name: Conectar ao cluster GKE
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          location: ${{ env.REGION }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Aplicar namespace
+        run: kubectl apply -f infra/k8s/namespace.yaml
+
+      - name: Aplicar secrets do Google Secret Manager
+        run: bash infra/k8s/apply-secrets.sh
+
+      - name: Aplicar RabbitMQ e Redis
+        run: |
+          kubectl apply -f infra/k8s/rabbitmq.yaml
+          kubectl apply -f infra/k8s/redis.yaml
+
+      - name: Atualizar imagem no deployment com SHA do commit
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}"
+          sed -i "s|image: .*api:.*|image: ${IMAGE}:${{ github.sha }}|" infra/k8s/deployment.yaml
+          kubectl apply -f infra/k8s/deployment.yaml
+
+      - name: Aplicar HPA
+        run: kubectl apply -f infra/k8s/hpa.yaml
+
+      - name: Aguardar rollout da API
+        run: kubectl rollout status deployment/api -n ${{ env.NAMESPACE }} --timeout=300s
+
+      - name: Exibir status dos pods
+        if: always()
+        run: kubectl get pods -n ${{ env.NAMESPACE }}
