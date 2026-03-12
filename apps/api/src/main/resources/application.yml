@@ -46,3 +46,9 @@ management:
     web:
       exposure:
         include: health,info
+  health:
+    mail:
+      # Desabilitado enquanto MAIL_USERNAME e MAIL_PASSWORD não estiverem configurados.
+      # Quando as credenciais de e-mail estiverem definidas, remover este bloco
+      # para reativar o health check do mail no Actuator.
+      enabled: false
