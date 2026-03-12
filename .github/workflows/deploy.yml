@@ -1,4 +1,4 @@
-name: Deploy API to GKE
+name: Deploy to Production
 
 on:
   push:
@@ -14,7 +14,8 @@ env:
   REGISTRY: europe-west1-docker.pkg.dev
 
 jobs:
-  deploy:
+  deploy-api:
+    name: Deploy API (GKE)
     runs-on: ubuntu-latest
 
     permissions:
@@ -82,3 +83,46 @@ jobs:
       - name: Exibir status dos pods
         if: always()
         run: kubectl get pods -n ${{ env.NAMESPACE }}
+
+  deploy-web:
+    name: Deploy Frontend (Vercel)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4.2.2
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+        working-directory: apps/web
+
+      - name: Instalar Vercel CLI
+        run: npm install -g vercel
+
+      - name: Pull configurações da Vercel
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build do projeto
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy para produção
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
