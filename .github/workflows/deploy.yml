@@ -14,9 +14,9 @@ env:
   REGISTRY: europe-west1-docker.pkg.dev
 
 jobs:
-  # ─────────────────────────────────────────
-  # 1. SOURCE — Checkout & validação inicial
-  # ─────────────────────────────────────────
+  # -------------------------------------------
+  # 1. SOURCE - Checkout & validacao inicial
+  # -------------------------------------------
   source:
     name: Source
     runs-on: ubuntu-latest
@@ -24,7 +24,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Checkout do código
+      - name: Checkout do codigo
         uses: actions/checkout@v4
 
       - name: Autenticar no GCP via Workload Identity Federation
@@ -36,9 +36,9 @@ jobs:
       - name: Configurar Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v3
 
-  # ─────────────────────────────────────────
-  # 2. BUILD API — Docker build & push
-  # ─────────────────────────────────────────
+  # -------------------------------------------
+  # 2. BUILD API - Docker build & push
+  # -------------------------------------------
   build-api:
     name: Build API
     runs-on: ubuntu-latest
@@ -47,7 +47,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Checkout do código
+      - name: Checkout do codigo
         uses: actions/checkout@v4
 
       - name: Autenticar no GCP via Workload Identity Federation
@@ -74,15 +74,15 @@ jobs:
           docker push "${IMAGE}:${{ github.sha }}"
           docker push "${IMAGE}:latest"
 
-  # ─────────────────────────────────────────
-  # 3. BUILD WEB — Vercel build
-  # ─────────────────────────────────────────
+  # -------------------------------------------
+  # 3. BUILD WEB - Vercel build
+  # -------------------------------------------
   build-web:
     name: Build Frontend
     runs-on: ubuntu-latest
     needs: source
     steps:
-      - name: Checkout do código
+      - name: Checkout do codigo
         uses: actions/checkout@v4
 
       - name: Instalar Node.js
@@ -92,14 +92,14 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
 
-      - name: Instalar dependências
+      - name: Instalar dependencias
         run: npm ci
         working-directory: apps/web
 
       - name: Instalar Vercel CLI
         run: npm install -g vercel
 
-      - name: Pull configurações da Vercel
+      - name: Pull configuracoes da Vercel
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: apps/web
         env:
@@ -113,9 +113,16 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-  # ─────────────────────────────────────────
-  # 4. DEPLOY API — Infra + rollout no GKE
-  # ─────────────────────────────────────────
+      - name: Salvar output do build
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-output
+          path: apps/web/.vercel/output
+          retention-days: 1
+
+  # -------------------------------------------
+  # 4. DEPLOY API - Infra + rollout no GKE
+  # -------------------------------------------
   deploy-api:
     name: Deploy API (GKE)
     runs-on: ubuntu-latest
@@ -124,7 +131,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Checkout do código
+      - name: Checkout do codigo
         uses: actions/checkout@v4
 
       - name: Autenticar no GCP via Workload Identity Federation
@@ -167,15 +174,15 @@ jobs:
         if: always()
         run: kubectl get pods -n ${{ env.NAMESPACE }}
 
-  # ─────────────────────────────────────────
-  # 5. DEPLOY WEB — Vercel production
-  # ─────────────────────────────────────────
+  # -------------------------------------------
+  # 5. DEPLOY WEB - Vercel production
+  # -------------------------------------------
   deploy-web:
     name: Deploy Frontend (Vercel)
     runs-on: ubuntu-latest
     needs: build-web
     steps:
-      - name: Checkout do código
+      - name: Checkout do codigo
         uses: actions/checkout@v4
 
       - name: Instalar Node.js
@@ -188,7 +195,13 @@ jobs:
       - name: Instalar Vercel CLI
         run: npm install -g vercel
 
-      - name: Deploy para produção
+      - name: Restaurar output do build
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: apps/web/.vercel/output
+
+      - name: Deploy para producao
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: apps/web
         env:
