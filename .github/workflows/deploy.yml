@@ -15,7 +15,7 @@ env:
 
 jobs:
   # -------------------------------------------
-  # 1. SOURCE - Checkout & validacao inicial
+  # 1. SOURCE - Detecta mudancas e valida
   # -------------------------------------------
   source:
     name: Source
@@ -23,9 +23,23 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    outputs:
+      api_changed: ${{ steps.filter.outputs.api }}
+      web_changed: ${{ steps.filter.outputs.web }}
     steps:
       - name: Checkout do codigo
         uses: actions/checkout@v4
+
+      - name: Detectar mudancas por contexto
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'infra/k8s/**'
+            web:
+              - 'apps/web/**'
 
       - name: Autenticar no GCP via Workload Identity Federation
         uses: google-github-actions/auth@v3
@@ -43,6 +57,7 @@ jobs:
     name: Build API
     runs-on: ubuntu-latest
     needs: source
+    if: needs.source.outputs.api_changed == 'true'
     permissions:
       contents: read
       id-token: write
@@ -81,6 +96,7 @@ jobs:
     name: Build Frontend
     runs-on: ubuntu-latest
     needs: source
+    if: needs.source.outputs.web_changed == 'true'
     steps:
       - name: Checkout do codigo
         uses: actions/checkout@v4
@@ -126,7 +142,8 @@ jobs:
   deploy-api:
     name: Deploy API (GKE)
     runs-on: ubuntu-latest
-    needs: build-api
+    needs: [source, build-api]
+    if: needs.source.outputs.api_changed == 'true'
     permissions:
       contents: read
       id-token: write
@@ -180,7 +197,8 @@ jobs:
   deploy-web:
     name: Deploy Frontend (Vercel)
     runs-on: ubuntu-latest
-    needs: build-web
+    needs: [source, build-web]
+    if: needs.source.outputs.web_changed == 'true'
     steps:
       - name: Checkout do codigo
         uses: actions/checkout@v4
