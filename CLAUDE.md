@@ -14,11 +14,11 @@ com preço mais acessível.
 
 ## Stack completa
 - Frontend: React 18 + TypeScript + Vite + TailwindCSS
-- Backend: Spring Boot 3.2 + Java 21 + PostgreSQL 15
+- Backend: Spring Boot 3.4.3 + Java 21 + PostgreSQL (Neon.tech)
 - Widget: TypeScript puro embarcável via script tag
 - Cache: Redis
 - Filas: RabbitMQ
-- Infra: Kubernetes + Jenkins CI/CD
+- Infra: GKE Autopilot + GitHub Actions CI/CD
 - Testes backend: JUnit 5 + Mockito + Testcontainers
 - Testes frontend: Vitest + React Testing Library + MSW
 
@@ -26,8 +26,9 @@ com preço mais acessível.
 - apps/web → frontend React (porta 5173 em dev)
 - apps/api → backend Spring Boot (porta 8080 em dev)
 - packages/widget → widget JS embarcável
-- infra/k8s → manifests Kubernetes
-- infra/jenkins → Jenkinsfile
+- infra/k8s → manifests Kubernetes + scripts de deploy
+- infra/scripts → scripts de setup (Secret Manager, GitHub Actions, start/stop)
+- .github/workflows → GitHub Actions CI/CD
 
 ## Como rodar localmente
 # 1. Subir infraestrutura
@@ -60,8 +61,65 @@ npm install && npm run dev
 - Plano Pro R$129/mês: 10 produtos, changelog, roadmap público
 - Plano Business R$299/mês: ilimitado, SSO, API, white-label
 
-## Contexto de infraestrutura
-- Kubernetes com namespace "upvote"
-- HPA na API: min 2, max 10 réplicas (gatilho CPU 70%)
-- Jenkins pipeline: test → build → docker push → kubectl apply
-- Domínios: app.upvote.com (frontend), api.upvote.com (backend)
+## Infraestrutura
+
+### Stack de infraestrutura
+- Kubernetes gerenciado: Google Kubernetes Engine (GKE) Autopilot
+- Região: europe-west1 (Bélgica)
+- Cluster: upvote-cluster
+- Namespace: upvote
+- Projeto GCP: project-38c32df4-c37c-41d9-b5d
+- Banco de dados: PostgreSQL gerenciado no Neon.tech (externo ao cluster)
+- Registry de imagens: Google Artifact Registry (europe-west1-docker.pkg.dev/project-38c32df4-c37c-41d9-b5d/upvote/api)
+- Secrets: Google Secret Manager
+- CI/CD: GitHub Actions (.github/workflows/deploy.yml)
+
+### Serviços rodando no cluster
+- **api** — Spring Boot 3.4.3, Java 21, 2 réplicas, HPA 2-10, porta 8080, Service tipo LoadBalancer
+- **redis** — Redis 7-alpine, porta 6379, Service ClusterIP
+- **rabbitmq** — RabbitMQ 3-management-alpine, portas 5672 e 15672, Service ClusterIP
+
+### Comandos úteis do dia a dia
+
+```bash
+# Ver status dos pods
+kubectl get pods -n upvote
+
+# Ver logs da API
+kubectl logs -f deployment/api -n upvote
+
+# Desligar tudo (economizar)
+kubectl scale deployment api rabbitmq redis --replicas=0 -n upvote
+
+# Ligar tudo
+kubectl scale deployment api rabbitmq redis --replicas=1 -n upvote
+
+# Atualizar um secret
+echo -n "novo-valor" | gcloud secrets versions add NOME_DO_SECRET --data-file=- --project=project-38c32df4-c37c-41d9-b5d
+
+# Buildar e fazer push da imagem manualmente
+./infra/k8s/build-and-push.sh
+
+# Deploy manual
+./infra/k8s/deploy.sh
+```
+
+### Fluxo de CI/CD
+- Push na branch `main` → GitHub Actions dispara automaticamente
+- Build da imagem Docker com `--platform linux/amd64` (necessário para Mac M1/M2/M3)
+- Push no Artifact Registry com tag `latest` e SHA do commit
+- Autenticação via Workload Identity Federation (sem chave JSON)
+- Deploy no GKE na ordem: namespace → secrets → rabbitmq → redis → api → hpa
+- Rollout aguardado com `kubectl rollout status`
+
+### Secrets gerenciados pelo Google Secret Manager
+`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `CORS_ORIGINS`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`
+
+### GitHub Actions secrets necessários
+- `GCP_PROJECT_ID` = `project-38c32df4-c37c-41d9-b5d`
+- `GCP_WORKLOAD_IDENTITY_PROVIDER` = `projects/223057559224/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider`
+- `GCP_SERVICE_ACCOUNT` = `github-actions@project-38c32df4-c37c-41d9-b5d.iam.gserviceaccount.com`
+
+### Domínios
+- app.upvote.com (frontend)
+- api.upvote.com (backend)

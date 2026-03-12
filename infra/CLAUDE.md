@@ -1,42 +1,43 @@
-# Infra — Kubernetes + Jenkins
+# Infra — GKE Autopilot + GitHub Actions
 
 ## Kubernetes
+- Cluster: GKE Autopilot (upvote-cluster, europe-west1)
 - Namespace: upvote
-- Cluster gerenciado (ex: GKE, EKS ou DigitalOcean)
+- Projeto GCP: project-38c32df4-c37c-41d9-b5d
 - Todos os manifests em infra/k8s/
-- Aplicar tudo: kubectl apply -f infra/k8s/
 
 ## Serviços no cluster
-- api → Deployment Spring Boot (2-10 réplicas via HPA)
-- web → Deployment React servido via nginx
-- postgres → StatefulSet com PersistentVolumeClaim
-- redis → Deployment Redis
-- rabbitmq → Deployment RabbitMQ
+- api → Deployment Spring Boot 3.4.3 (2-10 réplicas via HPA), Service LoadBalancer porta 8080
+- redis → Deployment Redis 7-alpine, Service ClusterIP porta 6379
+- rabbitmq → Deployment RabbitMQ 3-management-alpine, Service ClusterIP portas 5672/15672
+
+## Banco de dados
+- PostgreSQL gerenciado no Neon.tech (externo ao cluster)
+- Conexão via secrets injetados do Google Secret Manager
 
 ## Secrets
 - Nunca commitar valores reais em secrets.yaml
 - O arquivo secrets.yaml no repo tem apenas placeholders
-- Valores reais são injetados pelo Jenkins via credenciais
+- Valores reais ficam no Google Secret Manager
+- Script apply-secrets.sh busca do Secret Manager e aplica no cluster
 
-## Jenkins
-- Pipeline declarativo em infra/jenkins/Jenkinsfile
-- Stages: Checkout → Test → Build → Docker Push → Deploy
-- Credenciais necessárias no Jenkins:
-  - DOCKER_REGISTRY
-  - KUBECONFIG_CREDENTIALS
-  - DB_PASSWORD, JWT_SECRET (injetados como secrets no deploy)
+## CI/CD (GitHub Actions)
+- Workflow em .github/workflows/deploy.yml
+- Autenticação via Workload Identity Federation (sem chave JSON)
+- Fluxo: Build (linux/amd64) → Push Artifact Registry → Apply secrets → Apply manifests → Rollout
 
 ## Fluxo de deploy
 Push na branch main
-  → Jenkins detecta via webhook
-  → Roda testes
-  → Builda imagens Docker
-  → Push para registry
-  → kubectl apply nos manifests
-  → Kubernetes faz rolling update sem downtime
+  → GitHub Actions dispara automaticamente
+  → Builda imagem Docker (--platform linux/amd64)
+  → Push para Artifact Registry (tags: latest + SHA)
+  → Aplica secrets do Secret Manager no cluster
+  → kubectl apply nos manifests (namespace → secrets → rabbitmq → redis → api → hpa)
+  → kubectl rollout status aguarda conclusão
 
 ## Regras
-- Nunca fazer kubectl apply manual em produção — sempre via Jenkins
+- Sempre buildar imagens com --platform linux/amd64 (Mac M1/M2/M3 gera arm64)
 - Sempre usar resource limits nos containers (cpu e memory)
-- Liveness probe em /actuator/health (api) e / (web)
-- Readiness probe antes de receber tráfego
+- Liveness probe da API em /actuator/health
+- RabbitMQ usa tcpSocket probe (exec é lento demais)
+- Para ligar/desligar pods: usar scripts start.sh e stop.sh

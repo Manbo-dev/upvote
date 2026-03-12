@@ -88,36 +88,21 @@ npm run dev
 | GET | `/api/suggestions/{id}/comments` | Listar comentários | Não |
 | POST | `/api/suggestions/{id}/comments` | Adicionar comentário | Sim |
 
-## Deploy no Kubernetes
+## Deploy e Infraestrutura
 
-### 1. Criar namespace e recursos
+A aplicação roda em **GKE Autopilot** (Google Kubernetes Engine) na região `europe-west1`, com banco de dados PostgreSQL no **Neon.tech**, secrets no **Google Secret Manager** e CI/CD via **GitHub Actions**.
 
-```bash
-kubectl apply -f infra/k8s/namespace.yaml
-kubectl apply -f infra/k8s/secrets.yaml
-kubectl apply -f infra/k8s/configmap.yaml
-kubectl apply -f infra/k8s/
-```
-
-### 2. Build e push das imagens Docker
+O deploy é automático a cada push na branch `main`.
 
 ```bash
-# API
-docker build -t seu-registry/upvote-api:latest apps/api/
-docker push seu-registry/upvote-api:latest
-
-# Web
-docker build -t seu-registry/upvote-web:latest apps/web/
-docker push seu-registry/upvote-web:latest
+# Comandos rápidos
+kubectl get pods -n upvote              # Ver status
+./infra/scripts/start.sh                # Ligar pods
+./infra/scripts/stop.sh                 # Desligar pods (economizar)
+./infra/k8s/deploy.sh                   # Deploy manual
 ```
 
-### 3. Verificar deploy
-
-```bash
-kubectl get pods -n upvote
-kubectl get services -n upvote
-kubectl get ingress -n upvote
-```
+Para documentação completa (setup, troubleshooting, secrets, CI/CD), veja **[infra/README.md](infra/README.md)**.
 
 ## Widget embarcável
 
