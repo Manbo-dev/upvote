@@ -192,7 +192,7 @@ jobs:
         run: kubectl get pods -n ${{ env.NAMESPACE }}
 
   # -------------------------------------------
-  # 5. DEPLOY WEB - Vercel production
+  # 5. DEPLOY WEB - Vercel production 
   # -------------------------------------------
   deploy-web:
     name: Deploy Frontend (Vercel)
