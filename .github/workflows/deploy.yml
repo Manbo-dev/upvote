@@ -28,10 +28,10 @@ jobs:
       web_changed: ${{ steps.filter.outputs.web }}
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Detectar mudancas por contexto
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v3.0.2
         id: filter
         with:
           filters: |
@@ -63,7 +63,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Autenticar no GCP via Workload Identity Federation
         uses: google-github-actions/auth@v3
@@ -99,7 +99,7 @@ jobs:
     if: needs.source.outputs.web_changed == 'true'
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Instalar Node.js
         uses: actions/setup-node@v6
@@ -149,7 +149,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Autenticar no GCP via Workload Identity Federation
         uses: google-github-actions/auth@v3
@@ -201,7 +201,7 @@ jobs:
     if: needs.source.outputs.web_changed == 'true'
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Instalar Node.js
         uses: actions/setup-node@v6
