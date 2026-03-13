@@ -1,16 +1,65 @@
 # Upvote — Contexto Geral do Projeto
 
 ## O que é
-SaaS de feedback de produto. Empresas embarcam um widget no seu
-produto, usuários finais enviam sugestões e votam nas que mais
-querem ver implementadas. O dono do produto gerencia um board
-com status de roadmap público.
+SaaS de captura inteligente de feedback. Empresas embarcam um
+widget no seu produto; o usuário final escreve livremente
+(bug, sugestão, reclamação) e a plataforma usa IA para
+sintetizar, deduplicar e agrupar feedbacks automaticamente.
+O dono do produto recebe um dashboard com padrões acionáveis,
+não comentários brutos.
 
 ## Motivação do projeto
 Projeto pessoal com objetivo duplo: aprender todo o ciclo de
 desenvolvimento moderno (do código ao deploy) e potencialmente
 monetizar. Concorre com Canny.io focando no mercado brasileiro
 com preço mais acessível.
+
+## Visão de produto — MVP
+
+### Fluxo core
+1. Parceiro instala o widget via script tag no seu produto
+2. Usuário final escreve um feedback livremente no widget (texto livre, sem categorias)
+3. Backend recebe o comentário + contexto automático da página
+4. IA sintetiza o comentário e busca feedbacks similares já existentes para aquele produto
+5. Se encontra similar com alta confiança → adiciona um voto automaticamente
+6. Se confiança baixa → widget faz no máximo UMA pergunta de follow-up (opcional, o usuário pode ignorar)
+7. Se o usuário não responder, fechar o widget ou abandonar → a mensagem original é salva e processada normalmente
+8. Dashboard do parceiro exibe padrões agrupados com contexto, não comentários individuais
+
+### Widget
+- Experiência minimalista: caixa de texto + botão de enviar
+- Interação baixa do usuário — o trabalho pesado é no backend
+- Parceiro configura quando/como o widget aparece:
+  - Sempre visível na tela
+  - Acionado manualmente (botão no produto)
+  - Acionado por evento (ex: após erro, após ação específica)
+- Texto fixo de consentimento: "Ao enviar, você concorda com nossa política de feedback"
+- Sem fricção de configuração para o parceiro — cola o script e funciona
+
+### Contexto automático capturado
+Dados capturados junto com o comentário, em linguagem legível para PO/PM:
+- URL e título da página atual
+- Como o widget foi acionado (evento, botão, automático)
+- Último elemento interagido antes de abrir o widget (ex: "botão Pagar", não `#btn-checkout-submit`)
+- Horário e tipo de dispositivo (mobile/desktop)
+
+### IA no backend
+- Sintetiza o comentário do usuário
+- Busca feedbacks similares já existentes para o mesmo produto
+- Alta confiança → vota no feedback existente
+- Baixa confiança → solicita follow-up OU cria novo feedback
+- Recebe o contexto automático da página para melhorar a categorização
+- **Arquitetura injetável**: a integração com IA deve usar uma interface/abstração que permita trocar o fornecedor (OpenAI, Anthropic, etc.) sem alterar os métodos que a consomem
+
+### Dashboard
+- Exibe padrões agrupados, não comentários brutos
+- Cards com contexto: "5 relatos após 'botão Pagar' na tela de checkout esta semana"
+- Visão para PO/PM que permite decisão sem investigação técnica
+
+### LGPD / Consentimento
+- MVP: texto fixo no widget com link para política de feedback
+- Parceiro é o controlador dos dados, Upvote é o operador
+- Arquitetura desenhada para permitir controle granular de captura no futuro (sem implementar agora)
 
 ## Stack completa
 - Frontend: React 18 + TypeScript + Vite + TailwindCSS

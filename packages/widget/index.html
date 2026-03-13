@@ -20,18 +20,62 @@
         border-radius: 4px;
         font-size: 14px;
       }
+      .demo-section {
+        margin-top: 32px;
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #fafafa;
+      }
+      .demo-section h2 {
+        margin-top: 0;
+        font-size: 16px;
+        color: #6366f1;
+      }
+      .demo-btn {
+        padding: 10px 20px;
+        background: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 8px;
+      }
+      .demo-btn:hover { opacity: 0.9; }
+      .demo-input {
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        margin-right: 8px;
+      }
     </style>
   </head>
   <body>
-    <h1>Upvote Widget - Pagina de Demo</h1>
+    <h1>Upvote Widget - Página de Demo</h1>
     <p>
-      Esta pagina demonstra o widget Upvote. Clique no botao flutuante no canto
-      inferior direito para abrir o board de feedback.
+      Esta página demonstra o widget Upvote. Clique no botão flutuante no canto
+      inferior direito para abrir o painel de feedback.
     </p>
-    <p>
-      O widget e configurado com os atributos <code>data-product-slug</code> e
-      <code>data-color</code> no script tag.
-    </p>
+
+    <div class="demo-section">
+      <h2>Teste de captura de contexto</h2>
+      <p>Clique nos elementos abaixo e depois abra o widget para ver a captura de "lastInteraction":</p>
+      <button class="demo-btn">Pagar</button>
+      <button class="demo-btn">Cancelar</button>
+      <a href="#" onclick="event.preventDefault()">Minha Conta</a>
+      <br><br>
+      <label for="email">Email:</label>
+      <input id="email" class="demo-input" type="email" placeholder="seu@email.com" />
+    </div>
+
+    <div class="demo-section">
+      <h2>Abertura programática</h2>
+      <p>Teste a API pública do widget:</p>
+      <button class="demo-btn" onclick="window.UpvoteWidget.open()">Abrir via API</button>
+      <button class="demo-btn" onclick="window.UpvoteWidget.close()">Fechar via API</button>
+    </div>
 
     <!-- Widget Upvote -->
     <script
@@ -39,7 +83,7 @@
       src="/src/main.ts"
       data-product-slug="produto-demo"
       data-color="#6366f1"
-      data-base-url="http://localhost:5173">
+      data-base-url="http://localhost:8080">
     </script>
   </body>
 </html>
