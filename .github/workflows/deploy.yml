@@ -28,10 +28,10 @@ jobs:
       web_changed: ${{ steps.filter.outputs.web }}
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Detectar mudancas por contexto
-        uses: dorny/paths-filter@v3.0.2
+        uses: dorny/paths-filter@v4.0.0
         id: filter
         with:
           filters: |
@@ -42,13 +42,13 @@ jobs:
               - 'apps/web/**'
 
       - name: Autenticar no GCP via Workload Identity Federation
-        uses: google-github-actions/auth@v3
+        uses: google-github-actions/auth@v3.0.0
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Configurar Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v3
+        uses: google-github-actions/setup-gcloud@v3.0.1
 
   # -------------------------------------------
   # 2. BUILD API - Docker build & push
@@ -63,16 +63,16 @@ jobs:
       id-token: write
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Autenticar no GCP via Workload Identity Federation
-        uses: google-github-actions/auth@v3
+        uses: google-github-actions/auth@v3.0.0
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Configurar Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v3
+        uses: google-github-actions/setup-gcloud@v3.0.1
 
       - name: Autenticar no Artifact Registry
         run: gcloud auth configure-docker "${{ env.REGISTRY }}" --quiet
@@ -99,10 +99,10 @@ jobs:
     if: needs.source.outputs.web_changed == 'true'
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Instalar Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: 22
           cache: npm
@@ -130,7 +130,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Salvar output do build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: vercel-output
           path: apps/web/.vercel/output
@@ -149,16 +149,16 @@ jobs:
       id-token: write
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Autenticar no GCP via Workload Identity Federation
-        uses: google-github-actions/auth@v3
+        uses: google-github-actions/auth@v3.0.0
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Conectar ao cluster GKE
-        uses: google-github-actions/get-gke-credentials@v3
+        uses: google-github-actions/get-gke-credentials@v3.0.0
         with:
           cluster_name: ${{ env.CLUSTER_NAME }}
           location: ${{ env.REGION }}
@@ -201,10 +201,10 @@ jobs:
     if: needs.source.outputs.web_changed == 'true'
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
 
       - name: Instalar Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: 22
           cache: npm
@@ -214,7 +214,7 @@ jobs:
         run: npm install -g vercel
 
       - name: Restaurar output do build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: vercel-output
           path: apps/web/.vercel/output
