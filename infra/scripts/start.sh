@@ -22,10 +22,6 @@ kubectl rollout status deployment/redis -n "$NAMESPACE" --timeout=120s
 echo "  → Escalando api para 2"
 kubectl scale deployment api -n "$NAMESPACE" --replicas=2
 
-# Frontend
-echo "  → Escalando web-deployment para 1"
-kubectl scale deployment web-deployment -n "$NAMESPACE" --replicas=1
-
 echo "  ⏳ Aguardando api e web ficarem prontos..."
 kubectl rollout status deployment/api -n "$NAMESPACE" --timeout=300s
 kubectl rollout status deployment/web-deployment -n "$NAMESPACE" --timeout=120s
