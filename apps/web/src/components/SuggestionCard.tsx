@@ -20,7 +20,7 @@ export default function SuggestionCard({
 }: SuggestionCardProps) {
   return (
     <div
-      className="flex gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md"
+      className="flex gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
     >
       {/* Botão de voto */}
       <button
@@ -32,8 +32,8 @@ export default function SuggestionCard({
         className={clsx(
           'flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors',
           suggestion.votedByCurrentUser
-            ? 'border-primary-500 bg-primary-50 text-primary-600'
-            : 'border-gray-200 text-gray-500 hover:border-primary-300 hover:text-primary-500',
+            ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+            : 'border-gray-200 text-gray-500 hover:border-primary-300 hover:text-primary-500 dark:border-gray-700 dark:text-gray-400 dark:hover:border-primary-700',
         )}
       >
         <svg
@@ -58,15 +58,15 @@ export default function SuggestionCard({
         onClick={onClick}
       >
         <div className="mb-1 flex items-center gap-2">
-          <h3 className="font-semibold text-gray-900">{suggestion.title}</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">{suggestion.title}</h3>
           <StatusBadge status={suggestion.status} />
         </div>
         {suggestion.description && (
-          <p className="mb-2 text-sm text-gray-600 line-clamp-2">
+          <p className="mb-2 text-sm text-gray-600 line-clamp-2 dark:text-gray-400">
             {suggestion.description}
           </p>
         )}
-        <div className="flex items-center gap-3 text-xs text-gray-400">
+        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
           <span>{suggestion.authorName}</span>
           <span>
             {new Date(suggestion.createdAt).toLocaleDateString('pt-BR')}

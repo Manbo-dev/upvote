@@ -1,0 +1,33 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Frontend (apps/web)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "apps/web",
+      "port": 5173
+    },
+    {
+      "name": "Backend API (apps/api)",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["spring-boot:run"],
+      "cwd": "apps/api",
+      "port": 8080
+    },
+    {
+      "name": "Widget (packages/widget)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "packages/widget",
+      "port": 3000
+    },
+    {
+      "name": "Infraestrutura (Docker)",
+      "runtimeExecutable": "docker-compose",
+      "runtimeArgs": ["up", "-d"],
+      "cwd": ".",
+      "port": null
+    }
+  ]
+}

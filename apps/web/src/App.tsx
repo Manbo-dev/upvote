@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import LoginPage from './pages/LoginPage';
@@ -8,8 +9,16 @@ import PublicBoardPage from './pages/PublicBoardPage';
 import SettingsPage from './pages/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import { useThemeStore } from './store/themeStore';
 
 function App() {
+  const apply = useThemeStore((s) => s.apply);
+
+  // Aplica o tema salvo ao carregar
+  useEffect(() => {
+    apply();
+  }, [apply]);
+
   return (
     <>
     <Analytics />

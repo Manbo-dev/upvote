@@ -39,7 +39,7 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Meus Produtos</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Meus Produtos</h1>
         <button
           onClick={() => setIsModalOpen(true)}
           className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
@@ -53,14 +53,14 @@ export default function DashboardPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
         </div>
       ) : products?.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
+          <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">
+          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
             Nenhum produto ainda
           </h3>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             Crie seu primeiro produto para comecar a coletar feedback.
           </p>
         </div>
@@ -70,17 +70,17 @@ export default function DashboardPage() {
             <Link
               key={product.id}
               to={`/dashboard/${product.slug}`}
-              className="group rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-primary-300 hover:shadow-md"
+              className="group rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-primary-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700"
             >
               <div
                 className="mb-3 h-2 w-12 rounded-full"
                 style={{ backgroundColor: product.widgetColor }}
               />
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600">
+              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 dark:text-white">
                 {product.name}
               </h3>
-              <p className="mt-1 text-sm text-gray-500">/{product.slug}</p>
-              <p className="mt-3 text-xs text-gray-400">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">/{product.slug}</p>
+              <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">
                 Criado em{' '}
                 {new Date(product.createdAt).toLocaleDateString('pt-BR')}
               </p>
@@ -103,7 +103,7 @@ export default function DashboardPage() {
           className="space-y-4"
         >
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Nome do Produto
             </label>
             <input
@@ -111,12 +111,12 @@ export default function DashboardPage() {
               value={productName}
               onChange={(e) => handleNameChange(e.target.value)}
               required
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
               placeholder="Ex: Meu App"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Slug (URL)
             </label>
             <input
@@ -125,10 +125,10 @@ export default function DashboardPage() {
               onChange={(e) => setProductSlug(e.target.value)}
               required
               pattern="^[a-z0-9-]+$"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
               placeholder="meu-app"
             />
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
               Apenas letras minusculas, numeros e hifens
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Cancelar
             </button>

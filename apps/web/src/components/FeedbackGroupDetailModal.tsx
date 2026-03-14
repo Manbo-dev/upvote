@@ -70,16 +70,16 @@ export default function FeedbackGroupDetailModal({
       <div className="space-y-5">
         {/* Resumo e status */}
         <div>
-          <p className="text-sm text-gray-600">{group.summary}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{group.summary}</p>
           <div className="mt-3 flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-700">Status:</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
             <select
               value={group.status}
               onChange={(e) =>
                 statusMutation.mutate(e.target.value as SuggestionStatus)
               }
               disabled={statusMutation.isPending}
-              className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-primary-500 focus:outline-none"
+              className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
             >
               {ALL_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -93,16 +93,16 @@ export default function FeedbackGroupDetailModal({
 
         {/* Contexto principal */}
         {group.topContext && (
-          <div className="rounded-lg bg-gray-50 px-3 py-2">
-            <span className="text-xs font-medium text-gray-500">
+          <div className="rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
               Contexto principal:
             </span>
-            <p className="text-sm text-gray-700">{group.topContext}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{group.topContext}</p>
           </div>
         )}
 
         {/* Contador de relatos */}
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <svg
             className="h-4 w-4"
             fill="none"
@@ -124,7 +124,7 @@ export default function FeedbackGroupDetailModal({
 
         {/* Lista de feedbacks individuais */}
         <div>
-          <h4 className="mb-3 text-sm font-semibold text-gray-700">
+          <h4 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
             Feedbacks agrupados
           </h4>
 
@@ -133,7 +133,7 @@ export default function FeedbackGroupDetailModal({
               <div className="h-6 w-6 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
             </div>
           ) : feedbacks?.length === 0 ? (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-400 dark:text-gray-500">
               Nenhum feedback individual encontrado.
             </p>
           ) : (
@@ -154,31 +154,31 @@ export default function FeedbackGroupDetailModal({
  */
 function FeedbackItem({ feedback }: { feedback: FeedbackDetail }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
       {/* Mensagem original */}
       <div className="mb-2">
-        <span className="text-xs font-medium text-gray-500">
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
           Mensagem original:
         </span>
-        <p className="text-sm text-gray-800">{feedback.rawMessage}</p>
+        <p className="text-sm text-gray-800 dark:text-gray-200">{feedback.rawMessage}</p>
       </div>
 
       {/* Mensagem sintetizada pela IA */}
       {feedback.synthesizedMessage && (
         <div className="mb-2">
-          <span className="text-xs font-medium text-gray-500">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
             Sintese da IA:
           </span>
-          <p className="text-sm text-gray-600 italic">
+          <p className="text-sm text-gray-600 italic dark:text-gray-400">
             {feedback.synthesizedMessage}
           </p>
         </div>
       )}
 
       {/* Metadados de contexto */}
-      <div className="flex flex-wrap gap-2 text-xs text-gray-400">
+      <div className="flex flex-wrap gap-2 text-xs text-gray-400 dark:text-gray-500">
         {feedback.pageTitle && (
-          <span className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5">
+          <span className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5 dark:bg-gray-700 dark:text-gray-300">
             <svg
               className="h-3 w-3"
               fill="none"
@@ -196,7 +196,7 @@ function FeedbackItem({ feedback }: { feedback: FeedbackDetail }) {
           </span>
         )}
         {feedback.lastInteraction && (
-          <span className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5">
+          <span className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5 dark:bg-gray-700 dark:text-gray-300">
             <svg
               className="h-3 w-3"
               fill="none"
@@ -214,12 +214,12 @@ function FeedbackItem({ feedback }: { feedback: FeedbackDetail }) {
           </span>
         )}
         {feedback.triggerType && (
-          <span className="rounded bg-white px-2 py-0.5">
+          <span className="rounded bg-white px-2 py-0.5 dark:bg-gray-700 dark:text-gray-300">
             {TRIGGER_LABELS[feedback.triggerType] || feedback.triggerType}
           </span>
         )}
         {feedback.deviceType && (
-          <span className="rounded bg-white px-2 py-0.5">
+          <span className="rounded bg-white px-2 py-0.5 dark:bg-gray-700 dark:text-gray-300">
             {feedback.deviceType === 'mobile' ? 'Mobile' : 'Desktop'}
           </span>
         )}

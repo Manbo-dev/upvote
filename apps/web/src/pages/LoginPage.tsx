@@ -32,20 +32,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4 dark:from-gray-950 dark:to-gray-900">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-primary-600">Upvote</h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
             João, o melhor lugar para compartilhar e descobrir ideias incríveis!
           </p>
         </div>
 
-        <div className="rounded-xl bg-white p-8 shadow-lg">
-          <h2 className="mb-6 text-xl font-semibold text-gray-900">Entrar</h2>
+        <div className="rounded-xl bg-white p-8 shadow-lg dark:bg-gray-900 dark:shadow-black/40">
+          <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">Entrar</h2>
 
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
               {error}
             </div>
           )}
@@ -54,7 +54,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Email
               </label>
@@ -64,7 +64,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                 placeholder="seu@email.com"
               />
             </div>
@@ -72,7 +72,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Senha
               </label>
@@ -82,7 +82,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                 placeholder="Sua senha"
               />
             </div>
@@ -96,7 +96,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
             Nao tem conta?{' '}
             <Link
               to="/register"

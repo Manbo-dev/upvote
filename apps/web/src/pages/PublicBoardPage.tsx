@@ -90,18 +90,18 @@ export default function PublicBoardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
+      <header className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto max-w-3xl px-4 py-6">
           <div
             className="mb-2 h-1.5 w-12 rounded-full"
             style={{ backgroundColor: product?.widgetColor || '#6366f1' }}
           />
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {product?.name || 'Carregando...'}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Vote nas sugestoes que voce mais deseja ou crie a sua
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function PublicBoardPage() {
       {/* Aviso de autenticação */}
       {authWarning && (
         <div className="mx-auto max-w-3xl px-4 pt-4">
-          <div className="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-700">
+          <div className="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
             Voce precisa estar logado para votar ou criar sugestoes.{' '}
             <a href="/login" className="font-medium underline">
               Fazer login
@@ -136,7 +136,7 @@ export default function PublicBoardPage() {
           </div>
         ) : suggestions?.length === 0 ? (
           <div className="py-12 text-center">
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-gray-400">
               Nenhuma sugestao ainda. Seja o primeiro a criar uma!
             </p>
           </div>
@@ -158,36 +158,36 @@ export default function PublicBoardPage() {
 
                 {/* Comentários expandidos */}
                 {selectedSuggestion?.id === suggestion.id && (
-                  <div className="ml-[4.5rem] mt-2 rounded-lg border border-gray-200 bg-white p-4">
+                  <div className="ml-[4.5rem] mt-2 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                     <div className="mb-3 flex items-center gap-2">
                       <StatusBadge status={suggestion.status} />
                     </div>
 
-                    <h4 className="mb-2 text-sm font-semibold text-gray-700">
+                    <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       Comentarios
                     </h4>
                     <div className="mb-3 space-y-2">
                       {comments?.length === 0 && (
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-400 dark:text-gray-500">
                           Nenhum comentario.
                         </p>
                       )}
                       {comments?.map((comment) => (
                         <div
                           key={comment.id}
-                          className="rounded-lg bg-gray-50 p-3 text-sm"
+                          className="rounded-lg bg-gray-50 p-3 text-sm dark:bg-gray-800"
                         >
                           <div className="mb-1 flex items-center gap-2">
                             <span className="font-medium">
                               {comment.authorName}
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
                               {new Date(comment.createdAt).toLocaleDateString(
                                 'pt-BR',
                               )}
                             </span>
                           </div>
-                          <p className="text-gray-600">{comment.content}</p>
+                          <p className="text-gray-600 dark:text-gray-400">{comment.content}</p>
                         </div>
                       ))}
                     </div>
@@ -205,7 +205,7 @@ export default function PublicBoardPage() {
                           value={commentText}
                           onChange={(e) => setCommentText(e.target.value)}
                           placeholder="Escreva um comentario..."
-                          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+                          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                         />
                         <button
                           type="submit"
@@ -227,7 +227,7 @@ export default function PublicBoardPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-6 text-center text-sm text-gray-400">
+      <footer className="border-t border-gray-200 py-6 text-center text-sm text-gray-400 dark:border-gray-800 dark:text-gray-500">
         Powered by <span className="font-medium text-primary-500">Upvote</span>
       </footer>
 
@@ -245,7 +245,7 @@ export default function PublicBoardPage() {
           className="space-y-4"
         >
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Titulo
             </label>
             <input
@@ -253,25 +253,25 @@ export default function PublicBoardPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Descricao
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
           <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Cancelar
             </button>
