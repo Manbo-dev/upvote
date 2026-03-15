@@ -35,6 +35,9 @@ public class Product {
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
+    @Column(name = "api_key", nullable = false, unique = true, length = 52)
+    private String apiKey;
+
     @Column(name = "widget_color")
     @Builder.Default
     private String widgetColor = "#6366f1";

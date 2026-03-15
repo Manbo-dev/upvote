@@ -11,4 +11,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findByOrganizationId(UUID organizationId);
 
     Optional<Product> findBySlug(String slug);
+
+    Optional<Product> findByApiKey(String apiKey);
 }

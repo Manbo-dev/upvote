@@ -33,12 +33,13 @@ public class FeedbackService {
 
     /**
      * Submete um feedback enviado pelo widget (endpoint público, sem auth)
+     * Produto identificado pela API key enviada no header
      */
     @Transactional
-    public FeedbackSubmitResponse submitFeedback(String productSlug, FeedbackSubmitRequest request) {
-        // 1. Busca o produto pelo slug
-        Product product = productRepository.findBySlug(productSlug)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+    public FeedbackSubmitResponse submitFeedback(String apiKey, FeedbackSubmitRequest request) {
+        // 1. Busca o produto pela API key
+        Product product = productRepository.findByApiKey(apiKey)
+                .orElseThrow(() -> new IllegalArgumentException("Chave de API inválida"));
 
         // 2. Cria PageContext a partir do request
         PageContext pageContext = new PageContext(

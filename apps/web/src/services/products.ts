@@ -4,6 +4,7 @@ export interface ProductResponse {
   id: string;
   name: string;
   slug: string;
+  apiKey: string;
   widgetColor: string;
   createdAt: string;
 }

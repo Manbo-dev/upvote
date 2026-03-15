@@ -21,13 +21,14 @@ public class FeedbackController {
 
     /**
      * Submete um feedback pelo widget (endpoint público, sem auth)
+     * Identificação do produto via header X-API-Key
      */
-    @PostMapping("/api/widget/{slug}/feedback")
+    @PostMapping("/api/widget/feedback")
     public ResponseEntity<ApiResponse<FeedbackSubmitResponse>> submitFeedback(
-            @PathVariable String slug,
+            @RequestHeader("X-API-Key") String apiKey,
             @Valid @RequestBody FeedbackSubmitRequest request) {
 
-        FeedbackSubmitResponse response = feedbackService.submitFeedback(slug, request);
+        FeedbackSubmitResponse response = feedbackService.submitFeedback(apiKey, request);
         return ResponseEntity.ok(ApiResponse.ok(response, "Feedback recebido com sucesso"));
     }
 

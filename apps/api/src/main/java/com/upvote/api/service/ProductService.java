@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,9 +49,15 @@ public class ProductService {
             throw new IllegalArgumentException("Slug já está em uso");
         }
 
+        // Gera API key unica: prefixo "upv_" + 48 hex (24 bytes aleatorios)
+        byte[] randomBytes = new byte[24];
+        new SecureRandom().nextBytes(randomBytes);
+        String apiKey = "upv_" + HexFormat.of().formatHex(randomBytes);
+
         Product product = Product.builder()
                 .name(request.name())
                 .slug(request.slug())
+                .apiKey(apiKey)
                 .organization(org)
                 .build();
         product = productRepository.save(product);
@@ -71,6 +79,7 @@ public class ProductService {
                 product.getId(),
                 product.getName(),
                 product.getSlug(),
+                product.getApiKey(),
                 product.getWidgetColor(),
                 product.getCreatedAt()
         );

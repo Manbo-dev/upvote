@@ -111,7 +111,7 @@ Adicione o seguinte script na página do seu produto:
 ```html
 <script
   src="https://upvote.com/widget.js"
-  data-product-slug="meu-produto"
+  data-api-key="upv_sua_chave_aqui"
   data-color="#6366f1">
 </script>
 ```

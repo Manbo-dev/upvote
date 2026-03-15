@@ -10,7 +10,7 @@ import { iniciarRastreamento, coletarContexto } from './context';
  * Uso:
  * <script
  *   src="https://cdn.upvote.com/widget.js"
- *   data-product-slug="meu-produto"
+ *   data-api-key="upv_sua_chave_aqui"
  *   data-color="#6366f1"
  *   data-base-url="https://api.upvote.com"
  *   data-trigger="button"
@@ -32,15 +32,17 @@ declare global {
   const currentScript = document.currentScript as HTMLScriptElement;
   if (!currentScript) return;
 
-  const productSlug = currentScript.getAttribute('data-product-slug');
+  const apiKeyAttr = currentScript.getAttribute('data-api-key');
   const color = currentScript.getAttribute('data-color') || '#6366f1';
   const baseUrl = currentScript.getAttribute('data-base-url') || 'https://api.upvote.com';
   const triggerAttr = currentScript.getAttribute('data-trigger') || 'button';
 
-  if (!productSlug) {
-    console.error('[Upvote Widget] Atributo data-product-slug é obrigatório');
+  if (!apiKeyAttr) {
+    console.error('[Upvote Widget] Atributo data-api-key é obrigatório');
     return;
   }
+
+  const apiKey: string = apiKeyAttr;
 
   // Inicia o rastreamento de interações do usuário na página
   iniciarRastreamento();
@@ -234,10 +236,13 @@ declare global {
 
     try {
       const response = await fetch(
-        `${baseUrl}/api/widget/${productSlug}/feedback`,
+        `${baseUrl}/api/widget/feedback`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': apiKey,
+          },
           body: JSON.stringify(payload),
         }
       );

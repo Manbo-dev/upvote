@@ -8,14 +8,14 @@ um modal com o board de sugestões do produto.
 ## Como o cliente usa
 <script
   src="https://app.upvote.com/widget.js"
-  data-product-slug="slug-do-produto"
+  data-api-key="upv_sua_chave_aqui"
   data-color="#6366f1"
   data-position="bottom-right"
   data-user-token="jwt-opcional-do-usuario-logado">
 </script>
 
 ## Atributos disponíveis
-- data-product-slug (obrigatório) → qual produto carregar
+- data-api-key (obrigatório) → chave de API do produto (gerada ao criar o produto)
 - data-color → cor primária do widget (default: #6366f1)
 - data-position → bottom-right | bottom-left (default: bottom-right)
 - data-user-token → JWT do usuário logado no produto do cliente

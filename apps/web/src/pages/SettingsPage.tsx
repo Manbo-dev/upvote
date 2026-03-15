@@ -44,7 +44,7 @@ export default function SettingsPage() {
             feedback.
           </p>
           <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-green-400">
-            {`<script \n  src="https://cdn.upvote.com/widget.js" \n  data-product-slug="SLUG_DO_PRODUTO"\n  data-color="#6366f1"\n  data-base-url="URL_DA_API">\n</script>`}
+            {`<script \n  src="https://cdn.upvote.com/widget.js" \n  data-api-key="SUA_CHAVE_DE_API"\n  data-color="#6366f1"\n  data-base-url="URL_DA_API">\n</script>`}
           </pre>
         </div>
       </div>

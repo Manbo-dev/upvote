@@ -7,6 +7,7 @@ public record ProductResponse(
         UUID id,
         String name,
         String slug,
+        String apiKey,
         String widgetColor,
         LocalDateTime createdAt
 ) {

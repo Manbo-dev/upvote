@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import PublicBoardPage from './pages/PublicBoardPage';
 import SettingsPage from './pages/SettingsPage';
+import ApiKeysPage from './pages/ApiKeysPage';
 import LandingPage from './pages/LandingPage';
 import SandboxPage from './pages/SandboxPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -47,6 +48,7 @@ function App() {
       >
         <Route index element={<DashboardPage />} />
         <Route path=":productId" element={<ProductDetailPage />} />
+        <Route path="api-keys" element={<ApiKeysPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
       <Route path="/" element={<RootRoute />} />
