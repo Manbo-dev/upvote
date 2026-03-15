@@ -192,6 +192,9 @@ function NavbarSection() {
             <a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
               Blog
             </a>
+            <Link to="/sandbox" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+              Testar widget
+            </Link>
           </div>
 
           {/* CTAs */}
@@ -259,6 +262,9 @@ function NavbarSection() {
             <a href="#" className="block text-sm text-gray-600 dark:text-gray-400 py-2">
               Blog
             </a>
+            <Link to="/sandbox" onClick={() => setMenuAberto(false)} className="block text-sm text-gray-600 dark:text-gray-400 py-2">
+              Testar widget
+            </Link>
             {/* Toggle de tema — mobile */}
             <button
               onClick={toggle}
@@ -336,12 +342,15 @@ function HeroSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
               </Link>
-              <a
-                href="#como-funciona"
+              <Link
+                to="/sandbox"
                 className="inline-flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium px-6 py-3 rounded-lg text-base transition-colors"
               >
-                Ver como funciona
-              </a>
+                Testar widget
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+              </Link>
             </div>
 
             {/* Prova social discreta */}
@@ -715,7 +724,7 @@ function FooterSection() {
         {/* Rodapé inferior */}
         <div className="mt-12 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-500">
-            © 2025 Upvote. Todos os direitos reservados.
+            © {new Date().getFullYear()} Upvote. Todos os direitos reservados.
           </p>
           <p className="text-sm text-gray-500">
             Feito com carinho no Brasil 🇧🇷 Pelo Engenheiro Guilherme Dias Cardoso

@@ -8,6 +8,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import PublicBoardPage from './pages/PublicBoardPage';
 import SettingsPage from './pages/SettingsPage';
 import LandingPage from './pages/LandingPage';
+import SandboxPage from './pages/SandboxPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import { useThemeStore } from './store/themeStore';
@@ -35,6 +36,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/b/:slug" element={<PublicBoardPage />} />
+      <Route path="/sandbox" element={<SandboxPage />} />
       <Route
         path="/dashboard"
         element={
