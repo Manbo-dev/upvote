@@ -1,4 +1,4 @@
-# Upvote — Plataforma SaaS de Feedback de Produto
+# Upvote — Plataforma SaaS de Feedback sem ruído
 
 Upvote é uma plataforma que permite coletar, organizar e priorizar feedback dos usuários sobre seus produtos. Inclui um board público de sugestões, sistema de votação e um widget embarcável.
 

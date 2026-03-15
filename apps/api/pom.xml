@@ -16,7 +16,7 @@
     <artifactId>upvote-api</artifactId>
     <version>0.1.0</version>
     <name>Upvote API</name>
-    <description>API backend para a plataforma Upvote de feedback de produto</description>
+    <description>API backend para a plataforma Upvote de Feedback sem ruído</description>
 
     <properties>
         <java.version>21</java.version>
