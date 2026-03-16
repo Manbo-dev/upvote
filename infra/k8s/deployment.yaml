@@ -105,6 +105,9 @@ spec:
               value: "redis"
             - name: SPRING_DATA_REDIS_PORT
               value: "6379"
+            # Ativa o perfil de produção → logs JSON estruturado para Cloud Logging
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
           resources:
             requests:
               memory: "256Mi"

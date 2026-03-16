@@ -111,6 +111,13 @@
             <version>${mapstruct.version}</version>
         </dependency>
 
+        <!-- Logging estruturado (JSON) para Cloud Logging -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>8.0</version>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

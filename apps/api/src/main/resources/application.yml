@@ -63,3 +63,11 @@ management:
       # Quando as credenciais de e-mail estiverem definidas, remover este bloco
       # para reativar o health check do mail no Actuator.
       enabled: false
+
+logging:
+  # Nível padrão da aplicação
+  level:
+    root: INFO
+    com.upvote: INFO
+  # Em produção o formato é controlado pelo logback-spring.xml (JSON estruturado)
+  # Em dev usa o padrão colorido do Spring Boot
