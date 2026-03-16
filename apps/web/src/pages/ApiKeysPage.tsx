@@ -67,10 +67,10 @@ function CanalKeyCard({ canal }: { canal: CanalResponse }) {
     : '';
 
   const snippet = `<script
-  src="https://cdn.upvote.com/widget.js"
+  src="https://cdn.upvote.pro/widget.js"
   data-api-key="${canal.apiKey}"
   data-color="${canal.widgetColor}"
-  data-base-url="https://api.upvote.com">
+  data-base-url="https://api.upvote.pro">
 </script>`;
 
   const copiar = async (texto: string, tipo: 'key' | 'snippet') => {

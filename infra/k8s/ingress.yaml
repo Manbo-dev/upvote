@@ -4,17 +4,17 @@ metadata:
   name: upvote-ingress
   namespace: upvote
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - app.upvote.com
-        - api.upvote.com
+        - app.upvote.pro
+        - api.upvote.pro
       secretName: upvote-tls
   rules:
-    - host: app.upvote.com
+    - host: app.upvote.pro
       http:
         paths:
           - path: /
@@ -24,7 +24,7 @@ spec:
                 name: web-service
                 port:
                   number: 80
-    - host: api.upvote.com
+    - host: api.upvote.pro
       http:
         paths:
           - path: /
