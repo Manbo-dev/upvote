@@ -2,10 +2,13 @@ package com.upvote.api.service;
 
 import com.upvote.api.domain.Organization;
 import com.upvote.api.domain.Canal;
+import com.upvote.api.domain.Subscription;
 import com.upvote.api.dto.CanalRequest;
 import com.upvote.api.dto.CanalResponse;
+import com.upvote.api.exception.BusinessException;
 import com.upvote.api.repository.OrganizationRepository;
 import com.upvote.api.repository.CanalRepository;
+import com.upvote.api.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,7 @@ public class CanalService {
 
     private final CanalRepository canalRepository;
     private final OrganizationRepository organizationRepository;
+    private final SubscriptionRepository subscriptionRepository;
 
     /**
      * Lista todos os canais das organizações do usuário
@@ -44,6 +48,15 @@ public class CanalService {
         Organization org = organizationRepository.findByOwnerId(userId)
                 .stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException("Usuário não possui organização"));
+
+        // Verifica limite de canais do plano
+        Subscription subscription = subscriptionRepository.findByOrganizationId(org.getId())
+                .orElseThrow(() -> new IllegalStateException("Assinatura não encontrada"));
+        long canaisAtivos = canalRepository.countByOrganizationId(org.getId());
+        if (canaisAtivos >= subscription.getPlano().getLimiteCanais()) {
+            throw new BusinessException("Limite de canais do plano " + subscription.getPlano().name()
+                    + " atingido (" + subscription.getPlano().getLimiteCanais() + "). Faça upgrade para criar mais canais.");
+        }
 
         if (canalRepository.findBySlug(request.slug()).isPresent()) {
             throw new IllegalArgumentException("Slug já está em uso");

@@ -4,6 +4,7 @@ export interface AuthResponse {
   token: string;
   name: string;
   email: string;
+  plano: string;
 }
 
 interface ApiResult<T> {

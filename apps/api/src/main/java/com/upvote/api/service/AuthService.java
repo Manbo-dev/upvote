@@ -2,12 +2,15 @@ package com.upvote.api.service;
 
 import com.upvote.api.domain.Canal;
 import com.upvote.api.domain.Organization;
+import com.upvote.api.domain.Plano;
+import com.upvote.api.domain.Subscription;
 import com.upvote.api.domain.User;
 import com.upvote.api.dto.AuthResponse;
 import com.upvote.api.dto.LoginRequest;
 import com.upvote.api.dto.RegisterRequest;
 import com.upvote.api.repository.OrganizationRepository;
 import com.upvote.api.repository.CanalRepository;
+import com.upvote.api.repository.SubscriptionRepository;
 import com.upvote.api.repository.UserRepository;
 import com.upvote.api.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
     private final CanalRepository canalRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -56,6 +60,13 @@ public class AuthService {
                 .build();
         organizationRepository.save(org);
 
+        // Cria assinatura FREE padrão
+        Subscription subscription = Subscription.builder()
+                .organization(org)
+                .plano(Plano.FREE)
+                .build();
+        subscriptionRepository.save(subscription);
+
         // Cria canal padrão
         Canal canal = Canal.builder()
                 .name("Meu Canal")
@@ -65,7 +76,7 @@ public class AuthService {
         canalRepository.save(canal);
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getName(), user.getEmail());
+        return new AuthResponse(token, user.getName(), user.getEmail(), Plano.FREE.name());
     }
 
     /**
@@ -79,7 +90,14 @@ public class AuthService {
             throw new IllegalArgumentException("Credenciais inválidas");
         }
 
+        // Busca o plano da organização do usuário
+        String plano = organizationRepository.findByOwnerId(user.getId()).stream()
+                .findFirst()
+                .flatMap(org -> subscriptionRepository.findByOrganizationId(org.getId()))
+                .map(sub -> sub.getPlano().name())
+                .orElse(Plano.FREE.name());
+
         String token = jwtTokenProvider.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getName(), user.getEmail());
+        return new AuthResponse(token, user.getName(), user.getEmail(), plano);
     }
 }

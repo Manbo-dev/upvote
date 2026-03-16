@@ -13,4 +13,6 @@ public interface CanalRepository extends JpaRepository<Canal, UUID> {
     Optional<Canal> findBySlug(String slug);
 
     Optional<Canal> findByApiKey(String apiKey);
+
+    long countByOrganizationId(UUID organizationId);
 }

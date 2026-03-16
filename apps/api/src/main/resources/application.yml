@@ -51,6 +51,11 @@ app:
     expiration: ${JWT_EXPIRATION:86400000}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:sk_test_placeholder}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
+    starter-price-id: ${STRIPE_STARTER_PRICE_ID:price_placeholder}
+    pro-price-id: ${STRIPE_PRO_PRICE_ID:price_placeholder}
 
 management:
   endpoints:

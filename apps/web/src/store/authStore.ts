@@ -3,6 +3,7 @@ import { create } from 'zustand';
 interface UserInfo {
   name: string;
   email: string;
+  plano: string;
 }
 
 interface AuthState {

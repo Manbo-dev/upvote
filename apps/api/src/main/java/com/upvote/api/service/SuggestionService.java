@@ -4,11 +4,14 @@ import com.upvote.api.domain.*;
 import com.upvote.api.dto.SuggestionRequest;
 import com.upvote.api.dto.SuggestionResponse;
 import com.upvote.api.dto.VoteResponse;
+import com.upvote.api.exception.BusinessException;
 import com.upvote.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +27,7 @@ public class SuggestionService {
     private final UserRepository userRepository;
     private final VoteRepository voteRepository;
     private final OrganizationRepository organizationRepository;
+    private final SubscriptionRepository subscriptionRepository;
 
     /**
      * Lista sugestões de um canal, indicando se o usuário atual votou
@@ -46,6 +50,23 @@ public class SuggestionService {
     public SuggestionResponse createSuggestion(String canalSlug, SuggestionRequest request, UUID userId) {
         Canal canal = canalRepository.findBySlug(canalSlug)
                 .orElseThrow(() -> new IllegalArgumentException("Canal não encontrado"));
+
+        // Verifica limite de sugestões do plano no mês atual
+        UUID orgId = canal.getOrganization().getId();
+        Subscription subscription = subscriptionRepository.findByOrganizationId(orgId)
+                .orElseThrow(() -> new IllegalStateException("Assinatura não encontrada"));
+        int limite = subscription.getPlano().getLimiteSugestoesMes();
+        if (limite != Integer.MAX_VALUE) {
+            LocalDateTime inicioMes = LocalDateTime.now()
+                    .with(TemporalAdjusters.firstDayOfMonth())
+                    .withHour(0).withMinute(0).withSecond(0).withNano(0);
+            long sugestoesMes = suggestionRepository.countByOrganizationIdAndMesAtual(orgId, inicioMes);
+            if (sugestoesMes >= limite) {
+                throw new BusinessException("Limite de sugestões do plano " + subscription.getPlano().name()
+                        + " atingido (" + limite + "/mês). Faça upgrade para continuar.");
+            }
+        }
+
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
