@@ -111,6 +111,13 @@
             <version>${mapstruct.version}</version>
         </dependency>
 
+        <!-- Stripe -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>28.2.0</version>
+        </dependency>
+
         <!-- Logging estruturado (JSON) para Cloud Logging -->
         <dependency>
             <groupId>net.logstash.logback</groupId>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCanais, createCanal } from '../services/canais';
+import { getSubscription } from '../services/subscriptions';
 import Modal from '../components/Modal';
 
 export default function DashboardPage() {
@@ -14,6 +15,15 @@ export default function DashboardPage() {
     queryKey: ['canais'],
     queryFn: getCanais,
   });
+
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: getSubscription,
+  });
+
+  const limiteAtingido = subscription
+    ? subscription.canaisAtivos >= subscription.limiteCanais
+    : false;
 
   const createMutation = useMutation({
     mutationFn: () => createCanal({ name: canalName, slug: canalSlug }),
@@ -40,12 +50,21 @@ export default function DashboardPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Meus Canais</h1>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
-        >
-          Novo Canal
-        </button>
+        {limiteAtingido ? (
+          <Link
+            to="/dashboard/billing"
+            className="rounded-lg border border-primary-600 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20"
+          >
+            Limite atingido - Fazer upgrade
+          </Link>
+        ) : (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+          >
+            Novo Canal
+          </button>
+        )}
       </div>
 
       {isLoading ? (

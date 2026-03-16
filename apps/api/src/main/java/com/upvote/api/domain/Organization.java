@@ -35,6 +35,9 @@ public class Organization {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @OneToOne(mappedBy = "organization", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Subscription subscription;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

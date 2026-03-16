@@ -110,6 +110,77 @@ npm install && npm run dev
 - Plano Pro R$129/mês: 10 canais, changelog, roadmap público
 - Plano Business R$299/mês: ilimitado, SSO, API, white-label
 
+## Assinaturas e Pagamentos (Stripe)
+
+### Visão geral
+Sistema de assinaturas recorrentes mensais integrado com Stripe.
+Checkout e gerenciamento de assinatura via Stripe Hosted (Checkout Session + Customer Portal).
+Plano Business é tratado pelo time comercial — não passa pelo checkout.
+
+### Planos implementados
+
+| Plano      | Canais | Sugestões/mês     | Widget | Preço        |
+|------------|--------|--------------------|--------|--------------|
+| FREE       | 1      | 50                 | Não    | Grátis       |
+| STARTER    | 3      | Ilimitado          | Sim    | R$49/mês     |
+| PRO        | 10     | Ilimitado          | Sim    | R$129/mês    |
+| BUSINESS   | Ilimitado | Ilimitado       | Sim    | Sob consulta |
+
+### Arquitetura backend
+
+- **Entidade `Subscription`** — relação 1:1 com `Organization`, armazena `stripeCustomerId`, `stripeSubscriptionId`, `stripeStatus`, `plano` e `currentPeriodEnd`
+- **Enum `Plano`** — define limites de cada plano (canais, sugestões/mês, widget habilitado)
+- **Enum `StripeStatus`** — ACTIVE, PAST_DUE, CANCELED, INCOMPLETE
+- **`StripeConfig`** — inicializa a API key do Stripe via `@PostConstruct`
+- **`StripeService`** — lógica core: criação de checkout session, portal session e processamento de webhooks
+- **`SubscriptionController`** — endpoints autenticados para consulta de assinatura, checkout e portal
+- **`StripeWebhookController`** — endpoint público (valida assinatura Stripe) para receber webhooks
+
+### Endpoints da API
+
+| Método | Rota                          | Auth     | Descrição                              |
+|--------|-------------------------------|----------|----------------------------------------|
+| GET    | `/api/subscriptions`          | JWT      | Retorna assinatura atual + uso         |
+| POST   | `/api/subscriptions/checkout` | JWT      | Cria sessão de checkout Stripe         |
+| POST   | `/api/subscriptions/portal`   | JWT      | Cria sessão do portal de gerenciamento |
+| POST   | `/api/stripe/webhook`         | Público* | Recebe eventos do Stripe               |
+
+*Validado via `Stripe-Signature` header
+
+### Webhooks processados
+- `checkout.session.completed` — ativa assinatura após pagamento
+- `invoice.paid` — renova assinatura, atualiza período
+- `invoice.payment_failed` — marca como PAST_DUE
+- `customer.subscription.updated` — sincroniza plano e status
+- `customer.subscription.deleted` — reverte para FREE
+
+### Enforcement de limites
+- **Canais**: `CanalService.createCanal()` verifica `countByOrganizationId()` vs limite do plano
+- **Sugestões**: `SuggestionService.createSuggestion()` conta sugestões do mês atual vs limite (FREE = 50/mês)
+- Toda Organization recebe automaticamente uma `Subscription` FREE no registro
+
+### Frontend
+- **`BillingPage.tsx`** — página de gerenciamento de assinatura com cards de planos, métricas de uso e botões de upgrade/gerenciar
+- **`subscriptions.ts`** — service layer com `getSubscription()`, `createCheckoutSession()`, `createPortalSession()`
+
+### Variáveis de ambiente necessárias (Stripe)
+```
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_STARTER_PRICE_ID=price_...
+STRIPE_PRO_PRICE_ID=price_...
+```
+
+### Configuração no Stripe Dashboard (produção)
+1. Criar produtos Starter e Pro com preços recorrentes mensais em BRL
+2. Copiar os Price IDs para as variáveis de ambiente
+3. Configurar webhook apontando para `https://api.upvote.com/api/stripe/webhook`
+4. Eventos do webhook: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`
+5. Copiar o webhook signing secret para `STRIPE_WEBHOOK_SECRET`
+
+### Migration
+- `V6__create_subscriptions.sql` — cria tabela `subscriptions` e popula todas Organizations existentes com plano FREE
+
 ## Infraestrutura
 
 ### Stack de infraestrutura
@@ -162,7 +233,7 @@ echo -n "novo-valor" | gcloud secrets versions add NOME_DO_SECRET --data-file=- 
 - Rollout aguardado com `kubectl rollout status`
 
 ### Secrets gerenciados pelo Google Secret Manager
-`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `CORS_ORIGINS`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`
+`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `CORS_ORIGINS`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_STARTER_PRICE_ID`, `STRIPE_PRO_PRICE_ID`
 
 ### GitHub Actions secrets necessários
 - `GCP_PROJECT_ID` = `project-38c32df4-c37c-41d9-b5d`

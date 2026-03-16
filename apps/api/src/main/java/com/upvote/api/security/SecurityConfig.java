@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/suggestions/*/comments").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
+                        .requestMatchers("/api/stripe/webhook").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

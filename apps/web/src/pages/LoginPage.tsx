@@ -21,6 +21,7 @@ export default function LoginPage() {
       storeLogin(response.token, {
         name: response.name,
         email: response.email,
+        plano: response.plano,
       });
       navigate('/dashboard');
     } catch (err: unknown) {

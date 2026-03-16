@@ -22,6 +22,7 @@ export default function RegisterPage() {
       storeLogin(response.token, {
         name: response.name,
         email: response.email,
+        plano: response.plano,
       });
       navigate('/dashboard');
     } catch (err: unknown) {

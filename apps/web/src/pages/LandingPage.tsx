@@ -624,16 +624,25 @@ function PrecosSection() {
               </ul>
 
               {/* CTA */}
-              <Link
-                to="/register"
-                className={`mt-6 block text-center text-sm font-semibold py-2.5 rounded-lg transition-colors ${
-                  plano.destaque || plano.nome === 'Free'
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    : 'border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                }`}
-              >
-                {plano.cta}
-              </Link>
+              {plano.nome === 'Business' ? (
+                <a
+                  href="mailto:contato@upvote.com"
+                  className="mt-6 block text-center text-sm font-semibold py-2.5 rounded-lg transition-colors border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  {plano.cta}
+                </a>
+              ) : (
+                <Link
+                  to="/register"
+                  className={`mt-6 block text-center text-sm font-semibold py-2.5 rounded-lg transition-colors ${
+                    plano.destaque || plano.nome === 'Free'
+                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      : 'border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  {plano.cta}
+                </Link>
+              )}
             </div>
           ))}
         </div>
