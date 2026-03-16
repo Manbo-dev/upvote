@@ -100,6 +100,27 @@ spec:
                 secretKeyRef:
                   name: upvote-secrets
                   key: RABBITMQ_PASSWORD
+            # Stripe
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: STRIPE_SECRET_KEY
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: STRIPE_WEBHOOK_SECRET
+            - name: STRIPE_STARTER_PRICE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: STRIPE_STARTER_PRICE_ID
+            - name: STRIPE_PRO_PRICE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: STRIPE_PRO_PRICE_ID
             # Redis
             - name: SPRING_DATA_REDIS_HOST
               value: "redis"
