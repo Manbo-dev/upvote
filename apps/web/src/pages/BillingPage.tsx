@@ -1,18 +1,69 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { getSubscription, createCheckoutSession, createPortalSession } from '../services/subscriptions';
 
 /**
- * Página de gerenciamento de assinatura e billing
+ * Página de gerenciamento de assinatura e billing.
+ * Detecta retorno do Stripe checkout via query params e faz polling
+ * até o webhook processar a atualização da assinatura.
  */
 export default function BillingPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [banner, setBanner] = useState<{ type: 'success' | 'info' | 'error'; message: string } | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
 
   const { data: subscription, isLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: getSubscription,
+    // Polling a cada 2s quando retorna do checkout, para aguardar o webhook processar
+    refetchInterval: isPolling ? 2000 : false,
   });
+
+  // Detecta retorno do Stripe checkout via query params
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+
+    if (success === 'true') {
+      setBanner({ type: 'success', message: 'Assinatura ativada com sucesso! Atualizando dados...' });
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      setIsPolling(true);
+      // Limpa query params da URL
+      setSearchParams({}, { replace: true });
+    } else if (canceled === 'true') {
+      setBanner({ type: 'info', message: 'Checkout cancelado. Você pode tentar novamente quando quiser.' });
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams, queryClient]);
+
+  // Para o polling quando a assinatura mudar de FREE para um plano pago
+  const stopPollingIfUpdated = useCallback(() => {
+    if (isPolling && subscription && subscription.plano !== 'FREE') {
+      setIsPolling(false);
+      setBanner({ type: 'success', message: 'Assinatura ativada com sucesso!' });
+    }
+  }, [isPolling, subscription]);
+
+  useEffect(() => {
+    stopPollingIfUpdated();
+  }, [stopPollingIfUpdated]);
+
+  // Timeout de segurança: para o polling após 15s
+  useEffect(() => {
+    if (!isPolling) return;
+    const timeout = setTimeout(() => {
+      setIsPolling(false);
+      if (subscription?.plano === 'FREE') {
+        setBanner({ type: 'info', message: 'Processando assinatura... Atualize a página em alguns instantes.' });
+      }
+    }, 15000);
+    return () => clearTimeout(timeout);
+  }, [isPolling, subscription?.plano]);
 
   const handleCheckout = async (plano: string) => {
     setLoading(plano);
@@ -62,6 +113,27 @@ export default function BillingPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Assinatura</h1>
+
+      {/* Banner de feedback do checkout */}
+      {banner && (
+        <div className={`rounded-lg p-4 text-sm ${
+          banner.type === 'success'
+            ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+            : banner.type === 'error'
+              ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+              : 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span>{banner.message}</span>
+            <button
+              onClick={() => setBanner(null)}
+              className="ml-4 text-current opacity-60 hover:opacity-100"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">

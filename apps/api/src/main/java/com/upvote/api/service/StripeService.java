@@ -89,9 +89,10 @@ public class StripeService {
                     );
 
             com.stripe.model.checkout.Session session = com.stripe.model.checkout.Session.create(paramsBuilder.build());
+            log.info("[STRIPE] orgId={} Checkout session created: plan={}, sessionId={}", organizationId, planoDesejado, session.getId());
             return new CheckoutSessionResponse(session.getUrl());
         } catch (StripeException e) {
-            log.error("Erro ao criar sessão de checkout no Stripe", e);
+            log.error("[STRIPE] orgId={} Failed to create checkout session: plan={}", organizationId, planoDesejado, e);
             throw new BusinessException("Erro ao iniciar checkout. Tente novamente.");
         }
     }
@@ -116,9 +117,10 @@ public class StripeService {
                     .build();
 
             Session portalSession = Session.create(params);
+            log.info("[STRIPE] orgId={} Portal session created", organizationId);
             return new PortalSessionResponse(portalSession.getUrl());
         } catch (StripeException e) {
-            log.error("Erro ao criar sessão do portal no Stripe", e);
+            log.error("[STRIPE] orgId={} Failed to create portal session", organizationId, e);
             throw new BusinessException("Erro ao abrir portal de assinatura. Tente novamente.");
         }
     }
@@ -132,19 +134,20 @@ public class StripeService {
         try {
             event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
         } catch (SignatureVerificationException e) {
-            log.warn("Assinatura de webhook inválida", e);
+            log.warn("[STRIPE] Invalid webhook signature: sigHeader={}", sigHeader, e);
             throw new BusinessException("Assinatura de webhook inválida");
         }
 
-        log.info("Webhook recebido: {}", event.getType());
+        String eventId = event.getId();
+        log.info("[STRIPE] eventId={} Processing webhook event: type={}", eventId, event.getType());
 
         switch (event.getType()) {
-            case "checkout.session.completed" -> processarCheckoutCompleto(event);
-            case "invoice.paid" -> processarFaturaPaga(event);
-            case "invoice.payment_failed" -> processarFalhaFatura(event);
-            case "customer.subscription.updated" -> processarAssinaturaAtualizada(event);
-            case "customer.subscription.deleted" -> processarAssinaturaCancelada(event);
-            default -> log.info("Evento não tratado: {}", event.getType());
+            case "checkout.session.completed" -> processarCheckoutCompleto(event, eventId);
+            case "invoice.paid" -> processarFaturaPaga(event, eventId);
+            case "invoice.payment_failed" -> processarFalhaFatura(event, eventId);
+            case "customer.subscription.updated" -> processarAssinaturaAtualizada(event, eventId);
+            case "customer.subscription.deleted" -> processarAssinaturaCancelada(event, eventId);
+            default -> log.info("[STRIPE] eventId={} Unhandled event type: {}", eventId, event.getType());
         }
     }
 
@@ -177,17 +180,26 @@ public class StripeService {
 
     // --- Handlers de webhook ---
 
-    private void processarCheckoutCompleto(Event event) {
+    private void processarCheckoutCompleto(Event event, String eventId) {
         com.stripe.model.checkout.Session session = (com.stripe.model.checkout.Session)
                 event.getDataObjectDeserializer().getObject().orElse(null);
-        if (session == null) return;
+        if (session == null) {
+            log.warn("[STRIPE] eventId={} Failed to deserialize checkout session data", eventId);
+            return;
+        }
 
         String orgIdStr = session.getClientReferenceId();
-        if (orgIdStr == null) return;
+        if (orgIdStr == null) {
+            log.warn("[STRIPE] eventId={} Checkout session has no clientReferenceId", eventId);
+            return;
+        }
 
         UUID orgId = UUID.fromString(orgIdStr);
         Subscription subscription = subscriptionRepository.findByOrganizationId(orgId).orElse(null);
-        if (subscription == null) return;
+        if (subscription == null) {
+            log.warn("[STRIPE] eventId={} No subscription found for orgId={}", eventId, orgId);
+            return;
+        }
 
         // Determina o plano pela metadata
         Map<String, String> metadata = session.getMetadata();
@@ -210,21 +222,23 @@ public class StripeService {
                     )
             );
         } catch (StripeException e) {
-            log.warn("Não foi possível buscar período da assinatura", e);
+            log.warn("[STRIPE] eventId={} Failed to retrieve subscription period from Stripe", eventId, e);
         }
 
         subscriptionRepository.save(subscription);
-        log.info("Checkout completo: org={}, plano={}", orgId, plano);
+        log.info("[STRIPE] eventId={} Checkout completed: orgId={}, plan={}, customerId={}", eventId, orgId, plano, session.getCustomer());
     }
 
-    private void processarFaturaPaga(Event event) {
+    private void processarFaturaPaga(Event event, String eventId) {
         Invoice invoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
-        if (invoice == null || invoice.getSubscription() == null) return;
+        if (invoice == null || invoice.getSubscription() == null) {
+            log.warn("[STRIPE] eventId={} Failed to deserialize invoice data", eventId);
+            return;
+        }
 
         subscriptionRepository.findByStripeSubscriptionId(invoice.getSubscription())
                 .ifPresent(subscription -> {
                     subscription.setStripeStatus(StripeStatus.ACTIVE);
-                    // Atualiza período se disponível
                     Long periodEnd = invoice.getPeriodEnd();
                     if (periodEnd != null) {
                         subscription.setCurrentPeriodEnd(
@@ -232,36 +246,42 @@ public class StripeService {
                         );
                     }
                     subscriptionRepository.save(subscription);
-                    log.info("Fatura paga: subscription={}", invoice.getSubscription());
+                    log.info("[STRIPE] eventId={} Invoice paid: subscriptionId={}, periodEnd={}", eventId, invoice.getSubscription(), periodEnd);
                 });
     }
 
-    private void processarFalhaFatura(Event event) {
+    private void processarFalhaFatura(Event event, String eventId) {
         Invoice invoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
-        if (invoice == null || invoice.getSubscription() == null) return;
+        if (invoice == null || invoice.getSubscription() == null) {
+            log.warn("[STRIPE] eventId={} Failed to deserialize invoice data", eventId);
+            return;
+        }
 
         subscriptionRepository.findByStripeSubscriptionId(invoice.getSubscription())
                 .ifPresent(subscription -> {
                     subscription.setStripeStatus(StripeStatus.PAST_DUE);
                     subscriptionRepository.save(subscription);
-                    log.warn("Falha no pagamento: subscription={}", invoice.getSubscription());
+                    log.warn("[STRIPE] eventId={} Invoice payment failed: subscriptionId={}", eventId, invoice.getSubscription());
                 });
     }
 
-    private void processarAssinaturaAtualizada(Event event) {
+    private void processarAssinaturaAtualizada(Event event, String eventId) {
         com.stripe.model.Subscription stripeSub = (com.stripe.model.Subscription)
                 event.getDataObjectDeserializer().getObject().orElse(null);
-        if (stripeSub == null) return;
+        if (stripeSub == null) {
+            log.warn("[STRIPE] eventId={} Failed to deserialize subscription data", eventId);
+            return;
+        }
 
         subscriptionRepository.findByStripeSubscriptionId(stripeSub.getId())
                 .ifPresent(subscription -> {
-                    // Sincroniza status
                     subscription.setStripeStatus(mapStripeStatus(stripeSub.getStatus()));
 
-                    // Sincroniza plano pelo price ID
+                    Plano newPlano = subscription.getPlano();
                     if (!stripeSub.getItems().getData().isEmpty()) {
                         String priceId = stripeSub.getItems().getData().get(0).getPrice().getId();
-                        subscription.setPlano(mapPriceIdToPlano(priceId));
+                        newPlano = mapPriceIdToPlano(priceId);
+                        subscription.setPlano(newPlano);
                     }
 
                     subscription.setCurrentPeriodEnd(
@@ -271,14 +291,17 @@ public class StripeService {
                             )
                     );
                     subscriptionRepository.save(subscription);
-                    log.info("Assinatura atualizada: id={}, status={}", stripeSub.getId(), stripeSub.getStatus());
+                    log.info("[STRIPE] eventId={} Subscription updated: stripeSubId={}, status={}, plan={}", eventId, stripeSub.getId(), stripeSub.getStatus(), newPlano);
                 });
     }
 
-    private void processarAssinaturaCancelada(Event event) {
+    private void processarAssinaturaCancelada(Event event, String eventId) {
         com.stripe.model.Subscription stripeSub = (com.stripe.model.Subscription)
                 event.getDataObjectDeserializer().getObject().orElse(null);
-        if (stripeSub == null) return;
+        if (stripeSub == null) {
+            log.warn("[STRIPE] eventId={} Failed to deserialize subscription data", eventId);
+            return;
+        }
 
         subscriptionRepository.findByStripeSubscriptionId(stripeSub.getId())
                 .ifPresent(subscription -> {
@@ -286,7 +309,7 @@ public class StripeService {
                     subscription.setStripeStatus(StripeStatus.CANCELED);
                     subscription.setStripeSubscriptionId(null);
                     subscriptionRepository.save(subscription);
-                    log.info("Assinatura cancelada: id={}, voltou para FREE", stripeSub.getId());
+                    log.info("[STRIPE] eventId={} Subscription canceled: stripeSubId={}, reverted to FREE", eventId, stripeSub.getId());
                 });
     }
 
