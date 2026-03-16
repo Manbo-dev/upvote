@@ -3,8 +3,8 @@ package com.upvote.api.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-public record ProductRequest(
-        @NotBlank(message = "Nome do produto é obrigatório")
+public record CanalRequest(
+        @NotBlank(message = "Nome do canal é obrigatório")
         String name,
 
         @NotBlank(message = "Slug é obrigatório")

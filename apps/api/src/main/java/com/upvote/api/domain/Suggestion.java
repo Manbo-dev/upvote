@@ -37,8 +37,8 @@ public class Suggestion {
     private SuggestionStatus status = SuggestionStatus.OPEN;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "canal_id", nullable = false)
+    private Canal canal;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)

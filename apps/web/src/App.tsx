@@ -4,7 +4,7 @@ import { Analytics } from '@vercel/analytics/react';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
-import ProductDetailPage from './pages/ProductDetailPage';
+import CanalDetailPage from './pages/CanalDetailPage';
 import PublicBoardPage from './pages/PublicBoardPage';
 import SettingsPage from './pages/SettingsPage';
 import ApiKeysPage from './pages/ApiKeysPage';
@@ -47,7 +47,7 @@ function App() {
         }
       >
         <Route index element={<DashboardPage />} />
-        <Route path=":productId" element={<ProductDetailPage />} />
+        <Route path=":canalId" element={<CanalDetailPage />} />
         <Route path="api-keys" element={<ApiKeysPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>

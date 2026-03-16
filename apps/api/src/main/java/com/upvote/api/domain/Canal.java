@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Entidade que representa um produto que recebe feedback
+ * Entidade que representa um canal de feedback (ex: checkout, landing page, área de assinatura)
  */
 @Entity
-@Table(name = "products")
+@Table(name = "canais")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class Canal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

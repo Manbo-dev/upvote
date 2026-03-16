@@ -20,19 +20,19 @@ import java.util.UUID;
 public class SuggestionService {
 
     private final SuggestionRepository suggestionRepository;
-    private final ProductRepository productRepository;
+    private final CanalRepository canalRepository;
     private final UserRepository userRepository;
     private final VoteRepository voteRepository;
     private final OrganizationRepository organizationRepository;
 
     /**
-     * Lista sugestões de um produto, indicando se o usuário atual votou
+     * Lista sugestões de um canal, indicando se o usuário atual votou
      */
-    public List<SuggestionResponse> getSuggestionsByProduct(String slug, UUID currentUserId) {
-        Product product = productRepository.findBySlug(slug)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+    public List<SuggestionResponse> getSuggestionsByCanal(String slug, UUID currentUserId) {
+        Canal canal = canalRepository.findBySlug(slug)
+                .orElseThrow(() -> new IllegalArgumentException("Canal não encontrado"));
 
-        List<Suggestion> suggestions = suggestionRepository.findByProductIdOrderByVoteCountDesc(product.getId());
+        List<Suggestion> suggestions = suggestionRepository.findByCanalIdOrderByVoteCountDesc(canal.getId());
 
         return suggestions.stream()
                 .map(s -> toResponse(s, currentUserId))
@@ -40,19 +40,19 @@ public class SuggestionService {
     }
 
     /**
-     * Cria uma nova sugestão para um produto
+     * Cria uma nova sugestão para um canal
      */
     @Transactional
-    public SuggestionResponse createSuggestion(String productSlug, SuggestionRequest request, UUID userId) {
-        Product product = productRepository.findBySlug(productSlug)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+    public SuggestionResponse createSuggestion(String canalSlug, SuggestionRequest request, UUID userId) {
+        Canal canal = canalRepository.findBySlug(canalSlug)
+                .orElseThrow(() -> new IllegalArgumentException("Canal não encontrado"));
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         Suggestion suggestion = Suggestion.builder()
                 .title(request.title())
                 .description(request.description())
-                .product(product)
+                .canal(canal)
                 .author(author)
                 .build();
         suggestion = suggestionRepository.save(suggestion);
@@ -61,15 +61,15 @@ public class SuggestionService {
     }
 
     /**
-     * Altera o status de uma sugestão (apenas o owner do produto pode alterar)
+     * Altera o status de uma sugestão (apenas o owner do canal pode alterar)
      */
     @Transactional
     public SuggestionResponse updateStatus(UUID suggestionId, SuggestionStatus status, UUID userId) {
         Suggestion suggestion = suggestionRepository.findById(suggestionId)
                 .orElseThrow(() -> new IllegalArgumentException("Sugestão não encontrada"));
 
-        // Verifica se o usuário é owner da organização do produto
-        UUID orgId = suggestion.getProduct().getOrganization().getId();
+        // Verifica se o usuário é owner da organização do canal
+        UUID orgId = suggestion.getCanal().getOrganization().getId();
         Organization org = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new IllegalStateException("Organização não encontrada"));
 

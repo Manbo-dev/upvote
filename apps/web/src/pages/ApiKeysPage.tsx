@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getProducts, ProductResponse } from '../services/products';
+import { getCanais, CanalResponse } from '../services/canais';
 
 export default function ApiKeysPage() {
   return (
@@ -9,18 +9,18 @@ export default function ApiKeysPage() {
         Chaves de API
       </h1>
       <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-        Use a chave de API de cada produto para configurar o widget no seu site.
+        Use a chave de API de cada canal para configurar o widget no seu site.
       </p>
 
-      <ProductKeyList />
+      <CanalKeyList />
     </div>
   );
 }
 
-function ProductKeyList() {
-  const { data: products, isLoading, error } = useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts,
+function CanalKeyList() {
+  const { data: canais, isLoading, error } = useQuery({
+    queryKey: ['canais'],
+    queryFn: getCanais,
   });
 
   if (isLoading) {
@@ -34,16 +34,16 @@ function ProductKeyList() {
   if (error) {
     return (
       <div className="text-sm text-red-600 dark:text-red-400">
-        Erro ao carregar produtos.
+        Erro ao carregar canais.
       </div>
     );
   }
 
-  if (!products || products.length === 0) {
+  if (!canais || canais.length === 0) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-6 text-center dark:border-gray-800 dark:bg-gray-900">
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Nenhum produto encontrado. Crie um produto primeiro.
+          Nenhum canal encontrado. Crie um canal primeiro.
         </p>
       </div>
     );
@@ -51,25 +51,25 @@ function ProductKeyList() {
 
   return (
     <div className="space-y-4">
-      {products.map((product) => (
-        <ProductKeyCard key={product.id} product={product} />
+      {canais.map((canal) => (
+        <CanalKeyCard key={canal.id} canal={canal} />
       ))}
     </div>
   );
 }
 
-function ProductKeyCard({ product }: { product: ProductResponse }) {
+function CanalKeyCard({ canal }: { canal: CanalResponse }) {
   const [visivel, setVisivel] = useState(false);
   const [copiado, setCopiado] = useState<'key' | 'snippet' | null>(null);
 
-  const keyMascarada = product.apiKey
-    ? `${product.apiKey.slice(0, 8)}${'*'.repeat(36)}${product.apiKey.slice(-8)}`
+  const keyMascarada = canal.apiKey
+    ? `${canal.apiKey.slice(0, 8)}${'*'.repeat(36)}${canal.apiKey.slice(-8)}`
     : '';
 
   const snippet = `<script
   src="https://cdn.upvote.com/widget.js"
-  data-api-key="${product.apiKey}"
-  data-color="${product.widgetColor}"
+  data-api-key="${canal.apiKey}"
+  data-color="${canal.widgetColor}"
   data-base-url="https://api.upvote.com">
 </script>`;
 
@@ -83,10 +83,10 @@ function ProductKeyCard({ product }: { product: ProductResponse }) {
     <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {product.name}
+          {canal.name}
         </h2>
         <span className="text-xs text-gray-500 dark:text-gray-400">
-          {product.slug}
+          {canal.slug}
         </span>
       </div>
 
@@ -97,7 +97,7 @@ function ProductKeyCard({ product }: { product: ProductResponse }) {
         </label>
         <div className="flex items-center gap-2">
           <code className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-mono text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-            {visivel ? product.apiKey : keyMascarada}
+            {visivel ? canal.apiKey : keyMascarada}
           </code>
           <button
             onClick={() => setVisivel(!visivel)}
@@ -116,7 +116,7 @@ function ProductKeyCard({ product }: { product: ProductResponse }) {
             )}
           </button>
           <button
-            onClick={() => copiar(product.apiKey, 'key')}
+            onClick={() => copiar(canal.apiKey, 'key')}
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
             title="Copiar chave"
           >

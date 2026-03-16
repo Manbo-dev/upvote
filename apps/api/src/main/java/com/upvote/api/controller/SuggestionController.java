@@ -24,9 +24,9 @@ public class SuggestionController {
     private final UserRepository userRepository;
 
     /**
-     * Lista sugestões de um produto (público, mas verifica auth para votedByCurrentUser)
+     * Lista sugestões de um canal (público, mas verifica auth para votedByCurrentUser)
      */
-    @GetMapping("/api/products/{slug}/suggestions")
+    @GetMapping("/api/canais/{slug}/suggestions")
     public ResponseEntity<ApiResponse<List<SuggestionResponse>>> getSuggestions(
             @PathVariable String slug,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -35,14 +35,14 @@ public class SuggestionController {
             currentUserId = userRepository.findByEmail(userDetails.getUsername())
                     .map(u -> u.getId()).orElse(null);
         }
-        List<SuggestionResponse> suggestions = suggestionService.getSuggestionsByProduct(slug, currentUserId);
+        List<SuggestionResponse> suggestions = suggestionService.getSuggestionsByCanal(slug, currentUserId);
         return ResponseEntity.ok(ApiResponse.ok(suggestions));
     }
 
     /**
      * Cria uma nova sugestão (requer autenticação)
      */
-    @PostMapping("/api/products/{slug}/suggestions")
+    @PostMapping("/api/canais/{slug}/suggestions")
     public ResponseEntity<ApiResponse<SuggestionResponse>> createSuggestion(
             @PathVariable String slug,
             @Valid @RequestBody SuggestionRequest request,
@@ -67,7 +67,7 @@ public class SuggestionController {
     }
 
     /**
-     * Altera o status de uma sugestão (apenas owner do produto)
+     * Altera o status de uma sugestão (apenas owner do canal)
      */
     @PatchMapping("/api/suggestions/{id}/status")
     public ResponseEntity<ApiResponse<SuggestionResponse>> updateStatus(

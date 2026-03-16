@@ -27,8 +27,8 @@ public class FeedbackGroup {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "canal_id", nullable = false)
+    private Canal canal;
 
     @Column(nullable = false)
     private String title;

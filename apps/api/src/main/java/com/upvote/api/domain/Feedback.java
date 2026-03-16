@@ -26,8 +26,8 @@ public class Feedback {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "canal_id", nullable = false)
+    private Canal canal;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feedback_group_id")

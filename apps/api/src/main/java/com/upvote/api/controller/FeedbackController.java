@@ -21,7 +21,7 @@ public class FeedbackController {
 
     /**
      * Submete um feedback pelo widget (endpoint público, sem auth)
-     * Identificação do produto via header X-API-Key
+     * Identificação do canal via header X-API-Key
      */
     @PostMapping("/api/widget/feedback")
     public ResponseEntity<ApiResponse<FeedbackSubmitResponse>> submitFeedback(
@@ -45,9 +45,9 @@ public class FeedbackController {
     }
 
     /**
-     * Lista grupos de feedback para o dashboard (endpoint autenticado, dono do produto)
+     * Lista grupos de feedback para o dashboard (endpoint autenticado, dono do canal)
      */
-    @GetMapping("/api/products/{slug}/feedback-groups")
+    @GetMapping("/api/canais/{slug}/feedback-groups")
     public ResponseEntity<ApiResponse<List<FeedbackGroupResponse>>> getFeedbackGroups(
             @PathVariable String slug,
             @RequestParam(required = false) String status) {

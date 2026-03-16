@@ -33,7 +33,7 @@ export async function getSuggestions(
   slug: string,
 ): Promise<SuggestionResponse[]> {
   const { data } = await api.get<ApiResult<SuggestionResponse[]>>(
-    `/products/${slug}/suggestions`,
+    `/canais/${slug}/suggestions`,
   );
   return data.data;
 }
@@ -43,7 +43,7 @@ export async function createSuggestion(
   request: { title: string; description: string },
 ): Promise<SuggestionResponse> {
   const { data } = await api.post<ApiResult<SuggestionResponse>>(
-    `/products/${slug}/suggestions`,
+    `/canais/${slug}/suggestions`,
     request,
   );
   return data.data;

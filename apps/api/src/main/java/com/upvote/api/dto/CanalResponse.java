@@ -3,7 +3,7 @@ package com.upvote.api.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ProductResponse(
+public record CanalResponse(
         UUID id,
         String name,
         String slug,

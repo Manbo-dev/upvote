@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProductBySlug } from '../services/products';
+import { getCanalBySlug } from '../services/canais';
 import {
   getSuggestions,
   voteSuggestion,
@@ -26,9 +26,9 @@ export default function PublicBoardPage() {
   const [description, setDescription] = useState('');
   const [authWarning, setAuthWarning] = useState(false);
 
-  const { data: product } = useQuery({
-    queryKey: ['product', slug],
-    queryFn: () => getProductBySlug(slug!),
+  const { data: canal } = useQuery({
+    queryKey: ['canal', slug],
+    queryFn: () => getCanalBySlug(slug!),
     enabled: !!slug,
   });
 
@@ -96,10 +96,10 @@ export default function PublicBoardPage() {
         <div className="mx-auto max-w-3xl px-4 py-6">
           <div
             className="mb-2 h-1.5 w-12 rounded-full"
-            style={{ backgroundColor: product?.widgetColor || '#6366f1' }}
+            style={{ backgroundColor: canal?.widgetColor || '#6366f1' }}
           />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {product?.name || 'Carregando...'}
+            {canal?.name || 'Carregando...'}
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Vote nas sugestoes que voce mais deseja ou crie a sua

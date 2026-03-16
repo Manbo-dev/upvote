@@ -11,7 +11,7 @@ import com.upvote.api.dto.FeedbackSubmitResponse;
 import com.upvote.api.dto.FollowUpRequest;
 import com.upvote.api.repository.FeedbackGroupRepository;
 import com.upvote.api.repository.FeedbackRepository;
-import com.upvote.api.repository.ProductRepository;
+import com.upvote.api.repository.CanalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,17 +28,17 @@ public class FeedbackService {
 
     private final FeedbackRepository feedbackRepository;
     private final FeedbackGroupRepository feedbackGroupRepository;
-    private final ProductRepository productRepository;
+    private final CanalRepository canalRepository;
     private final AiService aiService;
 
     /**
      * Submete um feedback enviado pelo widget (endpoint público, sem auth)
-     * Produto identificado pela API key enviada no header
+     * Canal identificado pela API key enviada no header
      */
     @Transactional
     public FeedbackSubmitResponse submitFeedback(String apiKey, FeedbackSubmitRequest request) {
-        // 1. Busca o produto pela API key
-        Product product = productRepository.findByApiKey(apiKey)
+        // 1. Busca o canal pela API key
+        Canal canal = canalRepository.findByApiKey(apiKey)
                 .orElseThrow(() -> new IllegalArgumentException("Chave de API inválida"));
 
         // 2. Cria PageContext a partir do request
@@ -53,9 +53,9 @@ public class FeedbackService {
         // 3. Usa AiService para sintetizar o comentário
         String synthesized = aiService.synthesizeFeedback(request.message(), pageContext);
 
-        // 4. Busca grupos existentes do produto
+        // 4. Busca grupos existentes do canal
         List<FeedbackGroup> existingGroups = feedbackGroupRepository
-                .findByProductIdOrderByVoteCountDesc(product.getId());
+                .findByCanalIdOrderByVoteCountDesc(canal.getId());
 
         // 5. Usa AiService para encontrar feedback similar
         SimilarityResult similarity = aiService.findSimilarFeedback(synthesized, existingGroups);
@@ -70,7 +70,7 @@ public class FeedbackService {
             feedbackGroupRepository.save(matchedGroup);
 
             // Salva feedback vinculado ao grupo
-            Feedback feedback = buildFeedback(product, request, synthesized, pageContext);
+            Feedback feedback = buildFeedback(canal, request, synthesized, pageContext);
             feedback.setFeedbackGroup(matchedGroup);
             feedback.setStatus(FeedbackStatus.PROCESSED);
             feedback = feedbackRepository.save(feedback);
@@ -82,7 +82,7 @@ public class FeedbackService {
         if (similarity.confidence() > 0.0 && !similarity.isMatch()) {
             String followUpQuestion = aiService.generateFollowUpQuestion(request.message(), pageContext);
 
-            Feedback feedback = buildFeedback(product, request, synthesized, pageContext);
+            Feedback feedback = buildFeedback(canal, request, synthesized, pageContext);
             feedback.setFollowUpQuestion(followUpQuestion);
             feedback.setStatus(FeedbackStatus.AWAITING_FOLLOW_UP);
             feedback = feedbackRepository.save(feedback);
@@ -94,13 +94,13 @@ public class FeedbackService {
         GroupSuggestion groupSuggestion = aiService.suggestGroup(synthesized, pageContext);
 
         FeedbackGroup newGroup = FeedbackGroup.builder()
-                .product(product)
+                .canal(canal)
                 .title(groupSuggestion.title())
                 .summary(groupSuggestion.summary())
                 .build();
         newGroup = feedbackGroupRepository.save(newGroup);
 
-        Feedback feedback = buildFeedback(product, request, synthesized, pageContext);
+        Feedback feedback = buildFeedback(canal, request, synthesized, pageContext);
         feedback.setFeedbackGroup(newGroup);
         feedback.setStatus(FeedbackStatus.PROCESSED);
         feedback = feedbackRepository.save(feedback);
@@ -135,7 +135,7 @@ public class FeedbackService {
 
         // 4. Busca grupos existentes e tenta agrupar novamente
         List<FeedbackGroup> existingGroups = feedbackGroupRepository
-                .findByProductIdOrderByVoteCountDesc(feedback.getProduct().getId());
+                .findByCanalIdOrderByVoteCountDesc(feedback.getCanal().getId());
 
         SimilarityResult similarity = aiService.findSimilarFeedback(reSynthesized, existingGroups);
 
@@ -158,7 +158,7 @@ public class FeedbackService {
         GroupSuggestion groupSuggestion = aiService.suggestGroup(reSynthesized, pageContext);
 
         FeedbackGroup newGroup = FeedbackGroup.builder()
-                .product(feedback.getProduct())
+                .canal(feedback.getCanal())
                 .title(groupSuggestion.title())
                 .summary(groupSuggestion.summary())
                 .build();
@@ -174,19 +174,19 @@ public class FeedbackService {
     /**
      * Lista grupos de feedback para o dashboard (endpoint autenticado)
      */
-    public List<FeedbackGroupResponse> getFeedbackGroups(String productSlug, String status) {
-        Product product = productRepository.findBySlug(productSlug)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+    public List<FeedbackGroupResponse> getFeedbackGroups(String canalSlug, String status) {
+        Canal canal = canalRepository.findBySlug(canalSlug)
+                .orElseThrow(() -> new IllegalArgumentException("Canal não encontrado"));
 
         List<FeedbackGroup> groups;
 
         if (status != null && !status.isBlank()) {
             FeedbackGroupStatus groupStatus = FeedbackGroupStatus.valueOf(status.toUpperCase());
             groups = feedbackGroupRepository
-                    .findByProductIdAndStatusOrderByVoteCountDesc(product.getId(), groupStatus);
+                    .findByCanalIdAndStatusOrderByVoteCountDesc(canal.getId(), groupStatus);
         } else {
             groups = feedbackGroupRepository
-                    .findByProductIdOrderByVoteCountDesc(product.getId());
+                    .findByCanalIdOrderByVoteCountDesc(canal.getId());
         }
 
         return groups.stream()
@@ -197,10 +197,10 @@ public class FeedbackService {
     /**
      * Constrói a entidade Feedback a partir do request
      */
-    private Feedback buildFeedback(Product product, FeedbackSubmitRequest request,
+    private Feedback buildFeedback(Canal canal, FeedbackSubmitRequest request,
                                    String synthesized, PageContext pageContext) {
         return Feedback.builder()
-                .product(product)
+                .canal(canal)
                 .rawMessage(request.message())
                 .synthesizedMessage(synthesized)
                 .pageUrl(pageContext.pageUrl())

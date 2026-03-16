@@ -20,7 +20,7 @@ com preço mais acessível.
 1. Parceiro instala o widget via script tag no seu produto
 2. Usuário final escreve um feedback livremente no widget (texto livre, sem categorias)
 3. Backend recebe o comentário + contexto automático da página
-4. IA sintetiza o comentário e busca feedbacks similares já existentes para aquele produto
+4. IA sintetiza o comentário e busca feedbacks similares já existentes para aquele canal
 5. Se encontra similar com alta confiança → adiciona um voto automaticamente
 6. Se confiança baixa → widget faz no máximo UMA pergunta de follow-up (opcional, o usuário pode ignorar)
 7. Se o usuário não responder, fechar o widget ou abandonar → a mensagem original é salva e processada normalmente
@@ -45,7 +45,7 @@ Dados capturados junto com o comentário, em linguagem legível para PO/PM:
 
 ### IA no backend
 - Sintetiza o comentário do usuário
-- Busca feedbacks similares já existentes para o mesmo produto
+- Busca feedbacks similares já existentes para o mesmo canal
 - Alta confiança → vota no feedback existente
 - Baixa confiança → solicita follow-up OU cria novo feedback
 - Recebe o contexto automático da página para melhorar a categorização
@@ -100,14 +100,14 @@ npm install && npm run dev
 - Commits em português no formato: tipo(escopo): descrição
 - Respostas da API sempre no padrão ApiResponse<T>
 - Autenticação via JWT stateless (sem sessão no servidor)
-- Multi-tenancy: cada Organization tem seus Products isolados
+- Multi-tenancy: cada Organization tem seus Canais isolados
 - Nunca commitar secrets ou .env — usar .env.example como referência
 - Branches: main (produção), develop (desenvolvimento), feature/* (features)
 
 ## Modelo de negócio
-- Plano Free: 1 produto, 50 sugestões, sem widget
-- Plano Starter R$49/mês: 3 produtos, widget básico
-- Plano Pro R$129/mês: 10 produtos, changelog, roadmap público
+- Plano Free: 1 canal, 50 sugestões, sem widget
+- Plano Starter R$49/mês: 3 canais, widget básico
+- Plano Pro R$129/mês: 10 canais, changelog, roadmap público
 - Plano Business R$299/mês: ilimitado, SSO, API, white-label
 
 ## Infraestrutura

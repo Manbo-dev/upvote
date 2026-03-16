@@ -7,16 +7,16 @@ com.upvote.api
 ## Entidades e relacionamentos
 
 - User → dono da conta (1 user tem 1 organization)
-- Organization → agrupa produtos de um cliente (1:N com Product)
-- Product → produto monitorado, tem slug único por organization
-- Suggestion → sugestão enviada por usuário final (N:1 com Product)
+- Organization → agrupa canais de um cliente (1:N com Canal)
+- Canal → canal de feedback (ex: checkout, landing page), tem slug único
+- Suggestion → sugestão enviada por usuário final (N:1 com Canal)
 - Vote → unique(suggestionId + userId), toggle ao votar novamente
 - Comment → comentários em sugestões, ordenados por createdAt asc
 
 ## Status de uma Suggestion
 
 OPEN → PLANNED → IN_PROGRESS → DONE → CLOSED
-Apenas o owner do produto pode alterar o status.
+Apenas o owner do canal pode alterar o status.
 
 ## Padrões obrigatórios
 
@@ -38,7 +38,7 @@ Apenas o owner do produto pode alterar o status.
 - Senha com BCrypt strength 12
 - Endpoints públicos (sem token):
     - POST /api/auth/**
-    - GET /api/products/{slug}/suggestions
+    - GET /api/canais/{slug}/suggestions
     - GET /api/suggestions/{id}/comments
 - Todo o resto exige Bearer token no header Authorization
 
@@ -47,7 +47,7 @@ Apenas o owner do produto pode alterar o status.
 - PostgreSQL 15
 - Flyway para todas as alterações de schema
 - Nunca usar hbm2ddl auto create/update (apenas validate em prod)
-- Seed de dados em V999__seed_data.sql (1 user, 1 org, 1 produto)
+- Seed de dados em V2__seed_data.sql (1 user, 1 org, 1 canal)
 
 ## Variáveis de ambiente relevantes
 

@@ -17,13 +17,13 @@ const STATUS_TABS: { label: string; value: SuggestionStatus | 'ALL' }[] = [
   { label: 'Concluidas', value: 'DONE' },
 ];
 
-export default function ProductDetailPage() {
-  const { productId: slug } = useParams<{ productId: string }>();
+export default function CanalDetailPage() {
+  const { canalId: slug } = useParams<{ canalId: string }>();
   const [activeTab, setActiveTab] = useState<SuggestionStatus | 'ALL'>('ALL');
   const [selectedGroup, setSelectedGroup] =
     useState<FeedbackGroupResponse | null>(null);
 
-  // Busca grupos de feedback do produto
+  // Busca grupos de feedback do canal
   const { data: feedbackGroups, isLoading } = useQuery({
     queryKey: ['feedback-groups', slug],
     queryFn: () => getFeedbackGroups(slug!),

@@ -16,8 +16,8 @@
 ## Rotas
 - /login → público
 - /register → público
-- /dashboard → privado, lista produtos do owner autenticado
-- /dashboard/:productId → privado, gerencia sugestões do produto
+- /dashboard → privado, lista canais do owner autenticado
+- /dashboard/:canalId → privado, gerencia feedbacks do canal
 - /b/:slug → público, board de sugestões (acesso sem login)
 Rotas privadas redirecionam para /login se não autenticado.
 

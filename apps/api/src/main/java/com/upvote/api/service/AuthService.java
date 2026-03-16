@@ -1,13 +1,13 @@
 package com.upvote.api.service;
 
+import com.upvote.api.domain.Canal;
 import com.upvote.api.domain.Organization;
-import com.upvote.api.domain.Product;
 import com.upvote.api.domain.User;
 import com.upvote.api.dto.AuthResponse;
 import com.upvote.api.dto.LoginRequest;
 import com.upvote.api.dto.RegisterRequest;
 import com.upvote.api.repository.OrganizationRepository;
-import com.upvote.api.repository.ProductRepository;
+import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.UserRepository;
 import com.upvote.api.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
-    private final ProductRepository productRepository;
+    private final CanalRepository canalRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -56,13 +56,13 @@ public class AuthService {
                 .build();
         organizationRepository.save(org);
 
-        // Cria produto padrão
-        Product product = Product.builder()
-                .name("Meu Produto")
-                .slug(orgSlug + "-produto")
+        // Cria canal padrão
+        Canal canal = Canal.builder()
+                .name("Meu Canal")
+                .slug(orgSlug + "-canal")
                 .organization(org)
                 .build();
-        productRepository.save(product);
+        canalRepository.save(canal);
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
         return new AuthResponse(token, user.getName(), user.getEmail());

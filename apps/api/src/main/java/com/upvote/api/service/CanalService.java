@@ -1,11 +1,11 @@
 package com.upvote.api.service;
 
 import com.upvote.api.domain.Organization;
-import com.upvote.api.domain.Product;
-import com.upvote.api.dto.ProductRequest;
-import com.upvote.api.dto.ProductResponse;
+import com.upvote.api.domain.Canal;
+import com.upvote.api.dto.CanalRequest;
+import com.upvote.api.dto.CanalResponse;
 import com.upvote.api.repository.OrganizationRepository;
-import com.upvote.api.repository.ProductRepository;
+import com.upvote.api.repository.CanalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,36 +16,36 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Serviço para gerenciamento de produtos
+ * Serviço para gerenciamento de canais de feedback
  */
 @Service
 @RequiredArgsConstructor
-public class ProductService {
+public class CanalService {
 
-    private final ProductRepository productRepository;
+    private final CanalRepository canalRepository;
     private final OrganizationRepository organizationRepository;
 
     /**
-     * Lista todos os produtos das organizações do usuário
+     * Lista todos os canais das organizações do usuário
      */
-    public List<ProductResponse> getProductsByOwner(UUID userId) {
+    public List<CanalResponse> getCanaisByOwner(UUID userId) {
         List<Organization> orgs = organizationRepository.findByOwnerId(userId);
         return orgs.stream()
-                .flatMap(org -> productRepository.findByOrganizationId(org.getId()).stream())
+                .flatMap(org -> canalRepository.findByOrganizationId(org.getId()).stream())
                 .map(this::toResponse)
                 .toList();
     }
 
     /**
-     * Cria um novo produto na primeira organização do usuário
+     * Cria um novo canal na primeira organização do usuário
      */
     @Transactional
-    public ProductResponse createProduct(ProductRequest request, UUID userId) {
+    public CanalResponse createCanal(CanalRequest request, UUID userId) {
         Organization org = organizationRepository.findByOwnerId(userId)
                 .stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException("Usuário não possui organização"));
 
-        if (productRepository.findBySlug(request.slug()).isPresent()) {
+        if (canalRepository.findBySlug(request.slug()).isPresent()) {
             throw new IllegalArgumentException("Slug já está em uso");
         }
 
@@ -54,34 +54,34 @@ public class ProductService {
         new SecureRandom().nextBytes(randomBytes);
         String apiKey = "upv_" + HexFormat.of().formatHex(randomBytes);
 
-        Product product = Product.builder()
+        Canal canal = Canal.builder()
                 .name(request.name())
                 .slug(request.slug())
                 .apiKey(apiKey)
                 .organization(org)
                 .build();
-        product = productRepository.save(product);
+        canal = canalRepository.save(canal);
 
-        return toResponse(product);
+        return toResponse(canal);
     }
 
     /**
-     * Busca produto pelo slug (público)
+     * Busca canal pelo slug (público)
      */
-    public ProductResponse getProductBySlug(String slug) {
-        Product product = productRepository.findBySlug(slug)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
-        return toResponse(product);
+    public CanalResponse getCanalBySlug(String slug) {
+        Canal canal = canalRepository.findBySlug(slug)
+                .orElseThrow(() -> new IllegalArgumentException("Canal não encontrado"));
+        return toResponse(canal);
     }
 
-    private ProductResponse toResponse(Product product) {
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getSlug(),
-                product.getApiKey(),
-                product.getWidgetColor(),
-                product.getCreatedAt()
+    private CanalResponse toResponse(Canal canal) {
+        return new CanalResponse(
+                canal.getId(),
+                canal.getName(),
+                canal.getSlug(),
+                canal.getApiKey(),
+                canal.getWidgetColor(),
+                canal.getCreatedAt()
         );
     }
 }

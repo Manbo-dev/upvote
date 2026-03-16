@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
 
-    List<Feedback> findByProductId(UUID productId);
+    List<Feedback> findByCanalId(UUID canalId);
 
     List<Feedback> findByFeedbackGroupId(UUID feedbackGroupId);
 

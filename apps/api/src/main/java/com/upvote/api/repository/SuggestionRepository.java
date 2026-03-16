@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SuggestionRepository extends JpaRepository<Suggestion, UUID> {
-    List<Suggestion> findByProductIdOrderByVoteCountDesc(UUID productId);
+    List<Suggestion> findByCanalIdOrderByVoteCountDesc(UUID canalId);
 
-    List<Suggestion> findByProductIdAndStatusOrderByVoteCountDesc(UUID productId, SuggestionStatus status);
+    List<Suggestion> findByCanalIdAndStatusOrderByVoteCountDesc(UUID canalId, SuggestionStatus status);
 }

@@ -32,14 +32,14 @@ interface ApiResult<T> {
   data: T;
 }
 
-// Busca os grupos de feedback de um produto, opcionalmente filtrados por status
+// Busca os grupos de feedback de um canal, opcionalmente filtrados por status
 export async function getFeedbackGroups(
   slug: string,
   status?: string,
 ): Promise<FeedbackGroupResponse[]> {
   const params = status ? { status } : {};
   const { data } = await api.get<ApiResult<FeedbackGroupResponse[]>>(
-    `/products/${slug}/feedback-groups`,
+    `/canais/${slug}/feedback-groups`,
     { params },
   );
   return data.data;

@@ -5,7 +5,7 @@ import { useThemeStore } from '../store/themeStore';
 // ─── Dados mockados ───────────────────────────────────────────────────────────
 
 const STATS = [
-  { valor: '+500', label: 'Produtos monitorados' },
+  { valor: '+500', label: 'Canais monitorados' },
   { valor: '+12 mil', label: 'Feedbacks processados' },
   { valor: '98%', label: 'Satisfação dos parceiros' },
   { valor: '3x', label: 'Mais rápido que feedback manual' },
@@ -85,8 +85,8 @@ const FUNCIONALIDADES = [
     ),
   },
   {
-    titulo: 'Multi-produto',
-    descricao: 'Gerencie vários produtos em uma conta só. Cada produto tem seu dashboard e widget isolados.',
+    titulo: 'Multi-canal',
+    descricao: 'Gerencie vários canais em uma conta só. Cada canal tem seu dashboard e widget isolados.',
     icone: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 0 1-1.125-1.125v-3.75ZM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-8.25ZM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-2.25Z" />
@@ -137,7 +137,7 @@ const PLANOS = [
     preco: 'R$ 0',
     periodo: 'para sempre',
     destaque: false,
-    recursos: ['1 produto', '50 sugestões/mês', 'Board público', 'Sem widget'],
+    recursos: ['1 canal', '50 sugestões/mês', 'Board público', 'Sem widget'],
     cta: 'Começar grátis',
   },
   {
@@ -145,7 +145,7 @@ const PLANOS = [
     preco: 'R$ 49',
     periodo: '/mês',
     destaque: false,
-    recursos: ['3 produtos', 'Sugestões ilimitadas', 'Widget básico', 'Dashboard de padrões'],
+    recursos: ['3 canais', 'Sugestões ilimitadas', 'Widget básico', 'Dashboard de padrões'],
     cta: 'Começar',
   },
   {
@@ -153,7 +153,7 @@ const PLANOS = [
     preco: 'R$ 129',
     periodo: '/mês',
     destaque: true,
-    recursos: ['10 produtos', 'Changelog integrado', 'Roadmap público', 'IA avançada', 'Suporte prioritário'],
+    recursos: ['10 canais', 'Changelog integrado', 'Roadmap público', 'IA avançada', 'Suporte prioritário'],
     cta: 'Começar',
   },
   {
@@ -161,7 +161,7 @@ const PLANOS = [
     preco: 'R$ 299',
     periodo: '/mês',
     destaque: false,
-    recursos: ['Produtos ilimitados', 'SSO', 'API pública', 'White-label', 'SLA garantido'],
+    recursos: ['Canais ilimitados', 'SSO', 'API pública', 'White-label', 'SLA garantido'],
     cta: 'Falar com vendas',
   },
 ];
