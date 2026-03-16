@@ -18,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.util.HexFormat;
+
 /**
  * Serviço de autenticação: registro e login
  */
@@ -67,10 +70,16 @@ public class AuthService {
                 .build();
         subscriptionRepository.save(subscription);
 
+        // Gera API key única para o canal padrão
+        byte[] randomBytes = new byte[24];
+        new SecureRandom().nextBytes(randomBytes);
+        String apiKey = "upv_" + HexFormat.of().formatHex(randomBytes);
+
         // Cria canal padrão
         Canal canal = Canal.builder()
                 .name("Meu Canal")
                 .slug(orgSlug + "-canal")
+                .apiKey(apiKey)
                 .organization(org)
                 .build();
         canalRepository.save(canal);
