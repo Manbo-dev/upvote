@@ -59,15 +59,25 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        // Configuração para o widget: aceita qualquer origem (é embarcado em sites de parceiros)
+        CorsConfiguration widgetConfig = new CorsConfiguration();
+        widgetConfig.setAllowedOriginPatterns(List.of("*"));
+        widgetConfig.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        widgetConfig.setAllowedHeaders(List.of("*"));
+        widgetConfig.setAllowCredentials(false);
+        widgetConfig.setMaxAge(3600L);
+
+        // Configuração para o restante da API: apenas origens autorizadas
+        CorsConfiguration apiConfig = new CorsConfiguration();
+        apiConfig.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        apiConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        apiConfig.setAllowedHeaders(List.of("*"));
+        apiConfig.setAllowCredentials(true);
+        apiConfig.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/api/widget/**", widgetConfig);
+        source.registerCorsConfiguration("/**", apiConfig);
         return source;
     }
 

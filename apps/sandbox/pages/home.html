@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TechStore — Tecnologia para todos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- Barra de debug do sandbox -->
+  <div class="bg-gray-900 text-gray-300 text-xs px-4 py-2 flex items-center justify-between gap-4 flex-wrap">
+    <div class="flex items-center gap-4">
+      <span class="font-bold text-yellow-400">⚙ SANDBOX</span>
+      <span>API: <code class="text-green-400">{{BASE_URL}}</code></span>
+      <span>Key: <code class="text-blue-400">{{API_KEY_MASKED}}</code></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/" class="text-white font-bold underline">Home</a>
+      <a href="/produto" class="hover:text-white">Produto</a>
+      <a href="/checkout" class="hover:text-white">Checkout</a>
+      <a href="/config-info" target="_blank" class="text-yellow-400 hover:text-yellow-300">config ↗</a>
+    </div>
+  </div>
+
+  <!-- Header da loja -->
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-sm">T</span>
+        </div>
+        <span class="text-xl font-bold text-gray-900">TechStore</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-600">
+        <a href="/" class="text-indigo-600 font-semibold">Início</a>
+        <a href="/produto" class="hover:text-gray-900">Produtos</a>
+        <a href="#" class="hover:text-gray-900">Promoções</a>
+        <a href="#" class="hover:text-gray-900">Suporte</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="text-gray-500 hover:text-gray-900 text-sm border border-gray-200 px-3 py-1.5 rounded-lg">Entrar</button>
+        <button class="bg-indigo-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-indigo-700">
+          🛒 Carrinho (0)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-indigo-600 to-purple-700 text-white py-20 px-4">
+    <div class="max-w-6xl mx-auto text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">Tecnologia que transforma</h1>
+      <p class="text-indigo-200 text-lg mb-8 max-w-xl mx-auto">
+        Os melhores eletrônicos com entrega rápida e garantia estendida.
+      </p>
+      <div class="flex justify-center gap-3 flex-wrap">
+        <a href="/produto" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-xl hover:bg-indigo-50 transition">
+          Ver produtos em destaque
+        </a>
+        <button class="border border-white/50 text-white px-6 py-3 rounded-xl hover:bg-white/10 transition">
+          Ver promoções
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categorias -->
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <h2 class="text-xl font-bold text-gray-900 mb-6">Navegue por categoria</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <button class="bg-white rounded-xl p-5 text-center shadow-sm hover:shadow-md transition border border-gray-100 hover:border-indigo-200">
+        <div class="text-3xl mb-2">📱</div>
+        <span class="text-sm font-medium">Smartphones</span>
+      </button>
+      <button class="bg-white rounded-xl p-5 text-center shadow-sm hover:shadow-md transition border border-gray-100 hover:border-indigo-200">
+        <div class="text-3xl mb-2">💻</div>
+        <span class="text-sm font-medium">Notebooks</span>
+      </button>
+      <button class="bg-white rounded-xl p-5 text-center shadow-sm hover:shadow-md transition border border-gray-100 hover:border-indigo-200">
+        <div class="text-3xl mb-2">🎧</div>
+        <span class="text-sm font-medium">Áudio</span>
+      </button>
+      <button class="bg-white rounded-xl p-5 text-center shadow-sm hover:shadow-md transition border border-gray-100 hover:border-indigo-200">
+        <div class="text-3xl mb-2">⌚</div>
+        <span class="text-sm font-medium">Wearables</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Produtos em destaque -->
+  <section class="max-w-6xl mx-auto px-4 pb-16">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-gray-900">Produtos em destaque</h2>
+      <a href="/produto" class="text-sm text-indigo-600 hover:underline">Ver todos →</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Produto 1 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+        <div class="bg-gradient-to-br from-gray-100 to-gray-200 h-48 flex items-center justify-center text-6xl">📱</div>
+        <div class="p-5">
+          <span class="text-xs text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded">Mais vendido</span>
+          <h3 class="font-bold text-gray-900 mt-2">Galaxy Ultra Pro 5G</h3>
+          <p class="text-sm text-gray-500 mt-1">256GB · Câmera 200MP · 5000mAh</p>
+          <div class="flex items-center gap-1 mt-2 text-yellow-400 text-sm">
+            ★★★★★ <span class="text-gray-400 text-xs">(847)</span>
+          </div>
+          <div class="mt-3 flex items-end justify-between">
+            <div>
+              <p class="text-xs text-gray-400 line-through">R$ 5.999</p>
+              <p class="text-xl font-bold text-gray-900">R$ 4.799</p>
+            </div>
+            <div class="flex gap-2">
+              <button class="text-sm text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-50">
+                + Carrinho
+              </button>
+              <a href="/produto" class="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700">
+                Comprar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produto 2 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+        <div class="bg-gradient-to-br from-gray-100 to-gray-200 h-48 flex items-center justify-center text-6xl">🎧</div>
+        <div class="p-5">
+          <span class="text-xs text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded">Em promoção</span>
+          <h3 class="font-bold text-gray-900 mt-2">SoundMax ANC Pro</h3>
+          <p class="text-sm text-gray-500 mt-1">Noise Cancelling · 30h bateria · Bluetooth 5.3</p>
+          <div class="flex items-center gap-1 mt-2 text-yellow-400 text-sm">
+            ★★★★☆ <span class="text-gray-400 text-xs">(312)</span>
+          </div>
+          <div class="mt-3 flex items-end justify-between">
+            <div>
+              <p class="text-xs text-gray-400 line-through">R$ 899</p>
+              <p class="text-xl font-bold text-gray-900">R$ 649</p>
+            </div>
+            <div class="flex gap-2">
+              <button class="text-sm text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-50">
+                + Carrinho
+              </button>
+              <a href="/produto" class="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700">
+                Comprar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produto 3 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+        <div class="bg-gradient-to-br from-gray-100 to-gray-200 h-48 flex items-center justify-center text-6xl">💻</div>
+        <div class="p-5">
+          <span class="text-xs text-orange-600 font-semibold bg-orange-50 px-2 py-0.5 rounded">Últimas unidades</span>
+          <h3 class="font-bold text-gray-900 mt-2">UltraBook Slim 14"</h3>
+          <p class="text-sm text-gray-500 mt-1">Intel i7 · 16GB RAM · SSD 512GB</p>
+          <div class="flex items-center gap-1 mt-2 text-yellow-400 text-sm">
+            ★★★★★ <span class="text-gray-400 text-xs">(156)</span>
+          </div>
+          <div class="mt-3 flex items-end justify-between">
+            <div>
+              <p class="text-xs text-gray-400 line-through">R$ 4.299</p>
+              <p class="text-xl font-bold text-gray-900">R$ 3.599</p>
+            </div>
+            <div class="flex gap-2">
+              <button class="text-sm text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-50">
+                + Carrinho
+              </button>
+              <a href="/produto" class="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700">
+                Comprar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Banner de promoção -->
+  <section class="bg-indigo-600 text-white py-10 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-2xl font-bold mb-2">Frete grátis em compras acima de R$ 299</h2>
+      <p class="text-indigo-200 mb-5">Válido para todo o Brasil. Entrega em até 3 dias úteis.</p>
+      <button class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-xl hover:bg-indigo-50 transition">
+        Aproveitar promoção
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-10 px-4 mt-0">
+    <div class="max-w-6xl mx-auto text-center text-sm">
+      <p class="text-gray-500">TechStore © 2025 · Página simulada para teste do widget Upvote</p>
+    </div>
+  </footer>
+
+  <!-- Widget Upvote -->
+  <script
+    src="/widget.js"
+    data-api-key="{{API_KEY}}"
+    data-base-url="{{BASE_URL}}"
+    data-color="{{COLOR}}"
+    data-trigger="button"
+  ></script>
+
+</body>
+</html>

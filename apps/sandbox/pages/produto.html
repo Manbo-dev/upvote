@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galaxy Ultra Pro 5G — TechStore</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- Barra de debug do sandbox -->
+  <div class="bg-gray-900 text-gray-300 text-xs px-4 py-2 flex items-center justify-between gap-4 flex-wrap">
+    <div class="flex items-center gap-4">
+      <span class="font-bold text-yellow-400">⚙ SANDBOX</span>
+      <span>API: <code class="text-green-400">{{BASE_URL}}</code></span>
+      <span>Key: <code class="text-blue-400">{{API_KEY_MASKED}}</code></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/" class="hover:text-white">Home</a>
+      <a href="/produto" class="text-white font-bold underline">Produto</a>
+      <a href="/checkout" class="hover:text-white">Checkout</a>
+      <a href="/config-info" target="_blank" class="text-yellow-400 hover:text-yellow-300">config ↗</a>
+    </div>
+  </div>
+
+  <!-- Header da loja -->
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-sm">T</span>
+        </div>
+        <span class="text-xl font-bold text-gray-900">TechStore</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-600">
+        <a href="/" class="hover:text-gray-900">Início</a>
+        <a href="/produto" class="text-indigo-600 font-semibold">Produtos</a>
+        <a href="#" class="hover:text-gray-900">Promoções</a>
+        <a href="#" class="hover:text-gray-900">Suporte</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="text-gray-500 hover:text-gray-900 text-sm border border-gray-200 px-3 py-1.5 rounded-lg">Entrar</button>
+        <button class="bg-indigo-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-indigo-700">
+          🛒 Carrinho (1)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <div class="max-w-6xl mx-auto px-4 py-3">
+    <nav class="text-sm text-gray-500 flex items-center gap-2">
+      <a href="/" class="hover:text-indigo-600">Início</a>
+      <span>/</span>
+      <a href="#" class="hover:text-indigo-600">Smartphones</a>
+      <span>/</span>
+      <span class="text-gray-800">Galaxy Ultra Pro 5G</span>
+    </nav>
+  </div>
+
+  <!-- Detalhe do produto -->
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+      <!-- Galeria de imagens -->
+      <div class="space-y-4">
+        <div class="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl h-80 flex items-center justify-center text-8xl">
+          📱
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button class="bg-gray-100 rounded-xl h-16 flex items-center justify-center text-2xl hover:ring-2 ring-indigo-400">📱</button>
+          <button class="bg-gray-100 rounded-xl h-16 flex items-center justify-center text-2xl hover:ring-2 ring-indigo-400">📷</button>
+          <button class="bg-gray-100 rounded-xl h-16 flex items-center justify-center text-2xl hover:ring-2 ring-indigo-400">🔋</button>
+          <button class="bg-gray-100 rounded-xl h-16 flex items-center justify-center text-2xl hover:ring-2 ring-indigo-400">📦</button>
+        </div>
+      </div>
+
+      <!-- Informações do produto -->
+      <div class="space-y-5">
+        <div>
+          <span class="text-xs text-indigo-600 font-semibold bg-indigo-50 px-2 py-1 rounded">Mais vendido</span>
+          <h1 class="text-2xl font-bold text-gray-900 mt-3">Galaxy Ultra Pro 5G</h1>
+          <p class="text-gray-500 mt-1">Samsung · Modelo 2025 · SKU: GAL-UPR-256-BLK</p>
+        </div>
+
+        <!-- Avaliações -->
+        <div class="flex items-center gap-3">
+          <div class="text-yellow-400 text-lg">★★★★★</div>
+          <span class="text-sm text-gray-600">4.8 · <a href="#avaliacoes" class="text-indigo-600 hover:underline">847 avaliações</a></span>
+        </div>
+
+        <!-- Preço -->
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-sm text-gray-500 line-through">R$ 5.999,00</p>
+          <p class="text-3xl font-bold text-gray-900">R$ 4.799,00</p>
+          <p class="text-sm text-green-600 font-medium">↓ 20% de desconto · Economia de R$ 1.200</p>
+          <p class="text-xs text-gray-500 mt-1">ou 12x de R$ 399,91 sem juros no cartão</p>
+        </div>
+
+        <!-- Seleção de variante -->
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-2">Armazenamento</p>
+          <div class="flex gap-2">
+            <button class="px-4 py-2 text-sm rounded-lg border-2 border-indigo-600 text-indigo-600 font-semibold">256GB</button>
+            <button class="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:border-indigo-300">512GB +R$400</button>
+            <button class="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:border-indigo-300">1TB +R$800</button>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-2">Cor</p>
+          <div class="flex gap-2">
+            <button class="w-8 h-8 rounded-full bg-gray-900 ring-2 ring-offset-2 ring-indigo-600" title="Preto Fantasma"></button>
+            <button class="w-8 h-8 rounded-full bg-white border border-gray-200 hover:ring-2 ring-offset-2 ring-gray-300" title="Branco Creme"></button>
+            <button class="w-8 h-8 rounded-full bg-purple-600 hover:ring-2 ring-offset-2 ring-purple-400" title="Violeta"></button>
+          </div>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="space-y-3 pt-2">
+          <a href="/checkout" class="block w-full bg-indigo-600 text-white text-center py-3.5 rounded-xl font-semibold hover:bg-indigo-700 transition text-base">
+            Comprar agora
+          </a>
+          <button class="w-full border-2 border-indigo-600 text-indigo-600 py-3.5 rounded-xl font-semibold hover:bg-indigo-50 transition text-base">
+            Adicionar ao carrinho
+          </button>
+          <button class="w-full text-gray-500 text-sm py-2 hover:text-gray-700">
+            ♡ Adicionar à lista de desejos
+          </button>
+        </div>
+
+        <!-- Benefícios -->
+        <div class="border-t pt-4 space-y-2 text-sm text-gray-600">
+          <div class="flex items-center gap-2"><span class="text-green-500">✓</span> Frete grátis para todo o Brasil</div>
+          <div class="flex items-center gap-2"><span class="text-green-500">✓</span> Garantia de 12 meses pelo fabricante</div>
+          <div class="flex items-center gap-2"><span class="text-green-500">✓</span> Devolução gratuita em 30 dias</div>
+          <div class="flex items-center gap-2"><span class="text-green-500">✓</span> Produto original com nota fiscal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Especificações técnicas -->
+    <section class="mt-14">
+      <h2 class="text-xl font-bold text-gray-900 mb-6">Especificações técnicas</h2>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-gray-50">
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-3 font-medium text-gray-500 w-40">Processador</td>
+              <td class="px-6 py-3 text-gray-800">Snapdragon 8 Gen 3</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-3 font-medium text-gray-500">RAM</td>
+              <td class="px-6 py-3 text-gray-800">12GB LPDDR5X</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-3 font-medium text-gray-500">Câmera</td>
+              <td class="px-6 py-3 text-gray-800">200MP principal + 12MP ultra-wide + 10MP telephoto 10x</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-3 font-medium text-gray-500">Bateria</td>
+              <td class="px-6 py-3 text-gray-800">5000mAh · Carregamento 65W</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-3 font-medium text-gray-500">Tela</td>
+              <td class="px-6 py-3 text-gray-800">6.8" Dynamic AMOLED 2X · 120Hz · 2600 nits</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-3 font-medium text-gray-500">Sistema</td>
+              <td class="px-6 py-3 text-gray-800">Android 15 · One UI 7</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Avaliações -->
+    <section id="avaliacoes" class="mt-14 mb-16">
+      <h2 class="text-xl font-bold text-gray-900 mb-6">Avaliações dos clientes</h2>
+      <div class="space-y-4">
+
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">M</div>
+            <div>
+              <p class="text-sm font-semibold text-gray-800">Marcos R.</p>
+              <div class="text-yellow-400 text-xs">★★★★★</div>
+            </div>
+            <span class="ml-auto text-xs text-gray-400">há 2 dias</span>
+          </div>
+          <p class="text-sm text-gray-600">Câmera incrível! As fotos ficam nítidas mesmo de noite. Bateria dura o dia todo tranquilo.</p>
+          <button class="mt-2 text-xs text-gray-400 hover:text-gray-600">👍 Útil (12)</button>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm font-bold text-purple-600">A</div>
+            <div>
+              <p class="text-sm font-semibold text-gray-800">Ana Luiza S.</p>
+              <div class="text-yellow-400 text-xs">★★★★☆</div>
+            </div>
+            <span class="ml-auto text-xs text-gray-400">há 5 dias</span>
+          </div>
+          <p class="text-sm text-gray-600">Produto chegou antes do prazo e embalado direitinho. O único ponto é que aquece um pouco durante jogos pesados.</p>
+          <button class="mt-2 text-xs text-gray-400 hover:text-gray-600">👍 Útil (8)</button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-10 px-4">
+    <div class="max-w-6xl mx-auto text-center text-sm">
+      <p class="text-gray-500">TechStore © 2025 · Página simulada para teste do widget Upvote</p>
+    </div>
+  </footer>
+
+  <!-- Widget Upvote -->
+  <script
+    src="/widget.js"
+    data-api-key="{{API_KEY}}"
+    data-base-url="{{BASE_URL}}"
+    data-color="{{COLOR}}"
+    data-trigger="button"
+  ></script>
+
+</body>
+</html>
