@@ -23,6 +23,14 @@
       "port": 3000
     },
     {
+      "name": "Sandbox (apps/sandbox)",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js"],
+      "cwd": "apps/sandbox",
+      "port": 3333,
+      "autoPort": false
+    },
+    {
       "name": "Infraestrutura (Docker)",
       "runtimeExecutable": "docker-compose",
       "runtimeArgs": ["up", "-d"],

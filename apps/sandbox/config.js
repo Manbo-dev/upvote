@@ -11,10 +11,10 @@ module.exports = {
   // Copie a chave gerada no dashboard do Upvote para o canal desejado
   apiKey: 'upv_2be81665d18ce921b09ef26b70f17f465253c745d3bdd7ad',
 
-  // URL da API
+  // URL da API (sem /api no final — o widget adiciona automaticamente)
   // Desenvolvimento local : 'http://localhost:8080'
-  // Produção              : 'https://api.upvote.com'
-  baseUrl: 'https://api.upvote.pro/api',
+  // Produção              : 'https://api.upvote.pro'
+  baseUrl: 'https://api.upvote.pro',
 
   // Cor primária do widget (hexadecimal)
   color: '#6366f1',
