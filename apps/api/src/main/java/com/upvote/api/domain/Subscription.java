@@ -41,6 +41,10 @@ public class Subscription {
     @Column(name = "stripe_subscription_id")
     private String stripeSubscriptionId;
 
+    // ID do item da assinatura no Stripe (SDK v31+: period end e price vêm do item)
+    @Column(name = "stripe_item_id")
+    private String stripeItemId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "stripe_status")
     private StripeStatus stripeStatus;

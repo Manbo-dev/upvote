@@ -253,20 +253,21 @@ public class StripeService {
         subscription.setPlano(plano);
         subscription.setStripeStatus(StripeStatus.ACTIVE);
 
-        // Busca período da assinatura no Stripe (current_period_end migrou para item level no SDK v31+)
+        // Busca item ID e período da assinatura no Stripe (SDK v31+: current_period_end é item-level)
         try {
             com.stripe.model.Subscription stripeSub =
                     com.stripe.model.Subscription.retrieve(session.getSubscription());
             if (!stripeSub.getItems().getData().isEmpty()) {
-                Long periodEnd = stripeSub.getItems().getData().get(0).getCurrentPeriodEnd();
-                if (periodEnd != null) {
+                var item = stripeSub.getItems().getData().get(0);
+                subscription.setStripeItemId(item.getId());
+                if (item.getCurrentPeriodEnd() != null) {
                     subscription.setCurrentPeriodEnd(
-                            LocalDateTime.ofInstant(Instant.ofEpochSecond(periodEnd), ZoneId.systemDefault())
+                            LocalDateTime.ofInstant(Instant.ofEpochSecond(item.getCurrentPeriodEnd()), ZoneId.systemDefault())
                     );
                 }
             }
         } catch (StripeException e) {
-            log.warn("[STRIPE] eventId={} Falha ao buscar período da assinatura no Stripe", eventId, e);
+            log.warn("[STRIPE] eventId={} Falha ao buscar item da assinatura no Stripe", eventId, e);
         }
 
         subscriptionRepository.save(subscription);
@@ -348,23 +349,22 @@ public class StripeService {
 
                     Plano newPlano = subscription.getPlano();
                     if (!stripeSub.getItems().getData().isEmpty()) {
-                        String priceId = stripeSub.getItems().getData().get(0).getPrice().getId();
-                        Plano planoPorPriceId = mapPriceIdToPlano(priceId);
+                        var item = stripeSub.getItems().getData().get(0);
+                        subscription.setStripeItemId(item.getId());
+
+                        Plano planoPorPriceId = mapPriceIdToPlano(item.getPrice().getId());
                         if (planoPorPriceId != null) {
                             newPlano = planoPorPriceId;
                             subscription.setPlano(newPlano);
                         } else {
                             log.warn("[STRIPE] eventId={} Plano mantido: priceId={} não mapeado, plano atual={}",
-                                    eventId, priceId, subscription.getPlano());
+                                    eventId, item.getPrice().getId(), subscription.getPlano());
                         }
-                    }
 
-                    // current_period_end migrou para item level no SDK v31+
-                    if (!stripeSub.getItems().getData().isEmpty()) {
-                        Long periodEnd = stripeSub.getItems().getData().get(0).getCurrentPeriodEnd();
-                        if (periodEnd != null) {
+                        // current_period_end migrou para item level no SDK v31+
+                        if (item.getCurrentPeriodEnd() != null) {
                             subscription.setCurrentPeriodEnd(
-                                    LocalDateTime.ofInstant(Instant.ofEpochSecond(periodEnd), ZoneId.systemDefault())
+                                    LocalDateTime.ofInstant(Instant.ofEpochSecond(item.getCurrentPeriodEnd()), ZoneId.systemDefault())
                             );
                         }
                     }
@@ -400,7 +400,14 @@ public class StripeService {
             case "past_due" -> StripeStatus.PAST_DUE;
             case "canceled" -> StripeStatus.CANCELED;
             case "incomplete" -> StripeStatus.INCOMPLETE;
-            default -> StripeStatus.ACTIVE;
+            case "incomplete_expired" -> StripeStatus.INCOMPLETE_EXPIRED;
+            case "paused" -> StripeStatus.PAUSED;
+            case "trialing" -> StripeStatus.TRIALING;
+            case "unpaid" -> StripeStatus.UNPAID;
+            default -> {
+                log.warn("[STRIPE] Status desconhecido recebido do Stripe: {}", status);
+                yield StripeStatus.ACTIVE;
+            }
         };
     }
 
