@@ -8,7 +8,7 @@
     <springProfile name="!prod">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx</pattern>
+                <pattern>%d{HH:mm:ss.SSS} %5p --- [%15.15t] %-40.40logger{39} : %m%n%ex</pattern>
                 <charset>UTF-8</charset>
             </encoder>
         </appender>

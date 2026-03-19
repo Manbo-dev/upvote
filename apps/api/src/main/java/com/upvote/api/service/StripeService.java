@@ -185,6 +185,20 @@ public class StripeService {
         );
     }
 
+    // --- Utilitários ---
+
+    /**
+     * Extrai o subscription ID de um Invoice.
+     * No SDK v31+, o campo migrou de invoice.subscription para invoice.parent.subscriptionDetails.subscription
+     */
+    private String extrairSubscriptionIdDaFatura(Invoice invoice) {
+        if (invoice.getParent() != null
+                && invoice.getParent().getSubscriptionDetails() != null) {
+            return invoice.getParent().getSubscriptionDetails().getSubscription();
+        }
+        return null;
+    }
+
     // --- Utilitários de deserialização ---
 
     /**
@@ -239,16 +253,18 @@ public class StripeService {
         subscription.setPlano(plano);
         subscription.setStripeStatus(StripeStatus.ACTIVE);
 
-        // Busca período da assinatura no Stripe
+        // Busca período da assinatura no Stripe (current_period_end migrou para item level no SDK v31+)
         try {
             com.stripe.model.Subscription stripeSub =
                     com.stripe.model.Subscription.retrieve(session.getSubscription());
-            subscription.setCurrentPeriodEnd(
-                    LocalDateTime.ofInstant(
-                            Instant.ofEpochSecond(stripeSub.getCurrentPeriodEnd()),
-                            ZoneId.systemDefault()
-                    )
-            );
+            if (!stripeSub.getItems().getData().isEmpty()) {
+                Long periodEnd = stripeSub.getItems().getData().get(0).getCurrentPeriodEnd();
+                if (periodEnd != null) {
+                    subscription.setCurrentPeriodEnd(
+                            LocalDateTime.ofInstant(Instant.ofEpochSecond(periodEnd), ZoneId.systemDefault())
+                    );
+                }
+            }
         } catch (StripeException e) {
             log.warn("[STRIPE] eventId={} Falha ao buscar período da assinatura no Stripe", eventId, e);
         }
@@ -260,12 +276,13 @@ public class StripeService {
 
     private void processarFaturaPaga(Event event, String eventId) {
         Invoice invoice = (Invoice) extrairObjetoEvento(event, eventId);
-        if (invoice == null || invoice.getSubscription() == null) {
+        String subId = invoice != null ? extrairSubscriptionIdDaFatura(invoice) : null;
+        if (invoice == null || subId == null) {
             log.warn("[STRIPE] eventId={} Falha ao deserializar dados da fatura", eventId);
             return;
         }
 
-        subscriptionRepository.findByStripeSubscriptionId(invoice.getSubscription())
+        subscriptionRepository.findByStripeSubscriptionId(subId)
                 .ifPresent(subscription -> {
                     subscription.setStripeStatus(StripeStatus.ACTIVE);
                     Long periodEnd = invoice.getPeriodEnd();
@@ -280,14 +297,14 @@ public class StripeService {
                     if (subscription.getPlano() == Plano.FREE) {
                         try {
                             com.stripe.model.Subscription stripeSub =
-                                    com.stripe.model.Subscription.retrieve(invoice.getSubscription());
+                                    com.stripe.model.Subscription.retrieve(subId);
                             if (!stripeSub.getItems().getData().isEmpty()) {
                                 String priceId = stripeSub.getItems().getData().get(0).getPrice().getId();
                                 Plano planoRecuperado = mapPriceIdToPlano(priceId);
                                 if (planoRecuperado != null) {
                                     subscription.setPlano(planoRecuperado);
                                     log.warn("[STRIPE] eventId={} Safety net ativado: plano corrigido via invoice.paid: subId={}, plano={}",
-                                            eventId, invoice.getSubscription(), planoRecuperado);
+                                            eventId, subId, planoRecuperado);
                                 }
                             }
                         } catch (StripeException e) {
@@ -297,22 +314,23 @@ public class StripeService {
 
                     subscriptionRepository.save(subscription);
                     log.info("[STRIPE] eventId={} Fatura paga: subscriptionId={}, periodEnd={}, plano={}",
-                            eventId, invoice.getSubscription(), periodEnd, subscription.getPlano());
+                            eventId, subId, periodEnd, subscription.getPlano());
                 });
     }
 
     private void processarFalhaFatura(Event event, String eventId) {
         Invoice invoice = (Invoice) extrairObjetoEvento(event, eventId);
-        if (invoice == null || invoice.getSubscription() == null) {
+        String subId = invoice != null ? extrairSubscriptionIdDaFatura(invoice) : null;
+        if (invoice == null || subId == null) {
             log.warn("[STRIPE] eventId={} Falha ao deserializar dados da fatura", eventId);
             return;
         }
 
-        subscriptionRepository.findByStripeSubscriptionId(invoice.getSubscription())
+        subscriptionRepository.findByStripeSubscriptionId(subId)
                 .ifPresent(subscription -> {
                     subscription.setStripeStatus(StripeStatus.PAST_DUE);
                     subscriptionRepository.save(subscription);
-                    log.warn("[STRIPE] eventId={} Falha no pagamento da fatura: subscriptionId={}", eventId, invoice.getSubscription());
+                    log.warn("[STRIPE] eventId={} Falha no pagamento da fatura: subscriptionId={}", eventId, subId);
                 });
     }
 
@@ -341,12 +359,15 @@ public class StripeService {
                         }
                     }
 
-                    subscription.setCurrentPeriodEnd(
-                            LocalDateTime.ofInstant(
-                                    Instant.ofEpochSecond(stripeSub.getCurrentPeriodEnd()),
-                                    ZoneId.systemDefault()
-                            )
-                    );
+                    // current_period_end migrou para item level no SDK v31+
+                    if (!stripeSub.getItems().getData().isEmpty()) {
+                        Long periodEnd = stripeSub.getItems().getData().get(0).getCurrentPeriodEnd();
+                        if (periodEnd != null) {
+                            subscription.setCurrentPeriodEnd(
+                                    LocalDateTime.ofInstant(Instant.ofEpochSecond(periodEnd), ZoneId.systemDefault())
+                            );
+                        }
+                    }
                     subscriptionRepository.save(subscription);
                     log.info("[STRIPE] eventId={} Assinatura atualizada: stripeSubId={}, status={}, plano={}",
                             eventId, stripeSub.getId(), stripeSub.getStatus(), newPlano);
