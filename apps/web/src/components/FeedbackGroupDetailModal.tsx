@@ -6,6 +6,7 @@ import {
   type FeedbackDetail,
 } from '../services/feedbackGroups';
 import type { SuggestionStatus } from '../services/suggestions';
+import CategoryBadge from './CategoryBadge';
 import Modal from './Modal';
 import StatusBadge from './StatusBadge';
 
@@ -70,6 +71,9 @@ export default function FeedbackGroupDetailModal({
       <div className="space-y-5">
         {/* Resumo e status */}
         <div>
+          <div className="mb-2">
+            <CategoryBadge category={group.category} />
+          </div>
           <p className="text-sm text-gray-600 dark:text-gray-400">{group.summary}</p>
           <div className="mt-3 flex items-center gap-3">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>

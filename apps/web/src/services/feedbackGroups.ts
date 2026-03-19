@@ -2,12 +2,15 @@ import api from './api';
 import type { SuggestionStatus } from './suggestions';
 
 // Resposta de um grupo de feedbacks agrupados pela IA
+export type FeedbackCategory = 'BUG' | 'SUGGESTION' | 'COMPLAINT' | 'PRAISE';
+
 export interface FeedbackGroupResponse {
   id: string;
   title: string;
   summary: string;
   voteCount: number;
   status: SuggestionStatus;
+  category: FeedbackCategory;
   topContext: string; // ex: "apos 'botao Pagar' na tela de checkout"
   createdAt: string;
   updatedAt: string;
@@ -36,8 +39,11 @@ interface ApiResult<T> {
 export async function getFeedbackGroups(
   slug: string,
   status?: string,
+  category?: string,
 ): Promise<FeedbackGroupResponse[]> {
-  const params = status ? { status } : {};
+  const params: Record<string, string> = {};
+  if (status) params.status = status;
+  if (category) params.category = category;
   const { data } = await api.get<ApiResult<FeedbackGroupResponse[]>>(
     `/canais/${slug}/feedback-groups`,
     { params },

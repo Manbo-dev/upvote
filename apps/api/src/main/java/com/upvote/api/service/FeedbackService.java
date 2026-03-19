@@ -5,6 +5,7 @@ import com.upvote.api.ai.GroupSuggestion;
 import com.upvote.api.ai.PageContext;
 import com.upvote.api.ai.SynthesisResult;
 import com.upvote.api.domain.*;
+import static com.upvote.api.domain.FeedbackGroupCategory.*;
 import com.upvote.api.dto.FeedbackGroupResponse;
 import com.upvote.api.dto.FeedbackSubmitRequest;
 import com.upvote.api.dto.FeedbackSubmitResponse;
@@ -86,10 +87,13 @@ public class FeedbackService {
 
         GroupSuggestion groupSuggestion = aiService.suggestGroup(synthesis.synthesizedText(), pageContext);
 
+        FeedbackGroupCategory category = parseCategory(synthesis.category());
+
         FeedbackGroup newGroup = FeedbackGroup.builder()
                 .canal(canal)
                 .title(groupSuggestion.title())
                 .summary(groupSuggestion.summary())
+                .category(category)
                 .build();
         newGroup = feedbackGroupRepository.save(newGroup);
 
@@ -104,15 +108,26 @@ public class FeedbackService {
     /**
      * Lists feedback groups for the dashboard (authenticated, channel owner).
      */
-    public List<FeedbackGroupResponse> getFeedbackGroups(String canalSlug, String status) {
+    public List<FeedbackGroupResponse> getFeedbackGroups(String canalSlug, String status, String category) {
         Canal canal = canalRepository.findBySlug(canalSlug)
                 .orElseThrow(() -> new IllegalArgumentException("Channel not found"));
 
         List<FeedbackGroup> groups;
 
-        if (status != null && !status.isBlank()) {
+        boolean hasStatus = status != null && !status.isBlank();
+        boolean hasCategory = category != null && !category.isBlank();
+
+        if (hasStatus && hasCategory) {
+            FeedbackGroupStatus groupStatus = FeedbackGroupStatus.valueOf(status.toUpperCase());
+            FeedbackGroupCategory groupCategory = FeedbackGroupCategory.valueOf(category.toUpperCase());
+            groups = feedbackGroupRepository.findByCanalIdAndStatusAndCategoryOrderByVoteCountDesc(
+                    canal.getId(), groupStatus, groupCategory);
+        } else if (hasStatus) {
             FeedbackGroupStatus groupStatus = FeedbackGroupStatus.valueOf(status.toUpperCase());
             groups = feedbackGroupRepository.findByCanalIdAndStatusOrderByVoteCountDesc(canal.getId(), groupStatus);
+        } else if (hasCategory) {
+            FeedbackGroupCategory groupCategory = FeedbackGroupCategory.valueOf(category.toUpperCase());
+            groups = feedbackGroupRepository.findByCanalIdAndCategoryOrderByVoteCountDesc(canal.getId(), groupCategory);
         } else {
             groups = feedbackGroupRepository.findByCanalIdOrderByVoteCountDesc(canal.getId());
         }
@@ -144,10 +159,22 @@ public class FeedbackService {
                 group.getSummary(),
                 group.getVoteCount(),
                 group.getStatus().name(),
+                group.getCategory().name(),
                 topContext,
                 group.getCreatedAt(),
                 group.getUpdatedAt()
         );
+    }
+
+    private FeedbackGroupCategory parseCategory(String category) {
+        if (category == null || category.isBlank()) {
+            return SUGGESTION;
+        }
+        try {
+            return FeedbackGroupCategory.valueOf(category.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return SUGGESTION;
+        }
     }
 
     private String buildTopContext(FeedbackGroup group) {

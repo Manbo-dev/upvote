@@ -12,6 +12,7 @@ public record FeedbackGroupResponse(
         String summary,
         int voteCount,
         String status,
+        String category,
         String topContext,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

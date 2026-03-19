@@ -45,6 +45,11 @@ public class FeedbackGroup {
     @Builder.Default
     private FeedbackGroupStatus status = FeedbackGroupStatus.OPEN;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private FeedbackGroupCategory category = FeedbackGroupCategory.SUGGESTION;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

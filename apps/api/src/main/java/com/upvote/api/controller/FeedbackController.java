@@ -37,9 +37,10 @@ public class FeedbackController {
     @GetMapping("/api/canais/{slug}/feedback-groups")
     public ResponseEntity<ApiResponse<List<FeedbackGroupResponse>>> getFeedbackGroups(
             @PathVariable String slug,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String category) {
 
-        List<FeedbackGroupResponse> groups = feedbackService.getFeedbackGroups(slug, status);
+        List<FeedbackGroupResponse> groups = feedbackService.getFeedbackGroups(slug, status, category);
         return ResponseEntity.ok(ApiResponse.ok(groups));
     }
 }

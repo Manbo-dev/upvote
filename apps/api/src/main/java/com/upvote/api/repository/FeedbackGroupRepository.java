@@ -1,6 +1,7 @@
 package com.upvote.api.repository;
 
 import com.upvote.api.domain.FeedbackGroup;
+import com.upvote.api.domain.FeedbackGroupCategory;
 import com.upvote.api.domain.FeedbackGroupStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,10 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
     List<FeedbackGroup> findByCanalIdOrderByVoteCountDesc(UUID canalId);
 
     List<FeedbackGroup> findByCanalIdAndStatusOrderByVoteCountDesc(UUID canalId, FeedbackGroupStatus status);
+
+    List<FeedbackGroup> findByCanalIdAndCategoryOrderByVoteCountDesc(UUID canalId, FeedbackGroupCategory category);
+
+    List<FeedbackGroup> findByCanalIdAndStatusAndCategoryOrderByVoteCountDesc(UUID canalId, FeedbackGroupStatus status, FeedbackGroupCategory category);
 
     /**
      * Finds feedback groups similar to the given text using PostgreSQL trigram similarity (pg_trgm).

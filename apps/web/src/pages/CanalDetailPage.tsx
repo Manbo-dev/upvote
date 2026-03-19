@@ -3,72 +3,155 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   getFeedbackGroups,
+  type FeedbackCategory,
   type FeedbackGroupResponse,
 } from '../services/feedbackGroups';
 import type { SuggestionStatus } from '../services/suggestions';
-import FeedbackGroupCard from '../components/FeedbackGroupCard';
 import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
+import KanbanColumn from '../components/KanbanColumn';
 
-const STATUS_TABS: { label: string; value: SuggestionStatus | 'ALL' }[] = [
-  { label: 'Todas', value: 'ALL' },
-  { label: 'Abertas', value: 'OPEN' },
-  { label: 'Planejadas', value: 'PLANNED' },
-  { label: 'Em Progresso', value: 'IN_PROGRESS' },
-  { label: 'Concluidas', value: 'DONE' },
+const CATEGORY_FILTERS: {
+  label: string;
+  value: FeedbackCategory | 'ALL';
+  icon: React.ReactNode;
+  activeClasses: string;
+}[] = [
+  {
+    label: 'All',
+    value: 'ALL',
+    icon: null,
+    activeClasses:
+      'bg-gray-900 text-white dark:bg-white dark:text-gray-900',
+  },
+  {
+    label: 'Bug',
+    value: 'BUG',
+    icon: (
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    activeClasses: 'bg-red-600 text-white dark:bg-red-500',
+  },
+  {
+    label: 'Suggestion',
+    value: 'SUGGESTION',
+    icon: (
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      </svg>
+    ),
+    activeClasses: 'bg-blue-600 text-white dark:bg-blue-500',
+  },
+  {
+    label: 'Complaint',
+    value: 'COMPLAINT',
+    icon: (
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    activeClasses: 'bg-orange-600 text-white dark:bg-orange-500',
+  },
+  {
+    label: 'Praise',
+    value: 'PRAISE',
+    icon: (
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+    ),
+    activeClasses: 'bg-green-600 text-white dark:bg-green-500',
+  },
+];
+
+const KANBAN_COLUMNS: {
+  status: SuggestionStatus;
+  title: string;
+  color: string;
+}[] = [
+  { status: 'OPEN', title: 'Open', color: 'bg-blue-500' },
+  { status: 'PLANNED', title: 'Planned', color: 'bg-yellow-500' },
+  { status: 'IN_PROGRESS', title: 'In Progress', color: 'bg-orange-500' },
+  { status: 'DONE', title: 'Done', color: 'bg-green-500' },
 ];
 
 export default function CanalDetailPage() {
   const { canalId: slug } = useParams<{ canalId: string }>();
-  const [activeTab, setActiveTab] = useState<SuggestionStatus | 'ALL'>('ALL');
+  const [activeCategory, setActiveCategory] = useState<
+    FeedbackCategory | 'ALL'
+  >('ALL');
   const [selectedGroup, setSelectedGroup] =
     useState<FeedbackGroupResponse | null>(null);
 
-  // Busca grupos de feedback do canal
   const { data: feedbackGroups, isLoading } = useQuery({
     queryKey: ['feedback-groups', slug],
     queryFn: () => getFeedbackGroups(slug!),
     enabled: !!slug,
   });
 
-  // Filtra grupos pelo status selecionado
+  // Filter by category client-side
   const filtered =
-    activeTab === 'ALL'
+    activeCategory === 'ALL'
       ? feedbackGroups
-      : feedbackGroups?.filter((g) => g.status === activeTab);
+      : feedbackGroups?.filter((g) => g.category === activeCategory);
+
+  // Group by status for Kanban columns
+  const groupsByStatus = (status: SuggestionStatus) =>
+    filtered?.filter((g) => g.status === status) ?? [];
 
   return (
     <div>
-      {/* Cabeçalho */}
+      {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Feedbacks</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Feedbacks
+        </h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Feedbacks capturados pelo widget sao agrupados automaticamente pela IA
         </p>
       </div>
 
-      {/* Filtro por status */}
-      <div className="mb-6 flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              activeTab === tab.value
-                ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Category filter pills */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        {CATEGORY_FILTERS.map((filter) => {
+          const isActive = activeCategory === filter.value;
+          return (
+            <button
+              key={filter.value}
+              onClick={() => setActiveCategory(filter.value)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                isActive
+                  ? filter.activeClasses
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+              }`}
+            >
+              {filter.icon}
+              {filter.label}
+              {filtered && filter.value !== 'ALL' && (
+                <span
+                  className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${
+                    isActive
+                      ? 'bg-white/20'
+                      : 'bg-gray-200 dark:bg-gray-700'
+                  }`}
+                >
+                  {feedbackGroups?.filter(
+                    (g) => g.category === filter.value,
+                  ).length ?? 0}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Lista de grupos de feedback */}
+      {/* Kanban board */}
       {isLoading ? (
         <div className="flex justify-center py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
         </div>
-      ) : filtered?.length === 0 || !filtered ? (
+      ) : !feedbackGroups || feedbackGroups.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
           <svg
             className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
@@ -91,18 +174,21 @@ export default function CanalDetailPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((group) => (
-            <FeedbackGroupCard
-              key={group.id}
-              group={group}
-              onClick={() => setSelectedGroup(group)}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {KANBAN_COLUMNS.map((col) => (
+            <KanbanColumn
+              key={col.status}
+              title={col.title}
+              status={col.status}
+              color={col.color}
+              groups={groupsByStatus(col.status)}
+              onCardClick={setSelectedGroup}
             />
           ))}
         </div>
       )}
 
-      {/* Modal de detalhes do grupo */}
+      {/* Detail modal */}
       <FeedbackGroupDetailModal
         group={selectedGroup}
         slug={slug!}
