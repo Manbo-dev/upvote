@@ -61,7 +61,7 @@ export default function BillingPage() {
       if (subscription?.plano === 'FREE') {
         setBanner({ type: 'info', message: 'Processando assinatura... Atualize a página em alguns instantes.' });
       }
-    }, 15000);
+    }, 30000);
     return () => clearTimeout(timeout);
   }, [isPolling, subscription?.plano]);
 

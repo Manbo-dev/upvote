@@ -61,9 +61,12 @@ public class StripeService {
         if (planoDesejado != Plano.STARTER && planoDesejado != Plano.PRO) {
             throw new BusinessException("Apenas os planos STARTER e PRO podem ser assinados via checkout");
         }
+        log.info("[STRIPE] Validação ok: orgId={}, plano={}", organizationId, planoDesejado);
 
         Subscription subscription = subscriptionRepository.findByOrganizationId(organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assinatura não encontrada"));
+        log.info("[STRIPE] Subscription encontrada: orgId={}, stripeStatus={}, stripeSubId={}",
+                organizationId, subscription.getStripeStatus(), subscription.getStripeSubscriptionId());
 
         // Se já tem assinatura ativa no Stripe, redireciona para o portal
         if (subscription.getStripeSubscriptionId() != null && subscription.getStripeStatus() == StripeStatus.ACTIVE) {
@@ -71,6 +74,8 @@ public class StripeService {
         }
 
         String priceId = planoDesejado == Plano.STARTER ? starterPriceId : proPriceId;
+        log.info("[STRIPE] priceId selecionado: orgId={}, plano={}, priceId={}", organizationId, planoDesejado, priceId);
+
         String frontendUrl = allowedOrigins.split(",")[0].trim();
 
         try {
@@ -88,6 +93,7 @@ public class StripeService {
                                     .build()
                     );
 
+            log.info("[STRIPE] Chamando API Stripe: orgId={}, plano={}", organizationId, planoDesejado);
             com.stripe.model.checkout.Session session = com.stripe.model.checkout.Session.create(paramsBuilder.build());
             log.info("[STRIPE] orgId={} Checkout session created: plan={}, sessionId={}", organizationId, planoDesejado, session.getId());
             return new CheckoutSessionResponse(session.getUrl());
@@ -139,7 +145,7 @@ public class StripeService {
         }
 
         String eventId = event.getId();
-        log.info("[STRIPE] eventId={} Processing webhook event: type={}", eventId, event.getType());
+        log.info("[STRIPE] eventId={} Processando webhook: type={}", eventId, event.getType());
 
         switch (event.getType()) {
             case "checkout.session.completed" -> processarCheckoutCompleto(event, eventId);
@@ -147,7 +153,7 @@ public class StripeService {
             case "invoice.payment_failed" -> processarFalhaFatura(event, eventId);
             case "customer.subscription.updated" -> processarAssinaturaAtualizada(event, eventId);
             case "customer.subscription.deleted" -> processarAssinaturaCancelada(event, eventId);
-            default -> log.info("[STRIPE] eventId={} Unhandled event type: {}", eventId, event.getType());
+            default -> log.info("[STRIPE] eventId={} Evento não tratado: type={}", eventId, event.getType());
         }
     }
 
@@ -184,20 +190,20 @@ public class StripeService {
         com.stripe.model.checkout.Session session = (com.stripe.model.checkout.Session)
                 event.getDataObjectDeserializer().getObject().orElse(null);
         if (session == null) {
-            log.warn("[STRIPE] eventId={} Failed to deserialize checkout session data", eventId);
+            log.warn("[STRIPE] eventId={} Falha ao deserializar dados da checkout session", eventId);
             return;
         }
 
         String orgIdStr = session.getClientReferenceId();
         if (orgIdStr == null) {
-            log.warn("[STRIPE] eventId={} Checkout session has no clientReferenceId", eventId);
+            log.warn("[STRIPE] eventId={} Checkout session sem clientReferenceId", eventId);
             return;
         }
 
         UUID orgId = UUID.fromString(orgIdStr);
         Subscription subscription = subscriptionRepository.findByOrganizationId(orgId).orElse(null);
         if (subscription == null) {
-            log.warn("[STRIPE] eventId={} No subscription found for orgId={}", eventId, orgId);
+            log.warn("[STRIPE] eventId={} Nenhuma subscription encontrada para orgId={}", eventId, orgId);
             return;
         }
 
@@ -222,17 +228,18 @@ public class StripeService {
                     )
             );
         } catch (StripeException e) {
-            log.warn("[STRIPE] eventId={} Failed to retrieve subscription period from Stripe", eventId, e);
+            log.warn("[STRIPE] eventId={} Falha ao buscar período da assinatura no Stripe", eventId, e);
         }
 
         subscriptionRepository.save(subscription);
-        log.info("[STRIPE] eventId={} Checkout completed: orgId={}, plan={}, customerId={}", eventId, orgId, plano, session.getCustomer());
+        log.info("[STRIPE] eventId={} Checkout completo: orgId={}, plano={}, customerId={}, stripeSubId={}",
+                eventId, orgId, plano, session.getCustomer(), session.getSubscription());
     }
 
     private void processarFaturaPaga(Event event, String eventId) {
         Invoice invoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
         if (invoice == null || invoice.getSubscription() == null) {
-            log.warn("[STRIPE] eventId={} Failed to deserialize invoice data", eventId);
+            log.warn("[STRIPE] eventId={} Falha ao deserializar dados da fatura", eventId);
             return;
         }
 
@@ -245,15 +252,37 @@ public class StripeService {
                                 LocalDateTime.ofInstant(Instant.ofEpochSecond(periodEnd), ZoneId.systemDefault())
                         );
                     }
+
+                    // Safety net: se o plano ainda é FREE após o pagamento, tenta corrigir
+                    // buscando o plano diretamente no Stripe (indica falha no fluxo checkout.session.completed)
+                    if (subscription.getPlano() == Plano.FREE) {
+                        try {
+                            com.stripe.model.Subscription stripeSub =
+                                    com.stripe.model.Subscription.retrieve(invoice.getSubscription());
+                            if (!stripeSub.getItems().getData().isEmpty()) {
+                                String priceId = stripeSub.getItems().getData().get(0).getPrice().getId();
+                                Plano planoRecuperado = mapPriceIdToPlano(priceId);
+                                if (planoRecuperado != null) {
+                                    subscription.setPlano(planoRecuperado);
+                                    log.warn("[STRIPE] eventId={} Safety net ativado: plano corrigido via invoice.paid: subId={}, plano={}",
+                                            eventId, invoice.getSubscription(), planoRecuperado);
+                                }
+                            }
+                        } catch (StripeException e) {
+                            log.warn("[STRIPE] eventId={} Safety net falhou: erro ao buscar subscription no Stripe", eventId, e);
+                        }
+                    }
+
                     subscriptionRepository.save(subscription);
-                    log.info("[STRIPE] eventId={} Invoice paid: subscriptionId={}, periodEnd={}", eventId, invoice.getSubscription(), periodEnd);
+                    log.info("[STRIPE] eventId={} Fatura paga: subscriptionId={}, periodEnd={}, plano={}",
+                            eventId, invoice.getSubscription(), periodEnd, subscription.getPlano());
                 });
     }
 
     private void processarFalhaFatura(Event event, String eventId) {
         Invoice invoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
         if (invoice == null || invoice.getSubscription() == null) {
-            log.warn("[STRIPE] eventId={} Failed to deserialize invoice data", eventId);
+            log.warn("[STRIPE] eventId={} Falha ao deserializar dados da fatura", eventId);
             return;
         }
 
@@ -261,7 +290,7 @@ public class StripeService {
                 .ifPresent(subscription -> {
                     subscription.setStripeStatus(StripeStatus.PAST_DUE);
                     subscriptionRepository.save(subscription);
-                    log.warn("[STRIPE] eventId={} Invoice payment failed: subscriptionId={}", eventId, invoice.getSubscription());
+                    log.warn("[STRIPE] eventId={} Falha no pagamento da fatura: subscriptionId={}", eventId, invoice.getSubscription());
                 });
     }
 
@@ -269,7 +298,7 @@ public class StripeService {
         com.stripe.model.Subscription stripeSub = (com.stripe.model.Subscription)
                 event.getDataObjectDeserializer().getObject().orElse(null);
         if (stripeSub == null) {
-            log.warn("[STRIPE] eventId={} Failed to deserialize subscription data", eventId);
+            log.warn("[STRIPE] eventId={} Falha ao deserializar dados da assinatura", eventId);
             return;
         }
 
@@ -280,8 +309,14 @@ public class StripeService {
                     Plano newPlano = subscription.getPlano();
                     if (!stripeSub.getItems().getData().isEmpty()) {
                         String priceId = stripeSub.getItems().getData().get(0).getPrice().getId();
-                        newPlano = mapPriceIdToPlano(priceId);
-                        subscription.setPlano(newPlano);
+                        Plano planoPorPriceId = mapPriceIdToPlano(priceId);
+                        if (planoPorPriceId != null) {
+                            newPlano = planoPorPriceId;
+                            subscription.setPlano(newPlano);
+                        } else {
+                            log.warn("[STRIPE] eventId={} Plano mantido: priceId={} não mapeado, plano atual={}",
+                                    eventId, priceId, subscription.getPlano());
+                        }
                     }
 
                     subscription.setCurrentPeriodEnd(
@@ -291,7 +326,8 @@ public class StripeService {
                             )
                     );
                     subscriptionRepository.save(subscription);
-                    log.info("[STRIPE] eventId={} Subscription updated: stripeSubId={}, status={}, plan={}", eventId, stripeSub.getId(), stripeSub.getStatus(), newPlano);
+                    log.info("[STRIPE] eventId={} Assinatura atualizada: stripeSubId={}, status={}, plano={}",
+                            eventId, stripeSub.getId(), stripeSub.getStatus(), newPlano);
                 });
     }
 
@@ -299,7 +335,7 @@ public class StripeService {
         com.stripe.model.Subscription stripeSub = (com.stripe.model.Subscription)
                 event.getDataObjectDeserializer().getObject().orElse(null);
         if (stripeSub == null) {
-            log.warn("[STRIPE] eventId={} Failed to deserialize subscription data", eventId);
+            log.warn("[STRIPE] eventId={} Falha ao deserializar dados da assinatura", eventId);
             return;
         }
 
@@ -309,7 +345,7 @@ public class StripeService {
                     subscription.setStripeStatus(StripeStatus.CANCELED);
                     subscription.setStripeSubscriptionId(null);
                     subscriptionRepository.save(subscription);
-                    log.info("[STRIPE] eventId={} Subscription canceled: stripeSubId={}, reverted to FREE", eventId, stripeSub.getId());
+                    log.info("[STRIPE] eventId={} Assinatura cancelada: stripeSubId={}, revertido para FREE", eventId, stripeSub.getId());
                 });
     }
 
@@ -328,6 +364,10 @@ public class StripeService {
     private Plano mapPriceIdToPlano(String priceId) {
         if (priceId.equals(starterPriceId)) return Plano.STARTER;
         if (priceId.equals(proPriceId)) return Plano.PRO;
-        return Plano.FREE;
+        // Retorna null em vez de FREE para evitar reset silencioso do plano
+        // quando as env vars não batem com o priceId real do Stripe
+        log.warn("[STRIPE] priceId não reconhecido: priceId={}, starterPriceId={}, proPriceId={}",
+                priceId, starterPriceId, proPriceId);
+        return null;
     }
 }

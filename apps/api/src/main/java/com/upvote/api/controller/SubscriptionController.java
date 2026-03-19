@@ -7,6 +7,7 @@ import com.upvote.api.repository.UserRepository;
 import com.upvote.api.service.StripeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
+@Slf4j
 public class SubscriptionController {
 
     private final StripeService stripeService;
@@ -44,10 +46,14 @@ public class SubscriptionController {
     public ResponseEntity<ApiResponse<CheckoutSessionResponse>> createCheckout(
             @Valid @RequestBody CheckoutRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        UUID orgId = getOrganizationId(userDetails);
+        log.info("[CHECKOUT] Início: user={}, plano={}", userDetails.getUsername(), request.plano());
         Plano plano = Plano.valueOf(request.plano().toUpperCase());
+        log.info("[CHECKOUT] Plano validado: plano={}", plano);
+        UUID orgId = getOrganizationId(userDetails);
+        log.info("[CHECKOUT] orgId resolvido: orgId={}, plano={}", orgId, plano);
         CheckoutSessionResponse response = stripeService.criarCheckoutSession(
                 orgId, plano, userDetails.getUsername());
+        log.info("[CHECKOUT] Sessão criada com sucesso: orgId={}, plano={}", orgId, plano);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
