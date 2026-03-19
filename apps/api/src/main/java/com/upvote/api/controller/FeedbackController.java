@@ -8,10 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
- * Controller para o fluxo de feedback inteligente
+ * Controller for the intelligent feedback pipeline.
  */
 @RestController
 @RequiredArgsConstructor
@@ -20,8 +19,8 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     /**
-     * Submete um feedback pelo widget (endpoint público, sem auth)
-     * Identificação do canal via header X-API-Key
+     * Receives a feedback submission from the widget (public endpoint, no auth).
+     * Channel is identified via the X-API-Key header.
      */
     @PostMapping("/api/widget/feedback")
     public ResponseEntity<ApiResponse<FeedbackSubmitResponse>> submitFeedback(
@@ -29,23 +28,11 @@ public class FeedbackController {
             @Valid @RequestBody FeedbackSubmitRequest request) {
 
         FeedbackSubmitResponse response = feedbackService.submitFeedback(apiKey, request);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Feedback recebido com sucesso"));
+        return ResponseEntity.ok(ApiResponse.ok(response, "Feedback received successfully"));
     }
 
     /**
-     * Processa resposta de follow-up do usuário (endpoint público, sem auth)
-     */
-    @PostMapping("/api/widget/feedback/{feedbackId}/follow-up")
-    public ResponseEntity<ApiResponse<FeedbackSubmitResponse>> processFollowUp(
-            @PathVariable UUID feedbackId,
-            @Valid @RequestBody FollowUpRequest request) {
-
-        FeedbackSubmitResponse response = feedbackService.processFollowUp(feedbackId, request);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Resposta processada com sucesso"));
-    }
-
-    /**
-     * Lista grupos de feedback para o dashboard (endpoint autenticado, dono do canal)
+     * Lists feedback groups for the dashboard (authenticated, channel owner).
      */
     @GetMapping("/api/canais/{slug}/feedback-groups")
     public ResponseEntity<ApiResponse<List<FeedbackGroupResponse>>> getFeedbackGroups(

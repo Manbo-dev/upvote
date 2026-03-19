@@ -1,32 +1,28 @@
 package com.upvote.api.ai;
 
-import com.upvote.api.domain.FeedbackGroup;
-
-import java.util.List;
-
 /**
- * Interface para integração com IA — abstração injetável que permite
- * trocar o fornecedor (OpenAI, Anthropic, etc.) sem alterar os consumidores
+ * Injectable AI service abstraction — allows swapping providers (OpenAI, Anthropic, etc.)
+ * without changing the consumers.
  */
 public interface AiService {
 
     /**
-     * Sintetiza o comentário do usuário em uma frase clara
+     * Synthesizes the raw user message into a structured result.
+     * The implementation is responsible for loading the system prompt and
+     * returning a parsed {@link SynthesisResult}.
+     *
+     * @param rawMessage the original text submitted by the end user
+     * @param context    automatic page context captured by the widget
+     * @return structured synthesis with clean text, category and tags
      */
-    String synthesizeFeedback(String rawMessage, PageContext context);
+    SynthesisResult synthesizeFeedback(String rawMessage, PageContext context);
 
     /**
-     * Busca feedbacks similares e retorna score de confiança
-     */
-    SimilarityResult findSimilarFeedback(String synthesizedMessage, List<FeedbackGroup> existingGroups);
-
-    /**
-     * Gera uma pergunta de follow-up quando a confiança é baixa
-     */
-    String generateFollowUpQuestion(String rawMessage, PageContext context);
-
-    /**
-     * Gera título e resumo para um novo grupo de feedback
+     * Generates a title and summary for a new feedback group.
+     *
+     * @param synthesizedMessage the AI-synthesized version of the feedback
+     * @param context            automatic page context captured by the widget
+     * @return suggested title and summary for the new group
      */
     GroupSuggestion suggestGroup(String synthesizedMessage, PageContext context);
 }

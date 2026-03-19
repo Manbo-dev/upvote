@@ -3,10 +3,9 @@ package com.upvote.api.dto;
 import java.util.UUID;
 
 /**
- * Resposta após submissão de feedback pelo widget
+ * Response returned after a widget feedback submission.
  */
 public record FeedbackSubmitResponse(
         UUID feedbackId,
-        String followUpQuestion,
         boolean grouped
 ) {}

@@ -20,10 +20,10 @@ com preço mais acessível.
 1. Parceiro instala o widget via script tag no seu produto
 2. Usuário final escreve um feedback livremente no widget (texto livre, sem categorias)
 3. Backend recebe o comentário + contexto automático da página
-4. IA sintetiza o comentário e busca feedbacks similares já existentes para aquele canal
-5. Se encontra similar com alta confiança → adiciona um voto automaticamente
-6. Se confiança baixa → widget faz no máximo UMA pergunta de follow-up (opcional, o usuário pode ignorar)
-7. Se o usuário não responder, fechar o widget ou abandonar → a mensagem original é salva e processada normalmente
+4. IA sintetiza o comentário → retorna `SynthesisResult` (texto limpo, categoria, tags)
+5. Banco busca grupos similares via pg_trgm (similaridade de texto ≥ 0.45)
+6. Se encontra similar → adiciona um voto automaticamente ao grupo existente
+7. Se não encontra → IA sugere título/resumo → cria novo grupo de feedback
 8. Dashboard do parceiro exibe padrões agrupados com contexto, não comentários individuais
 
 ### Widget
@@ -44,12 +44,12 @@ Dados capturados junto com o comentário, em linguagem legível para PO/PM:
 - Horário e tipo de dispositivo (mobile/desktop)
 
 ### IA no backend
-- Sintetiza o comentário do usuário
-- Busca feedbacks similares já existentes para o mesmo canal
-- Alta confiança → vota no feedback existente
-- Baixa confiança → solicita follow-up OU cria novo feedback
-- Recebe o contexto automático da página para melhorar a categorização
-- **Arquitetura injetável**: a integração com IA deve usar uma interface/abstração que permita trocar o fornecedor (OpenAI, Anthropic, etc.) sem alterar os métodos que a consomem
+- Responsabilidade única: sintetizar o comentário → retorna `SynthesisResult { synthesizedText, category, tags }`
+- As instruções de comportamento e o formato de resposta JSON ficam em `src/main/resources/ai/prompts/feedback_synthesis.txt`
+- A busca por similaridade é feita pelo banco (pg_trgm), **não** pela IA
+- **Arquitetura injetável**: `AiService` é uma interface — trocar de provedor (OpenAI, Anthropic, etc.) não afeta os consumidores
+- Implementação padrão: `StubAiService` (sem chamada real à IA, para desenvolvimento e testes)
+- Métodos da interface: `synthesizeFeedback(String, PageContext)` e `suggestGroup(String, PageContext)`
 
 ### Dashboard
 - Exibe padrões agrupados, não comentários brutos
