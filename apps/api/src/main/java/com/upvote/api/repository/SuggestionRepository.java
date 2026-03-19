@@ -15,6 +15,6 @@ public interface SuggestionRepository extends JpaRepository<Suggestion, UUID> {
 
     List<Suggestion> findByCanalIdAndStatusOrderByVoteCountDesc(UUID canalId, SuggestionStatus status);
 
-    @Query("SELECT COUNT(s) FROM Suggestion s WHERE s.canal.organization.id = :orgId AND s.createdAt >= :inicioMes")
-    long countByOrganizationIdAndMesAtual(@Param("orgId") UUID orgId, @Param("inicioMes") LocalDateTime inicioMes);
+    @Query("SELECT COUNT(s) FROM Suggestion s WHERE s.canal.user.id = :userId AND s.createdAt >= :inicioMes")
+    long countByUserIdAndMesAtual(@Param("userId") UUID userId, @Param("inicioMes") LocalDateTime inicioMes);
 }

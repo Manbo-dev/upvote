@@ -2,7 +2,6 @@ package com.upvote.api.controller;
 
 import com.upvote.api.domain.Plano;
 import com.upvote.api.dto.*;
-import com.upvote.api.repository.OrganizationRepository;
 import com.upvote.api.repository.UserRepository;
 import com.upvote.api.service.StripeService;
 import jakarta.validation.Valid;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 /**
- * Controller para gerenciamento de assinaturas
+ * Controller for subscription management
  */
 @RestController
 @RequestMapping("/api/subscriptions")
@@ -26,21 +25,20 @@ public class SubscriptionController {
 
     private final StripeService stripeService;
     private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
 
     /**
-     * Retorna informações da assinatura atual
+     * Returns current subscription info
      */
     @GetMapping
     public ResponseEntity<ApiResponse<SubscriptionResponse>> getSubscription(
             @AuthenticationPrincipal UserDetails userDetails) {
-        UUID orgId = getOrganizationId(userDetails);
-        SubscriptionResponse response = stripeService.obterAssinatura(orgId);
+        UUID userId = getUserId(userDetails);
+        SubscriptionResponse response = stripeService.obterAssinatura(userId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     /**
-     * Cria sessão de checkout do Stripe
+     * Creates a Stripe checkout session
      */
     @PostMapping("/checkout")
     public ResponseEntity<ApiResponse<CheckoutSessionResponse>> createCheckout(
@@ -49,31 +47,28 @@ public class SubscriptionController {
         log.info("[CHECKOUT] Início: user={}, plano={}", userDetails.getUsername(), request.plano());
         Plano plano = Plano.valueOf(request.plano().toUpperCase());
         log.info("[CHECKOUT] Plano validado: plano={}", plano);
-        UUID orgId = getOrganizationId(userDetails);
-        log.info("[CHECKOUT] orgId resolvido: orgId={}, plano={}", orgId, plano);
+        UUID userId = getUserId(userDetails);
+        log.info("[CHECKOUT] userId resolvido: userId={}, plano={}", userId, plano);
         CheckoutSessionResponse response = stripeService.criarCheckoutSession(
-                orgId, plano, userDetails.getUsername());
-        log.info("[CHECKOUT] Sessão criada com sucesso: orgId={}, plano={}", orgId, plano);
+                userId, plano, userDetails.getUsername());
+        log.info("[CHECKOUT] Sessão criada com sucesso: userId={}, plano={}", userId, plano);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     /**
-     * Cria sessão do Customer Portal do Stripe
+     * Creates a Stripe Customer Portal session
      */
     @PostMapping("/portal")
     public ResponseEntity<ApiResponse<PortalSessionResponse>> createPortal(
             @AuthenticationPrincipal UserDetails userDetails) {
-        UUID orgId = getOrganizationId(userDetails);
-        PortalSessionResponse response = stripeService.criarPortalSession(orgId);
+        UUID userId = getUserId(userDetails);
+        PortalSessionResponse response = stripeService.criarPortalSession(userId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    private UUID getOrganizationId(UserDetails userDetails) {
-        var user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
-        return organizationRepository.findByOwnerId(user.getId())
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Organização não encontrada"))
+    private UUID getUserId(UserDetails userDetails) {
+        return userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"))
                 .getId();
     }
 }

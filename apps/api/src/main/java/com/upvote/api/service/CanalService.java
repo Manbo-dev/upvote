@@ -1,14 +1,14 @@
 package com.upvote.api.service;
 
-import com.upvote.api.domain.Organization;
 import com.upvote.api.domain.Canal;
 import com.upvote.api.domain.Subscription;
+import com.upvote.api.domain.User;
 import com.upvote.api.dto.CanalRequest;
 import com.upvote.api.dto.CanalResponse;
 import com.upvote.api.exception.BusinessException;
-import com.upvote.api.repository.OrganizationRepository;
 import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.SubscriptionRepository;
+import com.upvote.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,40 +19,37 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Serviço para gerenciamento de canais de feedback
+ * Service for managing feedback channels
  */
 @Service
 @RequiredArgsConstructor
 public class CanalService {
 
     private final CanalRepository canalRepository;
-    private final OrganizationRepository organizationRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
 
     /**
-     * Lista todos os canais das organizações do usuário
+     * Lists all channels belonging to the user
      */
     public List<CanalResponse> getCanaisByOwner(UUID userId) {
-        List<Organization> orgs = organizationRepository.findByOwnerId(userId);
-        return orgs.stream()
-                .flatMap(org -> canalRepository.findByOrganizationId(org.getId()).stream())
+        return canalRepository.findByUserId(userId).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     /**
-     * Cria um novo canal na primeira organização do usuário
+     * Creates a new channel for the user
      */
     @Transactional
     public CanalResponse createCanal(CanalRequest request, UUID userId) {
-        Organization org = organizationRepository.findByOwnerId(userId)
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Usuário não possui organização"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
 
-        // Verifica limite de canais do plano
-        Subscription subscription = subscriptionRepository.findByOrganizationId(org.getId())
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Assinatura não encontrada"));
-        long canaisAtivos = canalRepository.countByOrganizationId(org.getId());
+
+        long canaisAtivos = canalRepository.countByUserId(userId);
         if (canaisAtivos >= subscription.getPlano().getLimiteCanais()) {
             throw new BusinessException("Limite de canais do plano " + subscription.getPlano().name()
                     + " atingido (" + subscription.getPlano().getLimiteCanais() + "). Faça upgrade para criar mais canais.");
@@ -62,7 +59,6 @@ public class CanalService {
             throw new IllegalArgumentException("Slug já está em uso");
         }
 
-        // Gera API key unica: prefixo "upv_" + 48 hex (24 bytes aleatorios)
         byte[] randomBytes = new byte[24];
         new SecureRandom().nextBytes(randomBytes);
         String apiKey = "upv_" + HexFormat.of().formatHex(randomBytes);
@@ -71,7 +67,7 @@ public class CanalService {
                 .name(request.name())
                 .slug(request.slug())
                 .apiKey(apiKey)
-                .organization(org)
+                .user(user)
                 .build();
         canal = canalRepository.save(canal);
 
@@ -79,7 +75,7 @@ public class CanalService {
     }
 
     /**
-     * Busca canal pelo slug (público)
+     * Finds a channel by slug (public)
      */
     public CanalResponse getCanalBySlug(String slug) {
         Canal canal = canalRepository.findBySlug(slug)

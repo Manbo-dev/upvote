@@ -1,14 +1,12 @@
 package com.upvote.api.service;
 
 import com.upvote.api.domain.Canal;
-import com.upvote.api.domain.Organization;
 import com.upvote.api.domain.Plano;
 import com.upvote.api.domain.Subscription;
 import com.upvote.api.domain.User;
 import com.upvote.api.dto.AuthResponse;
 import com.upvote.api.dto.LoginRequest;
 import com.upvote.api.dto.RegisterRequest;
-import com.upvote.api.repository.OrganizationRepository;
 import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.SubscriptionRepository;
 import com.upvote.api.repository.UserRepository;
@@ -22,21 +20,20 @@ import java.security.SecureRandom;
 import java.util.HexFormat;
 
 /**
- * Serviço de autenticação: registro e login
+ * Authentication service: registration and login
  */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
     private final CanalRepository canalRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     /**
-     * Registra um novo usuário, cria organização e produto padrão
+     * Registers a new user, creates default subscription and canal
      */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -44,7 +41,6 @@ public class AuthService {
             throw new IllegalArgumentException("Email já está em uso");
         }
 
-        // Cria o usuário
         User user = User.builder()
                 .name(request.name())
                 .email(request.email())
@@ -52,35 +48,27 @@ public class AuthService {
                 .build();
         user = userRepository.save(user);
 
-        // Cria organização padrão
-        String orgSlug = request.name().toLowerCase()
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-|-$", "");
-        Organization org = Organization.builder()
-                .name("Org de " + request.name())
-                .slug(orgSlug + "-org")
-                .owner(user)
-                .build();
-        organizationRepository.save(org);
-
-        // Cria assinatura FREE padrão
+        // Create default FREE subscription
         Subscription subscription = Subscription.builder()
-                .organization(org)
+                .user(user)
                 .plano(Plano.FREE)
                 .build();
         subscriptionRepository.save(subscription);
 
-        // Gera API key única para o canal padrão
+        // Generate unique API key for the default canal
         byte[] randomBytes = new byte[24];
         new SecureRandom().nextBytes(randomBytes);
         String apiKey = "upv_" + HexFormat.of().formatHex(randomBytes);
 
-        // Cria canal padrão
+        String slug = request.name().toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-|-$", "");
+
         Canal canal = Canal.builder()
                 .name("Meu Canal")
-                .slug(orgSlug + "-canal")
+                .slug(slug + "-canal")
                 .apiKey(apiKey)
-                .organization(org)
+                .user(user)
                 .build();
         canalRepository.save(canal);
 
@@ -89,7 +77,7 @@ public class AuthService {
     }
 
     /**
-     * Realiza login e retorna token JWT
+     * Performs login and returns a JWT token
      */
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
@@ -99,10 +87,7 @@ public class AuthService {
             throw new IllegalArgumentException("Credenciais inválidas");
         }
 
-        // Busca o plano da organização do usuário
-        String plano = organizationRepository.findByOwnerId(user.getId()).stream()
-                .findFirst()
-                .flatMap(org -> subscriptionRepository.findByOrganizationId(org.getId()))
+        String plano = subscriptionRepository.findByUserId(user.getId())
                 .map(sub -> sub.getPlano().name())
                 .orElse(Plano.FREE.name());
 

@@ -26,7 +26,6 @@ public class SuggestionService {
     private final CanalRepository canalRepository;
     private final UserRepository userRepository;
     private final VoteRepository voteRepository;
-    private final OrganizationRepository organizationRepository;
     private final SubscriptionRepository subscriptionRepository;
 
     /**
@@ -52,15 +51,15 @@ public class SuggestionService {
                 .orElseThrow(() -> new IllegalArgumentException("Canal não encontrado"));
 
         // Verifica limite de sugestões do plano no mês atual
-        UUID orgId = canal.getOrganization().getId();
-        Subscription subscription = subscriptionRepository.findByOrganizationId(orgId)
+        UUID ownerId = canal.getUser().getId();
+        Subscription subscription = subscriptionRepository.findByUserId(ownerId)
                 .orElseThrow(() -> new IllegalStateException("Assinatura não encontrada"));
         int limite = subscription.getPlano().getLimiteSugestoesMes();
         if (limite != Integer.MAX_VALUE) {
             LocalDateTime inicioMes = LocalDateTime.now()
                     .with(TemporalAdjusters.firstDayOfMonth())
                     .withHour(0).withMinute(0).withSecond(0).withNano(0);
-            long sugestoesMes = suggestionRepository.countByOrganizationIdAndMesAtual(orgId, inicioMes);
+            long sugestoesMes = suggestionRepository.countByUserIdAndMesAtual(ownerId, inicioMes);
             if (sugestoesMes >= limite) {
                 throw new BusinessException("Limite de sugestões do plano " + subscription.getPlano().name()
                         + " atingido (" + limite + "/mês). Faça upgrade para continuar.");
@@ -89,12 +88,8 @@ public class SuggestionService {
         Suggestion suggestion = suggestionRepository.findById(suggestionId)
                 .orElseThrow(() -> new IllegalArgumentException("Sugestão não encontrada"));
 
-        // Verifica se o usuário é owner da organização do canal
-        UUID orgId = suggestion.getCanal().getOrganization().getId();
-        Organization org = organizationRepository.findById(orgId)
-                .orElseThrow(() -> new IllegalStateException("Organização não encontrada"));
-
-        if (!org.getOwner().getId().equals(userId)) {
+        // Verifica se o usuário é owner do canal
+        if (!suggestion.getCanal().getUser().getId().equals(userId)) {
             throw new SecurityException("Apenas o owner pode alterar o status");
         }
 

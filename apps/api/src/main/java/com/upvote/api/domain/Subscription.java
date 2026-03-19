@@ -27,8 +27,8 @@ public class Subscription {
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false, unique = true)
-    private Organization organization;
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

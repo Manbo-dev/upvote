@@ -57,16 +57,16 @@ public class StripeService {
     /**
      * Cria uma sessão de checkout do Stripe para o plano desejado
      */
-    public CheckoutSessionResponse criarCheckoutSession(UUID organizationId, Plano planoDesejado, String userEmail) {
+    public CheckoutSessionResponse criarCheckoutSession(UUID userId, Plano planoDesejado, String userEmail) {
         if (planoDesejado != Plano.STARTER && planoDesejado != Plano.PRO) {
             throw new BusinessException("Apenas os planos STARTER e PRO podem ser assinados via checkout");
         }
-        log.info("[STRIPE] Validação ok: orgId={}, plano={}", organizationId, planoDesejado);
+        log.info("[STRIPE] Validação ok: userId={}, plano={}", userId, planoDesejado);
 
-        Subscription subscription = subscriptionRepository.findByOrganizationId(organizationId)
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assinatura não encontrada"));
-        log.info("[STRIPE] Subscription encontrada: orgId={}, stripeStatus={}, stripeSubId={}",
-                organizationId, subscription.getStripeStatus(), subscription.getStripeSubscriptionId());
+        log.info("[STRIPE] Subscription encontrada: userId={}, stripeStatus={}, stripeSubId={}",
+                userId, subscription.getStripeStatus(), subscription.getStripeSubscriptionId());
 
         // Se já tem assinatura ativa no Stripe, redireciona para o portal
         if (subscription.getStripeSubscriptionId() != null && subscription.getStripeStatus() == StripeStatus.ACTIVE) {
@@ -74,7 +74,7 @@ public class StripeService {
         }
 
         String priceId = planoDesejado == Plano.STARTER ? starterPriceId : proPriceId;
-        log.info("[STRIPE] priceId selecionado: orgId={}, plano={}, priceId={}", organizationId, planoDesejado, priceId);
+        log.info("[STRIPE] priceId selecionado: userId={}, plano={}, priceId={}", userId, planoDesejado, priceId);
 
         String frontendUrl = allowedOrigins.split(",")[0].trim();
 
@@ -82,7 +82,7 @@ public class StripeService {
             SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                     .setCustomerEmail(userEmail)
-                    .setClientReferenceId(organizationId.toString())
+                    .setClientReferenceId(userId.toString())
                     .setSuccessUrl(frontendUrl + "/dashboard/billing?success=true")
                     .setCancelUrl(frontendUrl + "/dashboard/billing?canceled=true")
                     .putMetadata("plano", planoDesejado.name())
@@ -93,12 +93,12 @@ public class StripeService {
                                     .build()
                     );
 
-            log.info("[STRIPE] Chamando API Stripe: orgId={}, plano={}", organizationId, planoDesejado);
+            log.info("[STRIPE] Chamando API Stripe: userId={}, plano={}", userId, planoDesejado);
             com.stripe.model.checkout.Session session = com.stripe.model.checkout.Session.create(paramsBuilder.build());
-            log.info("[STRIPE] orgId={} Checkout session created: plan={}, sessionId={}", organizationId, planoDesejado, session.getId());
+            log.info("[STRIPE] userId={} Checkout session created: plan={}, sessionId={}", userId, planoDesejado, session.getId());
             return new CheckoutSessionResponse(session.getUrl());
         } catch (StripeException e) {
-            log.error("[STRIPE] orgId={} Failed to create checkout session: plan={}", organizationId, planoDesejado, e);
+            log.error("[STRIPE] userId={} Failed to create checkout session: plan={}", userId, planoDesejado, e);
             throw new BusinessException("Erro ao iniciar checkout. Tente novamente.");
         }
     }
@@ -106,8 +106,8 @@ public class StripeService {
     /**
      * Cria uma sessão do Customer Portal do Stripe
      */
-    public PortalSessionResponse criarPortalSession(UUID organizationId) {
-        Subscription subscription = subscriptionRepository.findByOrganizationId(organizationId)
+    public PortalSessionResponse criarPortalSession(UUID userId) {
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assinatura não encontrada"));
 
         if (subscription.getStripeCustomerId() == null) {
@@ -123,10 +123,10 @@ public class StripeService {
                     .build();
 
             Session portalSession = Session.create(params);
-            log.info("[STRIPE] orgId={} Portal session created", organizationId);
+            log.info("[STRIPE] userId={} Portal session created", userId);
             return new PortalSessionResponse(portalSession.getUrl());
         } catch (StripeException e) {
-            log.error("[STRIPE] orgId={} Failed to create portal session", organizationId, e);
+            log.error("[STRIPE] userId={} Failed to create portal session", userId, e);
             throw new BusinessException("Erro ao abrir portal de assinatura. Tente novamente.");
         }
     }
@@ -161,16 +161,16 @@ public class StripeService {
     /**
      * Retorna informações da assinatura com uso atual
      */
-    public SubscriptionResponse obterAssinatura(UUID organizationId) {
-        Subscription subscription = subscriptionRepository.findByOrganizationId(organizationId)
+    public SubscriptionResponse obterAssinatura(UUID userId) {
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assinatura não encontrada"));
 
-        long canaisAtivos = canalRepository.countByOrganizationId(organizationId);
+        long canaisAtivos = canalRepository.countByUserId(userId);
 
         LocalDateTime inicioMes = LocalDateTime.now()
                 .with(TemporalAdjusters.firstDayOfMonth())
                 .withHour(0).withMinute(0).withSecond(0).withNano(0);
-        long sugestoesUsadasMes = suggestionRepository.countByOrganizationIdAndMesAtual(organizationId, inicioMes);
+        long sugestoesUsadasMes = suggestionRepository.countByUserIdAndMesAtual(userId, inicioMes);
 
         Plano plano = subscription.getPlano();
         return new SubscriptionResponse(
@@ -230,16 +230,16 @@ public class StripeService {
             return;
         }
 
-        String orgIdStr = session.getClientReferenceId();
-        if (orgIdStr == null) {
+        String userIdStr = session.getClientReferenceId();
+        if (userIdStr == null) {
             log.warn("[STRIPE] eventId={} Checkout session sem clientReferenceId", eventId);
             return;
         }
 
-        UUID orgId = UUID.fromString(orgIdStr);
-        Subscription subscription = subscriptionRepository.findByOrganizationId(orgId).orElse(null);
+        UUID userId = UUID.fromString(userIdStr);
+        Subscription subscription = subscriptionRepository.findByUserId(userId).orElse(null);
         if (subscription == null) {
-            log.warn("[STRIPE] eventId={} Nenhuma subscription encontrada para orgId={}", eventId, orgId);
+            log.warn("[STRIPE] eventId={} Nenhuma subscription encontrada para userId={}", eventId, userId);
             return;
         }
 
@@ -271,8 +271,8 @@ public class StripeService {
         }
 
         subscriptionRepository.save(subscription);
-        log.info("[STRIPE] eventId={} Checkout completo: orgId={}, plano={}, customerId={}, stripeSubId={}",
-                eventId, orgId, plano, session.getCustomer(), session.getSubscription());
+        log.info("[STRIPE] eventId={} Checkout completo: userId={}, plano={}, customerId={}, stripeSubId={}",
+                eventId, userId, plano, session.getCustomer(), session.getSubscription());
     }
 
     private void processarFaturaPaga(Event event, String eventId) {

@@ -8,11 +8,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CanalRepository extends JpaRepository<Canal, UUID> {
-    List<Canal> findByOrganizationId(UUID organizationId);
+    List<Canal> findByUserId(UUID userId);
 
     Optional<Canal> findBySlug(String slug);
 
     Optional<Canal> findByApiKey(String apiKey);
 
-    long countByOrganizationId(UUID organizationId);
+    long countByUserId(UUID userId);
 }

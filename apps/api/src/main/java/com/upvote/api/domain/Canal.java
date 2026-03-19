@@ -32,8 +32,8 @@ public class Canal {
     private String slug;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "api_key", nullable = false, unique = true, length = 52)
     private String apiKey;
