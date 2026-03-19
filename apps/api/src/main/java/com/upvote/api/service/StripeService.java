@@ -153,6 +153,7 @@ public class StripeService {
             case "invoice.payment_failed" -> processarFalhaFatura(event, eventId);
             case "customer.subscription.updated" -> processarAssinaturaAtualizada(event, eventId);
             case "customer.subscription.deleted" -> processarAssinaturaCancelada(event, eventId);
+
             default -> log.info("[STRIPE] eventId={} Evento não tratado: type={}", eventId, event.getType());
         }
     }
@@ -184,11 +185,32 @@ public class StripeService {
         );
     }
 
+    // --- Utilitários de deserialização ---
+
+    /**
+     * Extrai o objeto do evento Stripe. Tenta getObject() primeiro (seguro, requer mesma versão de API),
+     * e faz fallback para deserializeUnsafe() quando as versões de API divergem.
+     */
+    private StripeObject extrairObjetoEvento(Event event, String eventId) {
+        var deserializer = event.getDataObjectDeserializer();
+        if (deserializer.getObject().isPresent()) {
+            return deserializer.getObject().get();
+        }
+        // API version mismatch — tenta deserializar mesmo assim
+        log.warn("[STRIPE] eventId={} Versão de API divergente, usando deserializeUnsafe()", eventId);
+        try {
+            return deserializer.deserializeUnsafe();
+        } catch (Exception e) {
+            log.error("[STRIPE] eventId={} Falha ao deserializar objeto do evento", eventId, e);
+            return null;
+        }
+    }
+
     // --- Handlers de webhook ---
 
     private void processarCheckoutCompleto(Event event, String eventId) {
         com.stripe.model.checkout.Session session = (com.stripe.model.checkout.Session)
-                event.getDataObjectDeserializer().getObject().orElse(null);
+                extrairObjetoEvento(event, eventId);
         if (session == null) {
             log.warn("[STRIPE] eventId={} Falha ao deserializar dados da checkout session", eventId);
             return;
@@ -237,7 +259,7 @@ public class StripeService {
     }
 
     private void processarFaturaPaga(Event event, String eventId) {
-        Invoice invoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
+        Invoice invoice = (Invoice) extrairObjetoEvento(event, eventId);
         if (invoice == null || invoice.getSubscription() == null) {
             log.warn("[STRIPE] eventId={} Falha ao deserializar dados da fatura", eventId);
             return;
@@ -280,7 +302,7 @@ public class StripeService {
     }
 
     private void processarFalhaFatura(Event event, String eventId) {
-        Invoice invoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
+        Invoice invoice = (Invoice) extrairObjetoEvento(event, eventId);
         if (invoice == null || invoice.getSubscription() == null) {
             log.warn("[STRIPE] eventId={} Falha ao deserializar dados da fatura", eventId);
             return;
@@ -296,7 +318,7 @@ public class StripeService {
 
     private void processarAssinaturaAtualizada(Event event, String eventId) {
         com.stripe.model.Subscription stripeSub = (com.stripe.model.Subscription)
-                event.getDataObjectDeserializer().getObject().orElse(null);
+                extrairObjetoEvento(event, eventId);
         if (stripeSub == null) {
             log.warn("[STRIPE] eventId={} Falha ao deserializar dados da assinatura", eventId);
             return;
@@ -333,7 +355,7 @@ public class StripeService {
 
     private void processarAssinaturaCancelada(Event event, String eventId) {
         com.stripe.model.Subscription stripeSub = (com.stripe.model.Subscription)
-                event.getDataObjectDeserializer().getObject().orElse(null);
+                extrairObjetoEvento(event, eventId);
         if (stripeSub == null) {
             log.warn("[STRIPE] eventId={} Falha ao deserializar dados da assinatura", eventId);
             return;
