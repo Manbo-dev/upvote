@@ -55,23 +55,6 @@ public class AuthService {
                 .build();
         subscriptionRepository.save(subscription);
 
-        // Generate unique API key for the default canal
-        byte[] randomBytes = new byte[24];
-        new SecureRandom().nextBytes(randomBytes);
-        String apiKey = "upv_" + HexFormat.of().formatHex(randomBytes);
-
-        String slug = request.name().toLowerCase()
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-|-$", "");
-
-        Canal canal = Canal.builder()
-                .name("Meu Canal")
-                .slug(slug + "-canal")
-                .apiKey(apiKey)
-                .user(user)
-                .build();
-        canalRepository.save(canal);
-
         String token = jwtTokenProvider.generateToken(user.getEmail());
         return new AuthResponse(token, user.getName(), user.getEmail(), Plano.FREE.name());
     }
