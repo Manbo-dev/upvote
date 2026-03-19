@@ -96,8 +96,9 @@ cd packages/widget
 npm install && npm run dev
 
 ## Regras globais obrigatórias
-- Comentários de código sempre em português
-- Commits em português no formato: tipo(escopo): descrição
+- All new code must be written in English: comments, variable names, method names, class names, commit messages, branch names, and PR descriptions
+- Existing code written in Portuguese will be migrated to English gradually — do not mix languages within the same new file or function
+- Commits in English following the format: type(scope): description
 - Respostas da API sempre no padrão ApiResponse<T>
 - Autenticação via JWT stateless (sem sessão no servidor)
 - Multi-tenancy: cada Organization tem seus Canais isolados
