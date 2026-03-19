@@ -130,6 +130,10 @@ export default function CanalDetailPage() {
       ? feedbackGroups
       : feedbackGroups?.filter((g) => g.category === activeCategory);
 
+  const maxVotes = feedbackGroups
+    ? Math.max(0, ...feedbackGroups.map((g) => g.voteCount))
+    : 0;
+
   const groupsByStatus = (status: SuggestionStatus) =>
     filtered?.filter((g) => g.status === status) ?? [];
 
@@ -254,6 +258,7 @@ export default function CanalDetailPage() {
         slug={slug!}
         onClose={() => setSelectedGroup(null)}
         onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
+        maxVotes={maxVotes}
       />
     </div>
   );

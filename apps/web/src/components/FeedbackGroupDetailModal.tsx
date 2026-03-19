@@ -9,6 +9,36 @@ import CategoryBadge from './CategoryBadge';
 import Modal from './Modal';
 import StatusBadge from './StatusBadge';
 
+function getVoteHeatColor(
+  voteCount: number,
+  maxVotes: number,
+  isDark: boolean,
+): { background: string; text: string; border: string } {
+  const effectiveMax = Math.max(maxVotes, 1);
+  const ratio = Math.min(voteCount / effectiveMax, 1);
+
+  // Hue: 220 (blue/cold) → 0 (red/hot)
+  const hue = Math.round(220 - ratio * 220);
+
+  if (isDark) {
+    const bgSaturation = Math.round(50 + ratio * 40);
+    const bgLightness = Math.round(18 + ratio * 4);
+    const textLightness = Math.round(60 + ratio * 15);
+    return {
+      background: `hsl(${hue}, ${bgSaturation}%, ${bgLightness}%)`,
+      text: `hsl(${hue}, 85%, ${textLightness}%)`,
+      border: `hsl(${hue}, 70%, 30%)`,
+    };
+  }
+
+  const bgSaturation = Math.round(60 + ratio * 30);
+  return {
+    background: `hsl(${hue}, ${bgSaturation}%, 93%)`,
+    text: `hsl(${hue}, 85%, 30%)`,
+    border: `hsl(${hue}, 75%, 75%)`,
+  };
+}
+
 const ALL_STATUSES: SuggestionStatus[] = [
   'OPEN',
   'PLANNED',
@@ -29,12 +59,14 @@ interface FeedbackGroupDetailModalProps {
   slug: string;
   onClose: () => void;
   onStatusChange: (id: string, status: SuggestionStatus) => void;
+  maxVotes: number;
 }
 
 export default function FeedbackGroupDetailModal({
   group,
   onClose,
   onStatusChange,
+  maxVotes,
 }: FeedbackGroupDetailModalProps) {
   const { data: feedbacks, isLoading } = useQuery({
     queryKey: ['feedback-group-details', group?.id],
@@ -43,6 +75,9 @@ export default function FeedbackGroupDetailModal({
   });
 
   if (!group) return null;
+
+  const isDark = document.documentElement.classList.contains('dark');
+  const heatColors = getVoteHeatColor(group.voteCount, maxVotes, isDark);
 
   return (
     <Modal isOpen={!!group} onClose={onClose} title={group.title}>
@@ -82,22 +117,29 @@ export default function FeedbackGroupDetailModal({
           </div>
         )}
 
-        {/* Contador de relatos */}
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        {/* Vote count heat badge */}
+        <div className="flex items-center gap-2">
+          <span
+            style={{
+              background: heatColors.background,
+              color: heatColors.text,
+              border: `1px solid ${heatColors.border}`,
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          <span>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
             {group.voteCount}{' '}
             {group.voteCount === 1 ? 'relato' : 'relatos'}
           </span>
