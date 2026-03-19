@@ -91,33 +91,76 @@ export default function SandboxPage() {
                 <span className="ml-3 text-xs text-gray-500 dark:text-gray-400 font-mono">meuapp.com.br/checkout</span>
               </div>
 
-              {/* Conteúdo do app simulado */}
-              <div className="p-6 space-y-4 min-h-[400px] relative">
-                {/* UI fictícia do app */}
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Meu App</h2>
-                  <div className="flex gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+              {/* Conteúdo do app simulado — página de checkout */}
+              <div className="p-5 min-h-[400px] relative">
+                {/* Cabeçalho do app */}
+                <div className="flex items-center justify-between mb-5">
+                  <span className="text-base font-bold text-indigo-600">ShopBR</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                      <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400">GS</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/2"></div>
-                  <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-5/6"></div>
+                {/* Título da seção */}
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Resumo do pedido</p>
+
+                {/* Itens do carrinho */}
+                <div className="space-y-2 mb-4">
+                  <ItemCarrinho
+                    nome="Tênis Air Runner Pro"
+                    variante="Preto · 42"
+                    preco="R$ 349,90"
+                    qtd={1}
+                    emoji="👟"
+                  />
+                  <ItemCarrinho
+                    nome="Meia Esportiva Pack"
+                    variante="Branco · Tam. Único"
+                    preco="R$ 49,90"
+                    qtd={3}
+                    emoji="🧦"
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  <div className="h-24 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800"></div>
-                  <div className="h-24 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800"></div>
+                {/* Cupom */}
+                <div className="flex gap-2 mb-4">
+                  <div className="flex-1 h-8 rounded-md border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 flex items-center px-3">
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500">Código de cupom</span>
+                  </div>
+                  <button className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 px-3 rounded-md border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 h-8">
+                    Aplicar
+                  </button>
                 </div>
 
-                <div className="flex gap-2 mt-4">
-                  <div className="h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex-1"></div>
-                  <div className="h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg w-28 flex items-center justify-center">
-                    <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">Pagar</span>
+                {/* Totais */}
+                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-3 mb-4">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>R$ 499,60</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Frete (PAC)</span>
+                    <span className="text-green-600 dark:text-green-400">Grátis</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-gray-900 dark:text-white text-sm pt-1 border-t border-gray-100 dark:border-gray-800 mt-1">
+                    <span>Total</span>
+                    <span>R$ 499,60</span>
                   </div>
                 </div>
+
+                {/* Botão pagar */}
+                <button className="w-full h-9 bg-indigo-600 rounded-lg flex items-center justify-center gap-2">
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
+                  <span className="text-xs font-semibold text-white">Finalizar compra</span>
+                </button>
+
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">
+                  🔒 Pagamento 100% seguro via Stripe
+                </p>
 
                 {/* Widget do Upvote (posicionado no canto inferior direito) */}
                 <div className="absolute bottom-4 right-4">
@@ -349,6 +392,38 @@ function WidgetDemo({
         )}
       </button>
     </>
+  );
+}
+
+// ─── Item do carrinho (app simulado) ─────────────────────────────────────────
+
+function ItemCarrinho({
+  nome,
+  variante,
+  preco,
+  qtd,
+  emoji,
+}: {
+  nome: string;
+  variante: string;
+  preco: string;
+  qtd: number;
+  emoji: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+      <div className="w-10 h-10 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-lg flex-shrink-0">
+        {emoji}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{nome}</p>
+        <p className="text-[10px] text-gray-500 dark:text-gray-400">{variante}</p>
+      </div>
+      <div className="text-right flex-shrink-0">
+        <p className="text-xs font-semibold text-gray-900 dark:text-white">{preco}</p>
+        <p className="text-[10px] text-gray-500 dark:text-gray-400">Qtd: {qtd}</p>
+      </div>
+    </div>
   );
 }
 
