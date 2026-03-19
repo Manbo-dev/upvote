@@ -1,7 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   getFeedbackGroupDetails,
-  updateFeedbackGroupStatus,
   type FeedbackGroupResponse,
   type FeedbackDetail,
 } from '../services/feedbackGroups';
@@ -29,39 +28,18 @@ interface FeedbackGroupDetailModalProps {
   group: FeedbackGroupResponse | null;
   slug: string;
   onClose: () => void;
+  onStatusChange: (id: string, status: SuggestionStatus) => void;
 }
 
-/**
- * Modal que exibe os detalhes de um grupo de feedback.
- * Mostra título, resumo, lista de feedbacks individuais agrupados
- * e permite alterar o status do grupo.
- */
 export default function FeedbackGroupDetailModal({
   group,
-  slug,
   onClose,
+  onStatusChange,
 }: FeedbackGroupDetailModalProps) {
-  const queryClient = useQueryClient();
-
-  // Busca os feedbacks individuais do grupo
   const { data: feedbacks, isLoading } = useQuery({
     queryKey: ['feedback-group-details', group?.id],
     queryFn: () => getFeedbackGroupDetails(group!.id),
     enabled: !!group,
-  });
-
-  // Mutation para atualizar status do grupo
-  const statusMutation = useMutation({
-    mutationFn: (status: SuggestionStatus) =>
-      updateFeedbackGroupStatus(group!.id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['feedback-groups', slug],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['feedback-group-details', group?.id],
-      });
-    },
   });
 
   if (!group) return null;
@@ -80,9 +58,8 @@ export default function FeedbackGroupDetailModal({
             <select
               value={group.status}
               onChange={(e) =>
-                statusMutation.mutate(e.target.value as SuggestionStatus)
+                onStatusChange(group.id, e.target.value as SuggestionStatus)
               }
-              disabled={statusMutation.isPending}
               className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
             >
               {ALL_STATUSES.map((s) => (

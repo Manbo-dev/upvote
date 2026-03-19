@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller for the intelligent feedback pipeline.
@@ -42,5 +45,29 @@ public class FeedbackController {
 
         List<FeedbackGroupResponse> groups = feedbackService.getFeedbackGroups(slug, status, category);
         return ResponseEntity.ok(ApiResponse.ok(groups));
+    }
+
+    /**
+     * Updates the status of a feedback group (authenticated, channel owner).
+     */
+    @PatchMapping("/api/feedback-groups/{id}/status")
+    public ResponseEntity<ApiResponse<FeedbackGroupResponse>> updateFeedbackGroupStatus(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> body) {
+
+        String status = body.get("status");
+        FeedbackGroupResponse updated = feedbackService.updateFeedbackGroupStatus(id, status);
+        return ResponseEntity.ok(ApiResponse.ok(updated));
+    }
+
+    /**
+     * Lists individual feedbacks within a group (authenticated, channel owner).
+     */
+    @GetMapping("/api/feedback-groups/{id}/feedbacks")
+    public ResponseEntity<ApiResponse<List<FeedbackDetailResponse>>> getFeedbackGroupDetails(
+            @PathVariable UUID id) {
+
+        List<FeedbackDetailResponse> feedbacks = feedbackService.getFeedbackGroupDetails(id);
+        return ResponseEntity.ok(ApiResponse.ok(feedbacks));
     }
 }

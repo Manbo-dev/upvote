@@ -6,6 +6,7 @@ import com.upvote.api.ai.PageContext;
 import com.upvote.api.ai.SynthesisResult;
 import com.upvote.api.domain.*;
 import static com.upvote.api.domain.FeedbackGroupCategory.*;
+import com.upvote.api.dto.FeedbackDetailResponse;
 import com.upvote.api.dto.FeedbackGroupResponse;
 import com.upvote.api.dto.FeedbackSubmitRequest;
 import com.upvote.api.dto.FeedbackSubmitResponse;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Orchestrates the intelligent feedback pipeline:
@@ -134,6 +136,37 @@ public class FeedbackService {
 
         return groups.stream()
                 .map(this::toGroupResponse)
+                .toList();
+    }
+
+    /**
+     * Updates the status of a feedback group.
+     */
+    @Transactional
+    public FeedbackGroupResponse updateFeedbackGroupStatus(UUID groupId, String status) {
+        FeedbackGroup group = feedbackGroupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Feedback group not found"));
+        group.setStatus(FeedbackGroupStatus.valueOf(status.toUpperCase()));
+        feedbackGroupRepository.save(group);
+        return toGroupResponse(group);
+    }
+
+    /**
+     * Returns individual feedbacks within a group for the detail modal.
+     */
+    public List<FeedbackDetailResponse> getFeedbackGroupDetails(UUID groupId) {
+        return feedbackRepository.findByFeedbackGroupId(groupId).stream()
+                .map(f -> new FeedbackDetailResponse(
+                        f.getId(),
+                        f.getRawMessage(),
+                        f.getSynthesizedMessage(),
+                        f.getPageUrl(),
+                        f.getPageTitle(),
+                        f.getTriggerType(),
+                        f.getLastInteraction(),
+                        f.getDeviceType(),
+                        f.getCreatedAt()
+                ))
                 .toList();
     }
 

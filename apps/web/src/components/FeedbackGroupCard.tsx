@@ -1,31 +1,57 @@
+import { useDraggable } from '@dnd-kit/core';
 import type { FeedbackGroupResponse } from '../services/feedbackGroups';
+import type { SuggestionStatus } from '../services/suggestions';
 import CategoryBadge from './CategoryBadge';
 import StatusBadge from './StatusBadge';
+
+const ALL_STATUSES: { value: SuggestionStatus; label: string }[] = [
+  { value: 'OPEN', label: 'Open' },
+  { value: 'PLANNED', label: 'Planned' },
+  { value: 'IN_PROGRESS', label: 'In Progress' },
+  { value: 'DONE', label: 'Done' },
+  { value: 'CLOSED', label: 'Closed' },
+];
 
 interface FeedbackGroupCardProps {
   group: FeedbackGroupResponse;
   onClick: () => void;
+  onStatusChange?: (id: string, status: SuggestionStatus) => void;
   compact?: boolean;
 }
 
 export default function FeedbackGroupCard({
   group,
   onClick,
+  onStatusChange,
   compact = false,
 }: FeedbackGroupCardProps) {
   const timeAgo = getRelativeTime(group.updatedAt);
 
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: group.id,
+  });
+
+  const dragStyle = isDragging ? 'opacity-40' : '';
+
   if (compact) {
     return (
       <div
-        onClick={onClick}
-        className="cursor-pointer rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-primary-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary-700"
+        ref={setNodeRef}
+        className={`group cursor-grab rounded-lg border border-gray-200 bg-white p-3 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary-700 ${dragStyle}`}
+        {...listeners}
+        {...attributes}
       >
         <div className="mb-1.5 flex items-center gap-2">
           <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-primary-50 text-xs font-bold text-primary-600 dark:bg-primary-900/20 dark:text-primary-400">
             {group.voteCount}
           </span>
-          <h3 className="flex-1 truncate text-sm font-semibold text-gray-900 dark:text-white">
+          <h3
+            className="flex-1 truncate text-sm font-semibold text-gray-900 dark:text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
             {group.title}
           </h3>
         </div>
@@ -43,18 +69,41 @@ export default function FeedbackGroupCard({
               {group.topContext}
             </span>
           )}
-          <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
-            {timeAgo}
-          </span>
+          <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">{timeAgo}</span>
         </div>
+
+        {/* Inline status selector */}
+        {onStatusChange && (
+          <div
+            className="mt-2 border-t border-gray-100 pt-2 dark:border-gray-800"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <select
+              value={group.status}
+              onChange={(e) =>
+                onStatusChange(group.id, e.target.value as SuggestionStatus)
+              }
+              className="w-full rounded border border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-600 focus:border-primary-400 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+            >
+              {ALL_STATUSES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
     <div
-      onClick={onClick}
-      className="flex cursor-pointer gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-primary-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700"
+      ref={setNodeRef}
+      className={`flex cursor-grab gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700 ${dragStyle}`}
+      {...listeners}
+      {...attributes}
     >
       {/* Vote count */}
       <div className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg border-2 border-primary-500 bg-primary-50 text-sm font-bold text-primary-600 dark:bg-primary-900/20 dark:text-primary-400">
@@ -65,9 +114,15 @@ export default function FeedbackGroupCard({
       </div>
 
       {/* Main content */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
-          <h3 className="font-semibold text-gray-900 truncate dark:text-white">
+          <h3
+            className="truncate font-semibold text-gray-900 dark:text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
             {group.title}
           </h3>
           <CategoryBadge category={group.category} />
@@ -75,7 +130,7 @@ export default function FeedbackGroupCard({
         </div>
 
         {group.summary && (
-          <p className="mb-2 text-sm text-gray-600 line-clamp-2 dark:text-gray-400">
+          <p className="mb-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
             {group.summary}
           </p>
         )}

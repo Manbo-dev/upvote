@@ -1,12 +1,23 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
 import {
   getFeedbackGroups,
+  updateFeedbackGroupStatus,
   type FeedbackCategory,
   type FeedbackGroupResponse,
 } from '../services/feedbackGroups';
 import type { SuggestionStatus } from '../services/suggestions';
+import FeedbackGroupCard from '../components/FeedbackGroupCard';
 import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
 import KanbanColumn from '../components/KanbanColumn';
 
@@ -20,8 +31,7 @@ const CATEGORY_FILTERS: {
     label: 'All',
     value: 'ALL',
     icon: null,
-    activeClasses:
-      'bg-gray-900 text-white dark:bg-white dark:text-gray-900',
+    activeClasses: 'bg-gray-900 text-white dark:bg-white dark:text-gray-900',
   },
   {
     label: 'Bug',
@@ -78,11 +88,14 @@ const KANBAN_COLUMNS: {
 
 export default function CanalDetailPage() {
   const { canalId: slug } = useParams<{ canalId: string }>();
-  const [activeCategory, setActiveCategory] = useState<
-    FeedbackCategory | 'ALL'
-  >('ALL');
-  const [selectedGroup, setSelectedGroup] =
-    useState<FeedbackGroupResponse | null>(null);
+  const queryClient = useQueryClient();
+  const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
+  const [selectedGroup, setSelectedGroup] = useState<FeedbackGroupResponse | null>(null);
+  const [draggingGroup, setDraggingGroup] = useState<FeedbackGroupResponse | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  );
 
   const { data: feedbackGroups, isLoading } = useQuery({
     queryKey: ['feedback-groups', slug],
@@ -90,23 +103,57 @@ export default function CanalDetailPage() {
     enabled: !!slug,
   });
 
-  // Filter by category client-side
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: SuggestionStatus }) =>
+      updateFeedbackGroupStatus(id, status),
+    onMutate: async ({ id, status }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['feedback-groups', slug] });
+      const previous = queryClient.getQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug]);
+      queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
+        old?.map((g) => (g.id === id ? { ...g, status } : g)) ?? [],
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(['feedback-groups', slug], ctx.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['feedback-groups', slug] });
+    },
+  });
+
   const filtered =
     activeCategory === 'ALL'
       ? feedbackGroups
       : feedbackGroups?.filter((g) => g.category === activeCategory);
 
-  // Group by status for Kanban columns
   const groupsByStatus = (status: SuggestionStatus) =>
     filtered?.filter((g) => g.status === status) ?? [];
 
+  function handleDragStart(event: DragStartEvent) {
+    const group = feedbackGroups?.find((g) => g.id === event.active.id);
+    setDraggingGroup(group ?? null);
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setDraggingGroup(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const newStatus = over.id as SuggestionStatus;
+    const group = feedbackGroups?.find((g) => g.id === active.id);
+    if (!group || group.status === newStatus) return;
+
+    statusMutation.mutate({ id: group.id, status: newStatus });
+  }
+
   return (
     <div>
-      {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Feedbacks
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Feedbacks</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Feedbacks capturados pelo widget sao agrupados automaticamente pela IA
         </p>
@@ -128,17 +175,13 @@ export default function CanalDetailPage() {
             >
               {filter.icon}
               {filter.label}
-              {filtered && filter.value !== 'ALL' && (
+              {filter.value !== 'ALL' && (
                 <span
                   className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${
-                    isActive
-                      ? 'bg-white/20'
-                      : 'bg-gray-200 dark:bg-gray-700'
+                    isActive ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
                   }`}
                 >
-                  {feedbackGroups?.filter(
-                    (g) => g.category === filter.value,
-                  ).length ?? 0}
+                  {feedbackGroups?.filter((g) => g.category === filter.value).length ?? 0}
                 </span>
               )}
             </button>
@@ -174,25 +217,44 @@ export default function CanalDetailPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {KANBAN_COLUMNS.map((col) => (
-            <KanbanColumn
-              key={col.status}
-              title={col.title}
-              status={col.status}
-              color={col.color}
-              groups={groupsByStatus(col.status)}
-              onCardClick={setSelectedGroup}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {KANBAN_COLUMNS.map((col) => (
+              <KanbanColumn
+                key={col.status}
+                title={col.title}
+                status={col.status}
+                color={col.color}
+                groups={groupsByStatus(col.status)}
+                onCardClick={setSelectedGroup}
+                onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
+              />
+            ))}
+          </div>
+
+          <DragOverlay>
+            {draggingGroup ? (
+              <div className="rotate-2 opacity-90">
+                <FeedbackGroupCard
+                  group={draggingGroup}
+                  onClick={() => {}}
+                  compact
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
-      {/* Detail modal */}
       <FeedbackGroupDetailModal
         group={selectedGroup}
         slug={slug!}
         onClose={() => setSelectedGroup(null)}
+        onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
       />
     </div>
   );
