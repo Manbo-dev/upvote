@@ -9,7 +9,6 @@ interface KanbanColumnProps {
   groups: FeedbackGroupResponse[];
   color: string;
   onCardClick: (group: FeedbackGroupResponse) => void;
-  onStatusChange: (id: string, status: SuggestionStatus) => void;
 }
 
 export default function KanbanColumn({
@@ -18,7 +17,6 @@ export default function KanbanColumn({
   groups,
   color,
   onCardClick,
-  onStatusChange,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -61,7 +59,6 @@ export default function KanbanColumn({
               key={group.id}
               group={group}
               onClick={() => onCardClick(group)}
-              onStatusChange={onStatusChange}
               compact
             />
           ))

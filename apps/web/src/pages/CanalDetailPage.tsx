@@ -231,7 +231,6 @@ export default function CanalDetailPage() {
                 color={col.color}
                 groups={groupsByStatus(col.status)}
                 onCardClick={setSelectedGroup}
-                onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
               />
             ))}
           </div>

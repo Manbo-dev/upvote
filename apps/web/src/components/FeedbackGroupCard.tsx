@@ -1,28 +1,17 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { FeedbackGroupResponse } from '../services/feedbackGroups';
-import type { SuggestionStatus } from '../services/suggestions';
 import CategoryBadge from './CategoryBadge';
 import StatusBadge from './StatusBadge';
-
-const ALL_STATUSES: { value: SuggestionStatus; label: string }[] = [
-  { value: 'OPEN', label: 'Open' },
-  { value: 'PLANNED', label: 'Planned' },
-  { value: 'IN_PROGRESS', label: 'In Progress' },
-  { value: 'DONE', label: 'Done' },
-  { value: 'CLOSED', label: 'Closed' },
-];
 
 interface FeedbackGroupCardProps {
   group: FeedbackGroupResponse;
   onClick: () => void;
-  onStatusChange?: (id: string, status: SuggestionStatus) => void;
   compact?: boolean;
 }
 
 export default function FeedbackGroupCard({
   group,
   onClick,
-  onStatusChange,
   compact = false,
 }: FeedbackGroupCardProps) {
   const timeAgo = getRelativeTime(group.updatedAt);
@@ -72,28 +61,6 @@ export default function FeedbackGroupCard({
           <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">{timeAgo}</span>
         </div>
 
-        {/* Inline status selector */}
-        {onStatusChange && (
-          <div
-            className="mt-2 border-t border-gray-100 pt-2 dark:border-gray-800"
-            onClick={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            <select
-              value={group.status}
-              onChange={(e) =>
-                onStatusChange(group.id, e.target.value as SuggestionStatus)
-              }
-              className="w-full rounded border border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-600 focus:border-primary-400 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
-            >
-              {ALL_STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
     );
   }
