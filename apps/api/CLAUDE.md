@@ -24,7 +24,10 @@ Apenas o owner do canal pode alterar o status.
 - Toda lógica de negócio fica nos Services, controllers são finos
 - MapStruct para conversão Entity ↔ DTO (nunca conversão manual)
 - Migrations Flyway em resources/db/migration/
-  Formato obrigatório: V{numero}__{descricao_com_underscores}.sql
+  Formato obrigatório (V11+): V{YYYYMMDDHHMMSS}__{description_with_underscores}.sql
+  Exemplo: V20260320143000__add_webhook_event_log.sql
+  Migrations V1-V10 usam formato legado sequencial — NÃO renomear.
+  outOfOrder habilitado para suportar branches paralelas.
 - Exceptions customizadas em com.upvote.api.exception:
     - ResourceNotFoundException → 404
     - BusinessException → 422
