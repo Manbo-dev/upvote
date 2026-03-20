@@ -242,27 +242,37 @@ export default function CanalDetailPage() {
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setDraggingGroup(null);
     const { active, over } = event;
-    if (!over) return;
 
-    const overId = over.id as string;
-    const group = feedbackGroups?.find((g) => g.id === active.id);
-    if (!group) return;
+    if (over) {
+      const overId = over.id as string;
+      const group = feedbackGroups?.find((g) => g.id === active.id);
 
-    // Dropped on a category pill
-    if (overId.startsWith(CAT_DROP_PREFIX)) {
-      const newCategory = overId.replace(CAT_DROP_PREFIX, '');
-      if (newCategory === 'ALL' || group.category === newCategory) return;
-      const category = newCategory as FeedbackCategory;
-      categoryMutation.mutate({ id: group.id, category });
-      return;
+      if (group) {
+        if (overId.startsWith(CAT_DROP_PREFIX)) {
+          const newCategory = overId.replace(CAT_DROP_PREFIX, '') as FeedbackCategory;
+          if (newCategory !== 'ALL' && group.category !== newCategory) {
+            // Sync optimistic update before clearing drag state to avoid visual snap-back
+            queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
+              old?.map((g) => (g.id === group.id ? { ...g, category: newCategory } : g)) ?? [],
+            );
+            categoryMutation.mutate({ id: group.id, category: newCategory });
+          }
+        } else {
+          const newStatus = overId as SuggestionStatus;
+          if (group.status !== newStatus) {
+            // Sync optimistic update before clearing drag state to avoid visual snap-back
+            queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
+              old?.map((g) => (g.id === group.id ? { ...g, status: newStatus } : g)) ?? [],
+            );
+            statusMutation.mutate({ id: group.id, status: newStatus });
+          }
+        }
+      }
     }
 
-    // Dropped on a kanban column (status change)
-    const newStatus = overId as SuggestionStatus;
-    if (group.status === newStatus) return;
-    statusMutation.mutate({ id: group.id, status: newStatus });
+    // Clear drag state after cache is already updated so overlay removal shows the card in its new position
+    setDraggingGroup(null);
   }
 
   return (
