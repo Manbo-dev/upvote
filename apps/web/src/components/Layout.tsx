@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useThemeStore } from '../store/themeStore';
@@ -9,6 +10,7 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { theme, toggle } = useThemeStore();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -18,8 +20,10 @@ export default function Layout() {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex h-16 items-center border-b border-gray-200 px-6 dark:border-gray-800">
+      <aside
+        className={`${sidebarOpen ? 'w-64' : 'w-0'} flex-shrink-0 overflow-hidden border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-800 dark:bg-gray-900`}
+      >
+        <div className="flex h-16 w-64 items-center border-b border-gray-200 px-6 dark:border-gray-800">
           <Link to="/dashboard" className="text-xl font-bold text-primary-600">
             Upvote
           </Link>
@@ -79,7 +83,19 @@ export default function Layout() {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-800 dark:bg-gray-900">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Dashboard</h2>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label="Alternar sidebar"
+              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} />
+                <line x1="9" y1="3" x2="9" y2="21" strokeWidth={2} />
+              </svg>
+            </button>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Dashboard</h2>
+          </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600 dark:text-gray-400">{user?.name}</span>
 
