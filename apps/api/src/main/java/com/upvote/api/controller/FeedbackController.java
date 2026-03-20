@@ -61,6 +61,19 @@ public class FeedbackController {
     }
 
     /**
+     * Updates the category of a feedback group (authenticated, channel owner).
+     */
+    @PatchMapping("/api/feedback-groups/{id}/category")
+    public ResponseEntity<ApiResponse<FeedbackGroupResponse>> updateFeedbackGroupCategory(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> body) {
+
+        String category = body.get("category");
+        FeedbackGroupResponse updated = feedbackService.updateFeedbackGroupCategory(id, category);
+        return ResponseEntity.ok(ApiResponse.ok(updated));
+    }
+
+    /**
      * Lists individual feedbacks within a group (authenticated, channel owner).
      */
     @GetMapping("/api/feedback-groups/{id}/feedbacks")

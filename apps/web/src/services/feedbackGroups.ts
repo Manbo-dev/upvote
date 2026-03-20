@@ -61,6 +61,18 @@ export async function getFeedbackGroupDetails(
   return data.data;
 }
 
+// Atualiza a categoria de um grupo de feedback
+export async function updateFeedbackGroupCategory(
+  groupId: string,
+  category: FeedbackCategory,
+): Promise<FeedbackGroupResponse> {
+  const { data } = await api.patch<ApiResult<FeedbackGroupResponse>>(
+    `/feedback-groups/${groupId}/category`,
+    { category },
+  );
+  return data.data;
+}
+
 // Atualiza o status de um grupo de feedback
 export async function updateFeedbackGroupStatus(
   groupId: string,

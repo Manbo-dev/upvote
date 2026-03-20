@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   getFeedbackGroupDetails,
+  type FeedbackCategory,
   type FeedbackGroupResponse,
   type FeedbackDetail,
 } from '../services/feedbackGroups';
 import type { SuggestionStatus } from '../services/suggestions';
-import CategoryBadge from './CategoryBadge';
 import Modal from './Modal';
 import StatusBadge from './StatusBadge';
 import { getVoteHeatColor } from '../utils/voteHeat';
@@ -16,6 +16,54 @@ const ALL_STATUSES: SuggestionStatus[] = [
   'IN_PROGRESS',
   'DONE',
   'CLOSED',
+];
+
+const CATEGORY_OPTIONS: {
+  value: FeedbackCategory;
+  label: string;
+  activeClasses: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    value: 'BUG',
+    label: 'Bug',
+    activeClasses: 'bg-red-100 text-red-700 ring-red-400 dark:bg-red-900/40 dark:text-red-300 dark:ring-red-600',
+    icon: (
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    value: 'SUGGESTION',
+    label: 'Suggestion',
+    activeClasses: 'bg-blue-100 text-blue-700 ring-blue-400 dark:bg-blue-900/40 dark:text-blue-300 dark:ring-blue-600',
+    icon: (
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      </svg>
+    ),
+  },
+  {
+    value: 'COMPLAINT',
+    label: 'Complaint',
+    activeClasses: 'bg-orange-100 text-orange-700 ring-orange-400 dark:bg-orange-900/40 dark:text-orange-300 dark:ring-orange-600',
+    icon: (
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    value: 'PRAISE',
+    label: 'Praise',
+    activeClasses: 'bg-green-100 text-green-700 ring-green-400 dark:bg-green-900/40 dark:text-green-300 dark:ring-green-600',
+    icon: (
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+    ),
+  },
 ];
 
 // Labels legíveis para os tipos de acionamento do widget
@@ -30,6 +78,7 @@ interface FeedbackGroupDetailModalProps {
   slug: string;
   onClose: () => void;
   onStatusChange: (id: string, status: SuggestionStatus) => void;
+  onCategoryChange: (id: string, category: FeedbackCategory) => void;
   maxVotes: number;
 }
 
@@ -37,6 +86,7 @@ export default function FeedbackGroupDetailModal({
   group,
   onClose,
   onStatusChange,
+  onCategoryChange,
   maxVotes,
 }: FeedbackGroupDetailModalProps) {
   const { data: feedbacks, isLoading } = useQuery({
@@ -53,11 +103,32 @@ export default function FeedbackGroupDetailModal({
   return (
     <Modal isOpen={!!group} onClose={onClose} title={group.title}>
       <div className="space-y-5">
+        {/* Categoria */}
+        <div>
+          <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">Categoria</p>
+          <div className="flex flex-wrap gap-2">
+            {CATEGORY_OPTIONS.map((opt) => {
+              const isActive = group.category === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => onCategoryChange(group.id, opt.value)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                    isActive
+                      ? `ring-2 ${opt.activeClasses}`
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {opt.icon}
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Resumo e status */}
         <div>
-          <div className="mb-2">
-            <CategoryBadge category={group.category} />
-          </div>
           <p className="text-sm text-gray-600 dark:text-gray-400">{group.summary}</p>
           <div className="mt-3 flex items-center gap-3">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>

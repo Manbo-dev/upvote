@@ -13,6 +13,7 @@ import {
 import {
   getFeedbackGroups,
   updateFeedbackGroupStatus,
+  updateFeedbackGroupCategory,
   type FeedbackCategory,
   type FeedbackGroupResponse,
 } from '../services/feedbackGroups';
@@ -112,6 +113,27 @@ export default function CanalDetailPage() {
       const previous = queryClient.getQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug]);
       queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
         old?.map((g) => (g.id === id ? { ...g, status } : g)) ?? [],
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(['feedback-groups', slug], ctx.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['feedback-groups', slug] });
+    },
+  });
+
+  const categoryMutation = useMutation({
+    mutationFn: ({ id, category }: { id: string; category: FeedbackCategory }) =>
+      updateFeedbackGroupCategory(id, category),
+    onMutate: async ({ id, category }) => {
+      await queryClient.cancelQueries({ queryKey: ['feedback-groups', slug] });
+      const previous = queryClient.getQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug]);
+      queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
+        old?.map((g) => (g.id === id ? { ...g, category } : g)) ?? [],
       );
       return { previous };
     },
@@ -260,6 +282,7 @@ export default function CanalDetailPage() {
         slug={slug!}
         onClose={() => setSelectedGroup(null)}
         onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
+        onCategoryChange={(id, category) => categoryMutation.mutate({ id, category })}
         maxVotes={maxVotes}
       />
     </div>

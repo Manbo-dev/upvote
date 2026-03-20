@@ -152,6 +152,18 @@ public class FeedbackService {
     }
 
     /**
+     * Updates the category of a feedback group.
+     */
+    @Transactional
+    public FeedbackGroupResponse updateFeedbackGroupCategory(UUID groupId, String category) {
+        FeedbackGroup group = feedbackGroupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Feedback group not found"));
+        group.setCategory(FeedbackGroupCategory.valueOf(category.toUpperCase()));
+        feedbackGroupRepository.save(group);
+        return toGroupResponse(group);
+    }
+
+    /**
      * Returns individual feedbacks within a group for the detail modal.
      */
     public List<FeedbackDetailResponse> getFeedbackGroupDetails(UUID groupId) {
