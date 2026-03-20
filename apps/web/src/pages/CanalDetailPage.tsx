@@ -7,6 +7,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
@@ -27,12 +28,14 @@ const CATEGORY_FILTERS: {
   value: FeedbackCategory | 'ALL';
   icon: React.ReactNode;
   activeClasses: string;
+  dropClasses: string;
 }[] = [
   {
     label: 'All',
     value: 'ALL',
     icon: null,
     activeClasses: 'bg-gray-900 text-white dark:bg-white dark:text-gray-900',
+    dropClasses: '',
   },
   {
     label: 'Bug',
@@ -43,6 +46,7 @@ const CATEGORY_FILTERS: {
       </svg>
     ),
     activeClasses: 'bg-red-600 text-white dark:bg-red-500',
+    dropClasses: 'ring-2 ring-red-400 bg-red-50 dark:bg-red-900/20 dark:ring-red-500',
   },
   {
     label: 'Suggestion',
@@ -53,6 +57,7 @@ const CATEGORY_FILTERS: {
       </svg>
     ),
     activeClasses: 'bg-blue-600 text-white dark:bg-blue-500',
+    dropClasses: 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:ring-blue-500',
   },
   {
     label: 'Complaint',
@@ -63,6 +68,7 @@ const CATEGORY_FILTERS: {
       </svg>
     ),
     activeClasses: 'bg-orange-600 text-white dark:bg-orange-500',
+    dropClasses: 'ring-2 ring-orange-400 bg-orange-50 dark:bg-orange-900/20 dark:ring-orange-500',
   },
   {
     label: 'Praise',
@@ -73,6 +79,7 @@ const CATEGORY_FILTERS: {
       </svg>
     ),
     activeClasses: 'bg-green-600 text-white dark:bg-green-500',
+    dropClasses: 'ring-2 ring-green-400 bg-green-50 dark:bg-green-900/20 dark:ring-green-500',
   },
 ];
 
@@ -86,6 +93,64 @@ const KANBAN_COLUMNS: {
   { status: 'IN_PROGRESS', title: 'In Progress', color: 'bg-orange-500' },
   { status: 'DONE', title: 'Done', color: 'bg-green-500' },
 ];
+
+// Drop ID prefix to distinguish category drops from status drops
+const CAT_DROP_PREFIX = 'cat:';
+
+interface DroppableCategoryPillProps {
+  filter: (typeof CATEGORY_FILTERS)[number];
+  isActive: boolean;
+  isDragging: boolean;
+  count: number;
+  onClick: () => void;
+}
+
+function DroppableCategoryPill({
+  filter,
+  isActive,
+  isDragging,
+  count,
+  onClick,
+}: DroppableCategoryPillProps) {
+  const droppableId = filter.value === 'ALL' ? 'cat:ALL' : `${CAT_DROP_PREFIX}${filter.value}`;
+  const { setNodeRef, isOver } = useDroppable({
+    id: droppableId,
+    disabled: filter.value === 'ALL',
+  });
+
+  const showDropTarget = isDragging && filter.value !== 'ALL';
+  const isOvering = isOver && filter.value !== 'ALL';
+
+  return (
+    <button
+      ref={setNodeRef}
+      onClick={onClick}
+      className={`
+        inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150
+        ${isActive ? filter.activeClasses : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'}
+        ${showDropTarget && !isActive ? 'scale-105 shadow-md ' + filter.dropClasses : ''}
+        ${isOvering ? 'scale-110 shadow-lg ' + filter.activeClasses : ''}
+      `}
+    >
+      {filter.icon}
+      {filter.label}
+      {filter.value !== 'ALL' && (
+        <span
+          className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${
+            isActive || isOvering ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
+          }`}
+        >
+          {count}
+        </span>
+      )}
+      {isOvering && (
+        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      )}
+    </button>
+  );
+}
 
 export default function CanalDetailPage() {
   const { canalId: slug } = useParams<{ canalId: string }>();
@@ -108,7 +173,6 @@ export default function CanalDetailPage() {
     mutationFn: ({ id, status }: { id: string; status: SuggestionStatus }) =>
       updateFeedbackGroupStatus(id, status),
     onMutate: async ({ id, status }) => {
-      // Optimistic update
       await queryClient.cancelQueries({ queryKey: ['feedback-groups', slug] });
       const previous = queryClient.getQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug]);
       queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
@@ -169,10 +233,21 @@ export default function CanalDetailPage() {
     const { active, over } = event;
     if (!over) return;
 
-    const newStatus = over.id as SuggestionStatus;
+    const overId = over.id as string;
     const group = feedbackGroups?.find((g) => g.id === active.id);
-    if (!group || group.status === newStatus) return;
+    if (!group) return;
 
+    // Dropped on a category pill
+    if (overId.startsWith(CAT_DROP_PREFIX)) {
+      const newCategory = overId.replace(CAT_DROP_PREFIX, '') as FeedbackCategory;
+      if (newCategory === 'ALL' || group.category === newCategory) return;
+      categoryMutation.mutate({ id: group.id, category: newCategory });
+      return;
+    }
+
+    // Dropped on a kanban column (status change)
+    const newStatus = overId as SuggestionStatus;
+    if (group.status === newStatus) return;
     statusMutation.mutate({ id: group.id, status: newStatus });
   }
 
@@ -185,34 +260,26 @@ export default function CanalDetailPage() {
         </p>
       </div>
 
-      {/* Category filter pills */}
+      {/* Category filter pills — also drop targets */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {CATEGORY_FILTERS.map((filter) => {
-          const isActive = activeCategory === filter.value;
-          return (
-            <button
-              key={filter.value}
-              onClick={() => setActiveCategory(filter.value)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? filter.activeClasses
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
-              }`}
-            >
-              {filter.icon}
-              {filter.label}
-              {filter.value !== 'ALL' && (
-                <span
-                  className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${
-                    isActive ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
-                  }`}
-                >
-                  {feedbackGroups?.filter((g) => g.category === filter.value).length ?? 0}
-                </span>
-              )}
-            </button>
-          );
-        })}
+        {draggingGroup && (
+          <span className="flex items-center gap-1 self-center text-xs text-gray-400 dark:text-gray-500">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+            </svg>
+            Solte em uma categoria para reclassificar
+          </span>
+        )}
+        {CATEGORY_FILTERS.map((filter) => (
+          <DroppableCategoryPill
+            key={filter.value}
+            filter={filter}
+            isActive={activeCategory === filter.value}
+            isDragging={!!draggingGroup}
+            count={feedbackGroups?.filter((g) => g.category === filter.value).length ?? 0}
+            onClick={() => setActiveCategory(filter.value)}
+          />
+        ))}
       </div>
 
       {/* Kanban board */}
