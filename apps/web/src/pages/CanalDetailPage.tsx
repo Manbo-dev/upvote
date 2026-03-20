@@ -242,9 +242,10 @@ export default function CanalDetailPage() {
 
     // Dropped on a category pill
     if (overId.startsWith(CAT_DROP_PREFIX)) {
-      const newCategory = overId.replace(CAT_DROP_PREFIX, '') as FeedbackCategory;
+      const newCategory = overId.replace(CAT_DROP_PREFIX, '');
       if (newCategory === 'ALL' || group.category === newCategory) return;
-      categoryMutation.mutate({ id: group.id, category: newCategory });
+      const category = newCategory as FeedbackCategory;
+      categoryMutation.mutate({ id: group.id, category });
       return;
     }
 
