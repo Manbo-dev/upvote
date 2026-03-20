@@ -250,8 +250,9 @@ export default function CanalDetailPage() {
 
       if (group) {
         if (overId.startsWith(CAT_DROP_PREFIX)) {
-          const newCategory = overId.replace(CAT_DROP_PREFIX, '') as FeedbackCategory;
-          if (newCategory !== 'ALL' && group.category !== newCategory) {
+          const rawCategory = overId.replace(CAT_DROP_PREFIX, '');
+          if (rawCategory !== 'ALL' && group.category !== rawCategory) {
+            const newCategory = rawCategory as FeedbackCategory;
             // Sync optimistic update before clearing drag state to avoid visual snap-back
             queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
               old?.map((g) => (g.id === group.id ? { ...g, category: newCategory } : g)) ?? [],
