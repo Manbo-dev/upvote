@@ -1,5 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { FeedbackGroupResponse } from '../services/feedbackGroups';
+import { useThemeStore } from '../store/themeStore';
+import { getVoteHeatColor } from '../utils/voteHeat';
 import CategoryBadge from './CategoryBadge';
 import StatusBadge from './StatusBadge';
 
@@ -7,13 +9,18 @@ interface FeedbackGroupCardProps {
   group: FeedbackGroupResponse;
   onClick: () => void;
   compact?: boolean;
+  maxVotes?: number;
 }
 
 export default function FeedbackGroupCard({
   group,
   onClick,
   compact = false,
+  maxVotes = 1,
 }: FeedbackGroupCardProps) {
+  const { theme } = useThemeStore();
+  const isDark = theme === 'dark';
+  const heatColor = getVoteHeatColor(group.voteCount, maxVotes, isDark);
   const timeAgo = getRelativeTime(group.updatedAt);
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -31,7 +38,10 @@ export default function FeedbackGroupCard({
         {...attributes}
       >
         <div className="mb-1.5 flex items-center gap-2">
-          <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-primary-50 text-xs font-bold text-primary-600 dark:bg-primary-900/20 dark:text-primary-400">
+          <span
+            className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-xs font-bold"
+            style={{ background: heatColor.background, color: heatColor.text }}
+          >
             {group.voteCount}
           </span>
           <h3
@@ -73,7 +83,14 @@ export default function FeedbackGroupCard({
       {...attributes}
     >
       {/* Vote count */}
-      <div className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg border-2 border-primary-500 bg-primary-50 text-sm font-bold text-primary-600 dark:bg-primary-900/20 dark:text-primary-400">
+      <div
+        className="flex h-16 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg border-2 text-sm font-bold"
+        style={{
+          background: heatColor.background,
+          color: heatColor.text,
+          borderColor: heatColor.border,
+        }}
+      >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
         </svg>

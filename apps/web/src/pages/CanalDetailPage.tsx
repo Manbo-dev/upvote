@@ -235,6 +235,7 @@ export default function CanalDetailPage() {
                 color={col.color}
                 groups={groupsByStatus(col.status)}
                 onCardClick={setSelectedGroup}
+                maxVotes={maxVotes}
               />
             ))}
           </div>
@@ -246,6 +247,7 @@ export default function CanalDetailPage() {
                   group={draggingGroup}
                   onClick={() => {}}
                   compact
+                  maxVotes={maxVotes}
                 />
               </div>
             ) : null}

@@ -9,6 +9,7 @@ interface KanbanColumnProps {
   groups: FeedbackGroupResponse[];
   color: string;
   onCardClick: (group: FeedbackGroupResponse) => void;
+  maxVotes?: number;
 }
 
 export default function KanbanColumn({
@@ -17,6 +18,7 @@ export default function KanbanColumn({
   groups,
   color,
   onCardClick,
+  maxVotes = 1,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -60,6 +62,7 @@ export default function KanbanColumn({
               group={group}
               onClick={() => onCardClick(group)}
               compact
+              maxVotes={maxVotes}
             />
           ))
         )}
