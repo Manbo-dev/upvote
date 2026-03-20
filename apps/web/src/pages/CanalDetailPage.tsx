@@ -118,9 +118,30 @@ function DroppableCategoryPill({
     disabled: filter.value === 'ALL',
   });
 
-  const showDropTarget = isDragging && filter.value !== 'ALL';
-  const isOvering = isOver && filter.value !== 'ALL';
+  const isDroppable = filter.value !== 'ALL';
+  const isOvering = isOver && isDroppable;
 
+  // Zona grande durante drag (exceto "All")
+  if (isDragging && isDroppable) {
+    return (
+      <div
+        ref={setNodeRef}
+        className={`
+          flex flex-1 cursor-default flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed py-5 transition-all duration-150
+          ${isOvering ? 'scale-105 border-solid shadow-md ' + filter.dropClasses : 'border-gray-200 dark:border-gray-700'}
+        `}
+      >
+        <span className={`${isOvering ? 'opacity-100' : 'opacity-40'} transition-opacity`}>
+          {filter.icon}
+        </span>
+        <span className={`text-xs font-semibold ${isOvering ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
+          {filter.label}
+        </span>
+      </div>
+    );
+  }
+
+  // Pill normal
   return (
     <button
       ref={setNodeRef}
@@ -128,25 +149,14 @@ function DroppableCategoryPill({
       className={`
         inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150
         ${isActive ? filter.activeClasses : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'}
-        ${showDropTarget && !isActive ? 'scale-105 shadow-md ' + filter.dropClasses : ''}
-        ${isOvering ? 'scale-110 shadow-lg ' + filter.activeClasses : ''}
       `}
     >
       {filter.icon}
       {filter.label}
-      {filter.value !== 'ALL' && (
-        <span
-          className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${
-            isActive || isOvering ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
-          }`}
-        >
+      {isDroppable && (
+        <span className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${isActive ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'}`}>
           {count}
         </span>
-      )}
-      {isOvering && (
-        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
       )}
     </button>
   );
@@ -264,89 +274,83 @@ export default function CanalDetailPage() {
         </p>
       </div>
 
-      {/* Category filter pills — also drop targets */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        {draggingGroup && (
-          <span className="flex items-center gap-1 self-center text-xs text-gray-400 dark:text-gray-500">
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-            </svg>
-            Solte em uma categoria para reclassificar
-          </span>
-        )}
-        {CATEGORY_FILTERS.map((filter) => (
-          <DroppableCategoryPill
-            key={filter.value}
-            filter={filter}
-            isActive={activeCategory === filter.value}
-            isDragging={!!draggingGroup}
-            count={feedbackGroups?.filter((g) => g.category === filter.value).length ?? 0}
-            onClick={() => setActiveCategory(filter.value)}
-          />
-        ))}
-      </div>
-
-      {/* Kanban board */}
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
-        </div>
-      ) : !feedbackGroups || feedbackGroups.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        {/* Category filter pills — expand to drop zones while dragging */}
+        <div className={`mb-6 flex gap-3 ${draggingGroup ? '' : 'flex-wrap'}`}>
+          {CATEGORY_FILTERS.filter((f) => !draggingGroup || f.value !== 'ALL').map((filter) => (
+            <DroppableCategoryPill
+              key={filter.value}
+              filter={filter}
+              isActive={activeCategory === filter.value}
+              isDragging={!!draggingGroup}
+              count={feedbackGroups?.filter((g) => g.category === filter.value).length ?? 0}
+              onClick={() => setActiveCategory(filter.value)}
             />
-          </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-            Nenhum feedback recebido ainda
-          </h3>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Instale o widget no seu produto para comecar a capturar feedbacks.
-          </p>
+          ))}
         </div>
-      ) : (
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {KANBAN_COLUMNS.map((col) => (
-              <KanbanColumn
-                key={col.status}
-                title={col.title}
-                status={col.status}
-                color={col.color}
-                groups={groupsByStatus(col.status)}
-                onCardClick={(g) => setSelectedGroupId(g.id)}
-                maxVotes={maxVotes}
-              />
-            ))}
-          </div>
 
-          <DragOverlay>
-            {draggingGroup ? (
-              <div className="rotate-2 opacity-90">
-                <FeedbackGroupCard
-                  group={draggingGroup}
-                  onClick={() => {}}
-                  compact
+        {/* Kanban board */}
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
+          </div>
+        ) : !feedbackGroups || feedbackGroups.length === 0 ? (
+          <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+              />
+            </svg>
+            <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+              Nenhum feedback recebido ainda
+            </h3>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Instale o widget no seu produto para comecar a capturar feedbacks.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {KANBAN_COLUMNS.map((col) => (
+                <KanbanColumn
+                  key={col.status}
+                  title={col.title}
+                  status={col.status}
+                  color={col.color}
+                  groups={groupsByStatus(col.status)}
+                  onCardClick={(g) => setSelectedGroupId(g.id)}
                   maxVotes={maxVotes}
                 />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      )}
+              ))}
+            </div>
+
+            <DragOverlay>
+              {draggingGroup ? (
+                <div className="rotate-2 opacity-90">
+                  <FeedbackGroupCard
+                    group={draggingGroup}
+                    onClick={() => {}}
+                    compact
+                    maxVotes={maxVotes}
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </>
+        )}
+      </DndContext>
 
       <FeedbackGroupDetailModal
         group={selectedGroup}
