@@ -156,7 +156,7 @@ export default function CanalDetailPage() {
   const { canalId: slug } = useParams<{ canalId: string }>();
   const queryClient = useQueryClient();
   const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
-  const [selectedGroup, setSelectedGroup] = useState<FeedbackGroupResponse | null>(null);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [draggingGroup, setDraggingGroup] = useState<FeedbackGroupResponse | null>(null);
 
   const sensors = useSensors(
@@ -215,6 +215,9 @@ export default function CanalDetailPage() {
     activeCategory === 'ALL'
       ? feedbackGroups
       : feedbackGroups?.filter((g) => g.category === activeCategory);
+
+  // Derive selectedGroup from live cache so modal reflects optimistic updates
+  const selectedGroup = feedbackGroups?.find((g) => g.id === selectedGroupId) ?? null;
 
   const maxVotes = feedbackGroups
     ? Math.max(0, ...feedbackGroups.map((g) => g.voteCount))
@@ -323,7 +326,7 @@ export default function CanalDetailPage() {
                 status={col.status}
                 color={col.color}
                 groups={groupsByStatus(col.status)}
-                onCardClick={setSelectedGroup}
+                onCardClick={(g) => setSelectedGroupId(g.id)}
                 maxVotes={maxVotes}
               />
             ))}
@@ -347,7 +350,7 @@ export default function CanalDetailPage() {
       <FeedbackGroupDetailModal
         group={selectedGroup}
         slug={slug!}
-        onClose={() => setSelectedGroup(null)}
+        onClose={() => setSelectedGroupId(null)}
         onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
         onCategoryChange={(id, category) => categoryMutation.mutate({ id, category })}
         maxVotes={maxVotes}
