@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   DndContext,
@@ -15,6 +15,8 @@ import {
   getFeedbackGroups,
   updateFeedbackGroupStatus,
   updateFeedbackGroupCategory,
+  archiveAllDone,
+  archiveFeedbackGroup,
   type FeedbackCategory,
   type FeedbackGroupResponse,
 } from '../services/feedbackGroups';
@@ -221,6 +223,46 @@ export default function CanalDetailPage() {
     },
   });
 
+  const archiveAllMutation = useMutation({
+    mutationFn: () => archiveAllDone(slug!),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['feedback-groups', slug] });
+      const previous = queryClient.getQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug]);
+      queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
+        old?.filter((g) => g.status !== 'DONE') ?? [],
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(['feedback-groups', slug], ctx.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['feedback-groups', slug] });
+    },
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: (id: string) => archiveFeedbackGroup(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['feedback-groups', slug] });
+      const previous = queryClient.getQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug]);
+      queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>
+        old?.filter((g) => g.id !== id) ?? [],
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(['feedback-groups', slug], ctx.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['feedback-groups', slug] });
+    },
+  });
+
   const filtered =
     activeCategory === 'ALL'
       ? feedbackGroups
@@ -278,11 +320,22 @@ export default function CanalDetailPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Feedbacks</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Feedbacks capturados pelo widget sao agrupados automaticamente pela IA
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Feedbacks</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Feedbacks capturados pelo widget sao agrupados automaticamente pela IA
+          </p>
+        </div>
+        <Link
+          to={`/dashboard/${slug}/arquivo`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          Archive
+        </Link>
       </div>
 
       <DndContext
@@ -343,6 +396,22 @@ export default function CanalDetailPage() {
                   groups={groupsByStatus(col.status)}
                   onCardClick={(g) => setSelectedGroupId(g.id)}
                   maxVotes={maxVotes}
+                  onArchive={(id) => archiveMutation.mutate(id)}
+                  headerAction={
+                    col.status === 'DONE' && groupsByStatus('DONE').length > 0 ? (
+                      <button
+                        onClick={() => archiveAllMutation.mutate()}
+                        disabled={archiveAllMutation.isPending}
+                        className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
+                        title="Archive all done feedbacks"
+                      >
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                        </svg>
+                        {archiveAllMutation.isPending ? 'Archiving...' : 'Archive all'}
+                      </button>
+                    ) : undefined
+                  }
                 />
               ))}
             </div>

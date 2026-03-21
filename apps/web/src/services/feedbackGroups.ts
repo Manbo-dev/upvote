@@ -84,3 +84,33 @@ export async function updateFeedbackGroupStatus(
   );
   return data.data;
 }
+
+// Archives all DONE feedback groups for a channel
+export async function archiveAllDone(
+  slug: string,
+): Promise<{ archivedCount: number }> {
+  const { data } = await api.post<ApiResult<{ archivedCount: number }>>(
+    `/canais/${slug}/feedback-groups/archive-done`,
+  );
+  return data.data;
+}
+
+// Archives a single feedback group
+export async function archiveFeedbackGroup(
+  groupId: string,
+): Promise<FeedbackGroupResponse> {
+  const { data } = await api.post<ApiResult<FeedbackGroupResponse>>(
+    `/feedback-groups/${groupId}/archive`,
+  );
+  return data.data;
+}
+
+// Restores an archived feedback group back to DONE
+export async function restoreFeedbackGroup(
+  groupId: string,
+): Promise<FeedbackGroupResponse> {
+  const { data } = await api.post<ApiResult<FeedbackGroupResponse>>(
+    `/feedback-groups/${groupId}/restore`,
+  );
+  return data.data;
+}

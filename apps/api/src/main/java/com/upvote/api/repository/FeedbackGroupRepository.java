@@ -18,6 +18,8 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
 
     List<FeedbackGroup> findByCanalIdOrderByVoteCountDesc(UUID canalId);
 
+    List<FeedbackGroup> findByCanalIdAndStatusNotInOrderByVoteCountDesc(UUID canalId, List<FeedbackGroupStatus> excludedStatuses);
+
     List<FeedbackGroup> findByCanalIdAndStatusOrderByVoteCountDesc(UUID canalId, FeedbackGroupStatus status);
 
     List<FeedbackGroup> findByCanalIdAndCategoryOrderByVoteCountDesc(UUID canalId, FeedbackGroupCategory category);
@@ -46,6 +48,7 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
             SELECT fg.*
             FROM feedback_groups fg
             WHERE fg.canal_id = :canalId
+              AND fg.status NOT IN ('ARCHIVED', 'CLOSED')
               AND (
                 word_similarity(:text, fg.title || ' ' || COALESCE(fg.summary, '')) > :threshold
                 OR (
@@ -78,6 +81,7 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
                    similarity(fg.title || ' ' || COALESCE(fg.summary, ''), :text) AS sim_score
             FROM feedback_groups fg
             WHERE fg.canal_id = :canalId
+              AND fg.status NOT IN ('ARCHIVED', 'CLOSED')
             ORDER BY word_sim_score DESC
             LIMIT 5
             """, nativeQuery = true)
@@ -98,4 +102,14 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
     @Modifying
     @Query("DELETE FROM FeedbackGroup fg WHERE fg.canal.id = :canalId")
     void deleteByCanalId(@Param("canalId") UUID canalId);
+
+    /**
+     * Archives all feedback groups with DONE status for a given channel.
+     *
+     * @param canalId the channel ID
+     * @return number of groups archived
+     */
+    @Modifying
+    @Query("UPDATE FeedbackGroup fg SET fg.status = com.upvote.api.domain.FeedbackGroupStatus.ARCHIVED WHERE fg.canal.id = :canalId AND fg.status = com.upvote.api.domain.FeedbackGroupStatus.DONE")
+    int archiveAllDone(@Param("canalId") UUID canalId);
 }

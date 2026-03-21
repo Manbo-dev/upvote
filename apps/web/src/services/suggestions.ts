@@ -5,7 +5,8 @@ export type SuggestionStatus =
   | 'PLANNED'
   | 'IN_PROGRESS'
   | 'DONE'
-  | 'CLOSED';
+  | 'CLOSED'
+  | 'ARCHIVED';
 
 export interface SuggestionResponse {
   id: string;

@@ -8,5 +8,6 @@ public enum FeedbackGroupStatus {
     PLANNED,
     IN_PROGRESS,
     DONE,
-    CLOSED
+    CLOSED,
+    ARCHIVED
 }

@@ -172,8 +172,21 @@ export const handlers = [
   }),
 
   // Feedback groups
-  http.get(`${BASE}/canais/:slug/feedback-groups`, () => {
-    return HttpResponse.json({ success: true, data: feedbackGroups });
+  http.get(`${BASE}/canais/:slug/feedback-groups`, ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get('status');
+    const category = url.searchParams.get('category');
+    let filtered = feedbackGroups;
+    if (status) {
+      filtered = filtered.filter((g) => g.status === status);
+    } else {
+      // Default: exclude ARCHIVED (matches backend behavior)
+      filtered = filtered.filter((g) => g.status !== 'ARCHIVED');
+    }
+    if (category) {
+      filtered = filtered.filter((g) => g.category === category);
+    }
+    return HttpResponse.json({ success: true, data: filtered });
   }),
 
   http.get(`${BASE}/feedback-groups/:groupId/feedbacks`, ({ params }) => {
@@ -188,6 +201,37 @@ export const handlers = [
     );
     const updated = feedbackGroups.find((g) => g.id === params.groupId);
     return HttpResponse.json({ success: true, data: updated });
+  }),
+
+  // Archive all done
+  http.post(`${BASE}/canais/:slug/feedback-groups/archive-done`, () => {
+    let count = 0;
+    feedbackGroups = feedbackGroups.map((g) => {
+      if (g.status === 'DONE') {
+        count++;
+        return { ...g, status: 'ARCHIVED', updatedAt: new Date().toISOString() };
+      }
+      return g;
+    });
+    return HttpResponse.json({ success: true, data: { archivedCount: count }, message: `${count} feedback group(s) archived` });
+  }),
+
+  // Archive single
+  http.post(`${BASE}/feedback-groups/:groupId/archive`, ({ params }) => {
+    feedbackGroups = feedbackGroups.map((g) =>
+      g.id === params.groupId ? { ...g, status: 'ARCHIVED', updatedAt: new Date().toISOString() } : g
+    );
+    const updated = feedbackGroups.find((g) => g.id === params.groupId);
+    return HttpResponse.json({ success: true, data: updated, message: 'Feedback group archived' });
+  }),
+
+  // Restore
+  http.post(`${BASE}/feedback-groups/:groupId/restore`, ({ params }) => {
+    feedbackGroups = feedbackGroups.map((g) =>
+      g.id === params.groupId ? { ...g, status: 'DONE', updatedAt: new Date().toISOString() } : g
+    );
+    const updated = feedbackGroups.find((g) => g.id === params.groupId);
+    return HttpResponse.json({ success: true, data: updated, message: 'Feedback group restored' });
   }),
 
   http.patch(`${BASE}/feedback-groups/:groupId/category`, async ({ params, request }) => {

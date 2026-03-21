@@ -83,4 +83,32 @@ public class FeedbackController {
         List<FeedbackDetailResponse> feedbacks = feedbackService.getFeedbackGroupDetails(id);
         return ResponseEntity.ok(ApiResponse.ok(feedbacks));
     }
+
+    /**
+     * Archives all DONE feedback groups for a channel (authenticated, channel owner).
+     */
+    @PostMapping("/api/canais/{slug}/feedback-groups/archive-done")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> archiveAllDone(@PathVariable String slug) {
+        int count = feedbackService.archiveAllDone(slug);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("archivedCount", count),
+                count + " feedback group(s) archived"));
+    }
+
+    /**
+     * Archives a single feedback group (authenticated, channel owner).
+     */
+    @PostMapping("/api/feedback-groups/{id}/archive")
+    public ResponseEntity<ApiResponse<FeedbackGroupResponse>> archiveFeedbackGroup(@PathVariable UUID id) {
+        FeedbackGroupResponse archived = feedbackService.archiveFeedbackGroup(id);
+        return ResponseEntity.ok(ApiResponse.ok(archived, "Feedback group archived"));
+    }
+
+    /**
+     * Restores an archived feedback group back to DONE (authenticated, channel owner).
+     */
+    @PostMapping("/api/feedback-groups/{id}/restore")
+    public ResponseEntity<ApiResponse<FeedbackGroupResponse>> restoreFeedbackGroup(@PathVariable UUID id) {
+        FeedbackGroupResponse restored = feedbackService.restoreFeedbackGroup(id);
+        return ResponseEntity.ok(ApiResponse.ok(restored, "Feedback group restored"));
+    }
 }

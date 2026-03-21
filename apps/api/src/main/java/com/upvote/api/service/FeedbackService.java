@@ -177,7 +177,9 @@ public class FeedbackService {
             FeedbackGroupCategory groupCategory = FeedbackGroupCategory.valueOf(category.toUpperCase());
             groups = feedbackGroupRepository.findByCanalIdAndCategoryOrderByVoteCountDesc(canal.getId(), groupCategory);
         } else {
-            groups = feedbackGroupRepository.findByCanalIdOrderByVoteCountDesc(canal.getId());
+            // Exclude ARCHIVED from default listing (kanban board)
+            groups = feedbackGroupRepository.findByCanalIdAndStatusNotInOrderByVoteCountDesc(
+                    canal.getId(), List.of(FeedbackGroupStatus.ARCHIVED));
         }
 
         return groups.stream()
@@ -206,6 +208,49 @@ public class FeedbackService {
                 .orElseThrow(() -> new IllegalArgumentException("Feedback group not found"));
         group.setCategory(FeedbackGroupCategory.valueOf(category.toUpperCase()));
         feedbackGroupRepository.save(group);
+        return toGroupResponse(group);
+    }
+
+    /**
+     * Archives all DONE feedback groups for a channel.
+     *
+     * @return number of groups archived
+     */
+    @Transactional
+    public int archiveAllDone(String canalSlug) {
+        Canal canal = canalRepository.findBySlug(canalSlug)
+                .orElseThrow(() -> new IllegalArgumentException("Channel not found"));
+        int count = feedbackGroupRepository.archiveAllDone(canal.getId());
+        log.info("Archived {} DONE feedback groups for canal={}", count, canalSlug);
+        return count;
+    }
+
+    /**
+     * Archives a single feedback group.
+     */
+    @Transactional
+    public FeedbackGroupResponse archiveFeedbackGroup(UUID groupId) {
+        FeedbackGroup group = feedbackGroupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Feedback group not found"));
+        group.setStatus(FeedbackGroupStatus.ARCHIVED);
+        feedbackGroupRepository.save(group);
+        log.info("Archived feedback group: groupId={}, title={}", groupId, group.getTitle());
+        return toGroupResponse(group);
+    }
+
+    /**
+     * Restores an archived feedback group back to DONE status.
+     */
+    @Transactional
+    public FeedbackGroupResponse restoreFeedbackGroup(UUID groupId) {
+        FeedbackGroup group = feedbackGroupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Feedback group not found"));
+        if (group.getStatus() != FeedbackGroupStatus.ARCHIVED) {
+            throw new IllegalArgumentException("Only archived groups can be restored");
+        }
+        group.setStatus(FeedbackGroupStatus.DONE);
+        feedbackGroupRepository.save(group);
+        log.info("Restored feedback group: groupId={}, title={}", groupId, group.getTitle());
         return toGroupResponse(group);
     }
 

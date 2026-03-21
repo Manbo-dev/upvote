@@ -10,6 +10,8 @@ interface KanbanColumnProps {
   color: string;
   onCardClick: (group: FeedbackGroupResponse) => void;
   maxVotes?: number;
+  headerAction?: React.ReactNode;
+  onArchive?: (groupId: string) => void;
 }
 
 export default function KanbanColumn({
@@ -19,6 +21,8 @@ export default function KanbanColumn({
   color,
   onCardClick,
   maxVotes = 1,
+  headerAction,
+  onArchive,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -35,9 +39,10 @@ export default function KanbanColumn({
       <div className="flex items-center gap-2 px-3 py-3">
         <div className={`h-2.5 w-2.5 rounded-full ${color}`} />
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{title}</h3>
-        <span className="ml-auto rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+        <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
           {groups.length}
         </span>
+        {headerAction && <div className="ml-auto">{headerAction}</div>}
       </div>
 
       {/* Cards */}
@@ -63,6 +68,7 @@ export default function KanbanColumn({
               onClick={() => onCardClick(group)}
               compact
               maxVotes={maxVotes}
+              onArchive={onArchive ? () => onArchive(group.id) : undefined}
             />
           ))
         )}
