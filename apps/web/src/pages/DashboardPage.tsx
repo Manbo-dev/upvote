@@ -276,10 +276,8 @@ export default function DashboardPage() {
               <input
                 type="text"
                 value={renameSlug}
-                onChange={(e) => setRenameSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                required
-                pattern="^[a-z0-9-]+$"
-                className="w-full rounded-lg bg-transparent px-2 py-2 text-sm focus:outline-none dark:text-white"
+                readOnly
+                className="w-full rounded-lg bg-transparent px-2 py-2 text-sm text-gray-500 dark:text-gray-400"
               />
             </div>
             <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
