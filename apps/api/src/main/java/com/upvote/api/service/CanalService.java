@@ -5,10 +5,17 @@ import com.upvote.api.domain.Subscription;
 import com.upvote.api.domain.User;
 import com.upvote.api.dto.CanalRequest;
 import com.upvote.api.dto.CanalResponse;
+import com.upvote.api.dto.RenameCanelRequest;
 import com.upvote.api.exception.BusinessException;
+import com.upvote.api.exception.ResourceNotFoundException;
 import com.upvote.api.repository.CanalRepository;
+import com.upvote.api.repository.CommentRepository;
+import com.upvote.api.repository.FeedbackGroupRepository;
+import com.upvote.api.repository.FeedbackRepository;
 import com.upvote.api.repository.SubscriptionRepository;
+import com.upvote.api.repository.SuggestionRepository;
 import com.upvote.api.repository.UserRepository;
+import com.upvote.api.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +35,11 @@ public class CanalService {
     private final CanalRepository canalRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
+    private final FeedbackRepository feedbackRepository;
+    private final FeedbackGroupRepository feedbackGroupRepository;
+    private final SuggestionRepository suggestionRepository;
+    private final VoteRepository voteRepository;
+    private final CommentRepository commentRepository;
 
     /**
      * Lists all channels belonging to the user
@@ -72,6 +84,43 @@ public class CanalService {
         canal = canalRepository.save(canal);
 
         return toResponse(canal);
+    }
+
+    /**
+     * Renames a channel (only name, slug is immutable)
+     */
+    @Transactional
+    public CanalResponse renameCanal(UUID canalId, RenameCanelRequest request, UUID userId) {
+        Canal canal = canalRepository.findById(canalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Canal não encontrado"));
+
+        if (!canal.getUser().getId().equals(userId)) {
+            throw new SecurityException("Você não tem permissão para renomear este canal");
+        }
+
+        canal.setName(request.name());
+        canal = canalRepository.save(canal);
+        return toResponse(canal);
+    }
+
+    /**
+     * Deletes a channel and all associated data
+     */
+    @Transactional
+    public void deleteCanal(UUID canalId, UUID userId) {
+        Canal canal = canalRepository.findById(canalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Canal não encontrado"));
+
+        if (!canal.getUser().getId().equals(userId)) {
+            throw new SecurityException("Você não tem permissão para deletar este canal");
+        }
+
+        feedbackRepository.deleteByCanalId(canalId);
+        feedbackGroupRepository.deleteByCanalId(canalId);
+        voteRepository.deleteBySuggestionCanalId(canalId);
+        commentRepository.deleteBySuggestionCanalId(canalId);
+        suggestionRepository.deleteByCanalId(canalId);
+        canalRepository.delete(canal);
     }
 
     /**

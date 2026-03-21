@@ -6,6 +6,7 @@ import com.upvote.api.domain.FeedbackGroupStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -54,4 +55,8 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT fg FROM FeedbackGroup fg WHERE fg.id = :id")
     Optional<FeedbackGroup> findByIdForUpdate(@Param("id") UUID id);
+
+    @Modifying
+    @Query("DELETE FROM FeedbackGroup fg WHERE fg.canal.id = :canalId")
+    void deleteByCanalId(@Param("canalId") UUID canalId);
 }

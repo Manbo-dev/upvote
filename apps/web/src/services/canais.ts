@@ -39,3 +39,15 @@ export async function getCanalBySlug(
   );
   return data.data;
 }
+
+export async function renameCanal(id: string, name: string): Promise<CanalResponse> {
+  const { data } = await api.patch<ApiResult<CanalResponse>>(
+    `/canais/${id}/rename`,
+    { name },
+  );
+  return data.data;
+}
+
+export async function deleteCanal(id: string): Promise<void> {
+  await api.delete(`/canais/${id}`);
+}
