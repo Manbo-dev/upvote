@@ -78,6 +78,50 @@ Sem essa variável, o `StubAiService` é usado (comportamento seguro para dev/te
 - Exibe padrões agrupados, não comentários brutos
 - Cards com contexto: "5 relatos após 'botão Pagar' na tela de checkout esta semana"
 - Visão para PO/PM que permite decisão sem investigação técnica
+- Kanban board com colunas: Open, Planned, In Progress, Done
+- Drag-and-drop para mover cards entre status e categorias
+
+### Arquivo (Archive)
+
+Funcionalidade inspirada no "Complete Sprint" do Jira. Feedbacks concluídos podem ser arquivados para limpar o board e manter histórico.
+
+#### Status do feedback group
+
+```
+OPEN → PLANNED → IN_PROGRESS → DONE → ARCHIVED
+                                    → CLOSED
+```
+
+- `DONE` = concluído mas ainda visível no board
+- `ARCHIVED` = movido para histórico, fora do board e da busca por similaridade
+- `CLOSED` = rejeitado/cancelado, também fora da busca por similaridade
+
+#### Fluxo de arquivamento
+1. Feedbacks na coluna **Done** podem ser arquivados individualmente (botão no hover do card) ou em lote (botão "Archive all" no header da coluna Done)
+2. Feedbacks arquivados saem do board principal e vão para a página dedicada de arquivo (`/dashboard/:canalId/arquivo`)
+3. Feedbacks arquivados podem ser restaurados (voltam para **Done**) via botão no hover do card na página de arquivo
+
+#### Impacto na busca por similaridade
+- A query `findSimilarGroups` exclui grupos com status `ARCHIVED` e `CLOSED` (`AND fg.status NOT IN ('ARCHIVED', 'CLOSED')`)
+- Novos feedbacks **nunca** são agrupados com itens arquivados ou fechados
+- A query de debug `findTopSimilarityScores` também exclui esses status
+
+#### Endpoints da API
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| POST | `/api/canais/{slug}/feedback-groups/archive-done` | JWT | Arquiva todos os grupos DONE do canal |
+| POST | `/api/feedback-groups/{id}/archive` | JWT | Arquiva um grupo individual |
+| POST | `/api/feedback-groups/{id}/restore` | JWT | Restaura grupo arquivado para DONE |
+
+#### Frontend
+- **`CanalDetailPage.tsx`** — botão "Archive all" na coluna Done, botão individual de archive no hover do card, link "Archive" no header da página
+- **`ArchivePage.tsx`** — página dedicada em `/dashboard/:canalId/arquivo` com filtros por categoria, restore individual
+- **`FeedbackGroupCard.tsx`** — props `onArchive` e `onRestore` que renderizam botões no hover
+- **`KanbanColumn.tsx`** — prop `headerAction` para ações customizadas no header da coluna
+
+#### Migration
+- `V20260321230000__add_archived_status.sql` — cria index em `feedback_groups.status` para otimizar filtros
 
 ### LGPD / Consentimento
 - MVP: texto fixo no widget com link para política de feedback

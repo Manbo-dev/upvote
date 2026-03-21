@@ -17,7 +17,8 @@
 - /login → público
 - /register → público
 - /dashboard → privado, lista canais do owner autenticado
-- /dashboard/:canalId → privado, gerencia feedbacks do canal
+- /dashboard/:canalId → privado, gerencia feedbacks do canal (kanban board)
+- /dashboard/:canalId/arquivo → privado, feedbacks arquivados do canal
 - /b/:slug → público, board de sugestões (acesso sem login)
 Rotas privadas redirecionam para /login se não autenticado.
 

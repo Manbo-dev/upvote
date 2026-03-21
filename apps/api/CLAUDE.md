@@ -16,7 +16,10 @@ com.upvote.api
 ## Status de uma Suggestion
 
 OPEN → PLANNED → IN_PROGRESS → DONE → CLOSED
+                                    → ARCHIVED
 Apenas o owner do canal pode alterar o status.
+- `ARCHIVED` e `CLOSED` são excluídos da busca por similaridade (não agrupam novos feedbacks)
+- Restore de `ARCHIVED` volta para `DONE`
 
 ## Padrões obrigatórios
 
