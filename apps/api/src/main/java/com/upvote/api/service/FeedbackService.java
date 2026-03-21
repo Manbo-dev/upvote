@@ -14,6 +14,9 @@ import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.FeedbackGroupRepository;
 import com.upvote.api.repository.FeedbackRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FeedbackService {
 
+    private static final Logger log = LoggerFactory.getLogger(FeedbackService.class);
     private static final double SIMILARITY_THRESHOLD = 0.45;
 
     private final FeedbackRepository feedbackRepository;
@@ -57,6 +61,20 @@ public class FeedbackService {
         Canal canal = canalRepository.findByApiKey(apiKey)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid API key"));
 
+        MDC.put("canalSlug", canal.getSlug());
+        MDC.put("canalId", canal.getId().toString());
+        try {
+            return processFeedback(canal, request);
+        } finally {
+            MDC.remove("canalSlug");
+            MDC.remove("canalId");
+        }
+    }
+
+    private FeedbackSubmitResponse processFeedback(Canal canal, FeedbackSubmitRequest request) {
+        log.info("Feedback received: canal={}, page={}, device={}, trigger={}",
+                canal.getSlug(), request.pageUrl(), request.deviceType(), request.triggerType());
+
         PageContext pageContext = new PageContext(
                 request.pageUrl(),
                 request.pageTitle(),
@@ -66,6 +84,8 @@ public class FeedbackService {
         );
 
         SynthesisResult synthesis = aiService.synthesizeFeedback(request.message(), pageContext);
+        log.info("AI synthesis complete: category={}, tags={}, text={}",
+                synthesis.category(), synthesis.tags(), synthesis.synthesizedText());
 
         List<FeedbackGroup> candidates = feedbackGroupRepository.findSimilarGroups(
                 canal.getId(), synthesis.synthesizedText(), SIMILARITY_THRESHOLD);
@@ -84,6 +104,8 @@ public class FeedbackService {
             feedback.setStatus(FeedbackStatus.PROCESSED);
             feedbackRepository.save(feedback);
 
+            log.info("Feedback grouped into existing cluster: groupId={}, groupTitle={}, totalVotes={}",
+                    matchedGroup.getId(), matchedGroup.getTitle(), matchedGroup.getVoteCount());
             return new FeedbackSubmitResponse(feedback.getId(), true);
         }
 
@@ -104,6 +126,8 @@ public class FeedbackService {
         feedback.setStatus(FeedbackStatus.PROCESSED);
         feedbackRepository.save(feedback);
 
+        log.info("New feedback group created: groupId={}, groupTitle={}, category={}",
+                newGroup.getId(), newGroup.getTitle(), newGroup.getCategory());
         return new FeedbackSubmitResponse(feedback.getId(), false);
     }
 
