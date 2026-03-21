@@ -32,7 +32,9 @@ import java.util.UUID;
 public class FeedbackService {
 
     private static final Logger log = LoggerFactory.getLogger(FeedbackService.class);
-    private static final double SIMILARITY_THRESHOLD = 0.45;
+    // word_similarity() threshold — lower than full-string similarity() because
+    // word_similarity checks partial matches (sentence fragment vs. short title).
+    private static final double WORD_SIMILARITY_THRESHOLD = 0.25;
 
     private final FeedbackRepository feedbackRepository;
     private final FeedbackGroupRepository feedbackGroupRepository;
@@ -87,25 +89,27 @@ public class FeedbackService {
         log.info("AI synthesis complete: category={}, tags={}, text={}",
                 synthesis.category(), synthesis.tags(), synthesis.synthesizedText());
 
-        log.info("Similarity search: canalId={}, threshold={}, searchText='{}'",
-                canal.getId(), SIMILARITY_THRESHOLD, synthesis.synthesizedText());
+        String tagsString = synthesis.tags() != null ? String.join(",", synthesis.tags()) : "";
 
-        // Debug: log actual similarity scores before applying threshold
+        log.info("Similarity search: canalId={}, wordSimThreshold={}, tags='{}', searchText='{}'",
+                canal.getId(), WORD_SIMILARITY_THRESHOLD, tagsString, synthesis.synthesizedText());
+
+        // Debug: log actual scores before applying threshold
         List<Object[]> debugScores = feedbackGroupRepository.findTopSimilarityScores(
                 canal.getId(), synthesis.synthesizedText());
         if (debugScores.isEmpty()) {
             log.info("Similarity debug: no groups found in canal (canal is empty)");
         } else {
             debugScores.forEach(row ->
-                    log.info("Similarity debug: groupId={}, title='{}', score={}",
-                            row[0], row[1], row[3]));
+                    log.info("Similarity debug: groupId={}, title='{}', groupTags='{}', wordSim={}, sim={}",
+                            row[0], row[1], row[3], row[4], row[5]));
         }
 
         List<FeedbackGroup> candidates = feedbackGroupRepository.findSimilarGroups(
-                canal.getId(), synthesis.synthesizedText(), SIMILARITY_THRESHOLD);
+                canal.getId(), synthesis.synthesizedText(), WORD_SIMILARITY_THRESHOLD, tagsString);
 
-        log.info("Similarity search result: {} candidate(s) found above threshold={}",
-                candidates.size(), SIMILARITY_THRESHOLD);
+        log.info("Similarity search result: {} candidate(s) found (wordSimThreshold={}, tags='{}')",
+                candidates.size(), WORD_SIMILARITY_THRESHOLD, tagsString);
 
         if (!candidates.isEmpty()) {
             // Lock the top candidate to prevent race conditions on concurrent submissions
@@ -135,6 +139,7 @@ public class FeedbackService {
                 .title(groupSuggestion.title())
                 .summary(groupSuggestion.summary())
                 .category(category)
+                .tags(tagsString)
                 .build();
         newGroup = feedbackGroupRepository.save(newGroup);
 

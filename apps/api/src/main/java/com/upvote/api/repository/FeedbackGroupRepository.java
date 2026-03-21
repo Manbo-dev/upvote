@@ -25,25 +25,64 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
     List<FeedbackGroup> findByCanalIdAndStatusAndCategoryOrderByVoteCountDesc(UUID canalId, FeedbackGroupStatus status, FeedbackGroupCategory category);
 
     /**
-     * Finds feedback groups similar to the given text using PostgreSQL trigram similarity (pg_trgm).
-     * Requires the pg_trgm extension and GIN indexes on title and summary (see V8 migration).
+     * Finds feedback groups similar to the given text using a hybrid strategy:
+     * <ul>
+     *   <li><b>word_similarity</b> (pg_trgm): checks if the synthesized text matches any
+     *       contiguous word sequence in the group title/summary — more effective than
+     *       full-string similarity for sentences vs. short titles.</li>
+     *   <li><b>Tag overlap</b>: matches groups that share at least 2 tags with the incoming
+     *       feedback, catching semantic matches that trigrams miss (e.g. "notebook" vs "computador").</li>
+     * </ul>
+     *
+     * Requires the pg_trgm extension and GIN indexes on title/summary (see V8 migration).
      *
      * @param canalId   the channel to search within
      * @param text      the synthesized feedback text to compare against
-     * @param threshold minimum similarity score (0.0–1.0); recommended value: 0.45
-     * @return groups ordered by similarity score descending, limited to 5 results
+     * @param threshold minimum word_similarity score (0.0–1.0); recommended value: 0.25
+     * @param tags      comma-separated tags from AI synthesis (e.g. "icone,desalinhado,computador")
+     * @return groups ordered by word_similarity score descending, limited to 5 results
      */
     @Query(value = """
             SELECT fg.*
             FROM feedback_groups fg
             WHERE fg.canal_id = :canalId
-              AND similarity(fg.title || ' ' || COALESCE(fg.summary, ''), :text) > :threshold
-            ORDER BY similarity(fg.title || ' ' || COALESCE(fg.summary, ''), :text) DESC
+              AND (
+                word_similarity(:text, fg.title || ' ' || COALESCE(fg.summary, '')) > :threshold
+                OR (
+                  fg.tags IS NOT NULL
+                  AND (
+                    SELECT COUNT(*)
+                    FROM (
+                      SELECT unnest(string_to_array(fg.tags, ','))
+                      INTERSECT
+                      SELECT unnest(string_to_array(:tags, ','))
+                    ) overlap
+                  ) >= 2
+                )
+              )
+            ORDER BY word_similarity(:text, fg.title || ' ' || COALESCE(fg.summary, '')) DESC
             LIMIT 5
             """, nativeQuery = true)
     List<FeedbackGroup> findSimilarGroups(@Param("canalId") UUID canalId,
                                           @Param("text") String text,
-                                          @Param("threshold") double threshold);
+                                          @Param("threshold") double threshold,
+                                          @Param("tags") String tags);
+
+    /**
+     * Debug query: returns the top 5 groups with both word_similarity and similarity scores
+     * against the given text, regardless of threshold. Use only for diagnostic logging.
+     */
+    @Query(value = """
+            SELECT fg.id, fg.title, fg.summary, fg.tags,
+                   word_similarity(:text, fg.title || ' ' || COALESCE(fg.summary, '')) AS word_sim_score,
+                   similarity(fg.title || ' ' || COALESCE(fg.summary, ''), :text) AS sim_score
+            FROM feedback_groups fg
+            WHERE fg.canal_id = :canalId
+            ORDER BY word_sim_score DESC
+            LIMIT 5
+            """, nativeQuery = true)
+    List<Object[]> findTopSimilarityScores(@Param("canalId") UUID canalId,
+                                           @Param("text") String text);
 
     /**
      * Fetches a feedback group by ID with a pessimistic write lock (SELECT FOR UPDATE).
@@ -52,21 +91,6 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
      * @param id the feedback group ID
      * @return the locked group, or empty if not found
      */
-    /**
-     * Debug query: returns the top 5 groups with their similarity scores against the given text,
-     * regardless of threshold. Use only for diagnostic logging.
-     */
-    @Query(value = """
-            SELECT fg.id, fg.title, fg.summary,
-                   similarity(fg.title || ' ' || COALESCE(fg.summary, ''), :text) AS score
-            FROM feedback_groups fg
-            WHERE fg.canal_id = :canalId
-            ORDER BY score DESC
-            LIMIT 5
-            """, nativeQuery = true)
-    List<Object[]> findTopSimilarityScores(@Param("canalId") UUID canalId,
-                                           @Param("text") String text);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT fg FROM FeedbackGroup fg WHERE fg.id = :id")
     Optional<FeedbackGroup> findByIdForUpdate(@Param("id") UUID id);

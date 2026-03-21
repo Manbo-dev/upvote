@@ -40,6 +40,13 @@ public class FeedbackGroup {
     @Builder.Default
     private Integer voteCount = 1;
 
+    /**
+     * Comma-separated tags extracted by AI during synthesis (e.g. "icone,desalinhado,computador").
+     * Used for tag-overlap matching when trigram similarity alone is insufficient.
+     */
+    @Column(columnDefinition = "TEXT")
+    private String tags;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
