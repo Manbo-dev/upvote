@@ -52,6 +52,10 @@ app:
     expiration: ${JWT_EXPIRATION:86400000}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  gemini:
+    # Set GEMINI_API_KEY to enable real AI. Empty value = StubAiService fallback is used.
+    api-key: ${GEMINI_API_KEY:}
+    model: gemini-2.0-flash-lite
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:sk_test_placeholder}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}

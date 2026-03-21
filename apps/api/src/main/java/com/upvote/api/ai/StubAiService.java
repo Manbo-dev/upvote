@@ -1,19 +1,14 @@
 package com.upvote.api.ai;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Stub implementation of {@link AiService} using simple heuristics.
- * Used as the default provider until a real AI integration is configured.
- *
- * Annotated with {@code @Primary} so it takes precedence when multiple
- * implementations are present on the classpath.
+ * Active when {@code GEMINI_API_KEY} is not set — no real AI calls are made.
  */
 @Service
-@Primary
 public class StubAiService implements AiService {
 
     @Override

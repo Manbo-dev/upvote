@@ -121,6 +121,11 @@ spec:
                 secretKeyRef:
                   name: upvote-secrets
                   key: STRIPE_PRO_PRICE_ID
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: GEMINI_API_KEY
             # Redis
             - name: SPRING_DATA_REDIS_HOST
               value: "redis"

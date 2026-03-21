@@ -47,9 +47,32 @@ Dados capturados junto com o comentário, em linguagem legível para PO/PM:
 - Responsabilidade única: sintetizar o comentário → retorna `SynthesisResult { synthesizedText, category, tags }`
 - As instruções de comportamento e o formato de resposta JSON ficam em `src/main/resources/ai/prompts/feedback_synthesis.txt`
 - A busca por similaridade é feita pelo banco (pg_trgm), **não** pela IA
-- **Arquitetura injetável**: `AiService` é uma interface — trocar de provedor (OpenAI, Anthropic, etc.) não afeta os consumidores
-- Implementação padrão: `StubAiService` (sem chamada real à IA, para desenvolvimento e testes)
+- **Arquitetura injetável**: `AiService` é uma interface — trocar de provedor não afeta os consumidores
 - Métodos da interface: `synthesizeFeedback(String, PageContext)` e `suggestGroup(String, PageContext)`
+
+#### Implementações disponíveis
+
+| Classe | Quando ativa | Descrição |
+|--------|-------------|-----------|
+| `GeminiAiService` | `GEMINI_API_KEY` setado | Provedor real — Google Gemini via REST |
+| `StubAiService` | fallback (sem API key) | Heurísticas simples, sem chamada de rede |
+
+- Provedor atual: **Google Gemini** (`gemini-2.0-flash-lite` — tier mais barato)
+- Sem SDK externo — chamadas via `RestClient` do Spring Boot
+- `GeminiAiService` é `@Primary` e condicional; `StubAiService` assume automaticamente quando a key não está presente
+
+#### Prompts
+- `src/main/resources/ai/prompts/feedback_synthesis.txt` — síntese do feedback (texto, categoria, tags)
+- `src/main/resources/ai/prompts/group_suggestion.txt` — título e resumo para novo grupo de feedback
+
+#### Variável de ambiente necessária
+```
+GEMINI_API_KEY=AIzaSy...
+```
+Sem essa variável, o `StubAiService` é usado (comportamento seguro para dev/testes).
+
+#### Configurar no IntelliJ
+`Run → Edit Configurations → UpvoteApiApplication → Load variables from .env file` → apontar para `.env` na raiz do projeto.
 
 ### Dashboard
 - Exibe padrões agrupados, não comentários brutos
@@ -234,7 +257,7 @@ echo -n "novo-valor" | gcloud secrets versions add NOME_DO_SECRET --data-file=- 
 - Rollout aguardado com `kubectl rollout status`
 
 ### Secrets gerenciados pelo Google Secret Manager
-`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `CORS_ORIGINS`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_STARTER_PRICE_ID`, `STRIPE_PRO_PRICE_ID`
+`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `CORS_ORIGINS`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_STARTER_PRICE_ID`, `STRIPE_PRO_PRICE_ID`, `GEMINI_API_KEY`
 
 ### GitHub Actions secrets necessários
 - `GCP_PROJECT_ID` = `project-38c32df4-c37c-41d9-b5d`
