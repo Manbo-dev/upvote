@@ -30,7 +30,7 @@ public class FeedbackController {
             @RequestHeader("X-API-Key") String apiKey,
             @Valid @RequestBody FeedbackSubmitRequest request) {
 
-        FeedbackSubmitResponse response = feedbackService.submitFeedback(apiKey, request);
+        FeedbackSubmitResponse response = feedbackService.receiveFeedback(apiKey, request);
         return ResponseEntity.ok(ApiResponse.ok(response, "Feedback received successfully"));
     }
 

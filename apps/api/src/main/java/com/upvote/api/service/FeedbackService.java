@@ -10,6 +10,8 @@ import com.upvote.api.dto.FeedbackDetailResponse;
 import com.upvote.api.dto.FeedbackGroupResponse;
 import com.upvote.api.dto.FeedbackSubmitRequest;
 import com.upvote.api.dto.FeedbackSubmitResponse;
+import com.upvote.api.messaging.FeedbackProducer;
+import com.upvote.api.messaging.FeedbackProcessingMessage;
 import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.FeedbackGroupRepository;
 import com.upvote.api.repository.FeedbackRepository;
@@ -19,19 +21,29 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Orchestrates the intelligent feedback pipeline:
- * AI synthesis → DB similarity search → group or create.
+ * Orchestrates the async feedback pipeline.
+ *
+ * <p>Reception and processing are intentionally decoupled:
+ * <ol>
+ *   <li>{@link #receiveFeedback} — validates the API key, persists the raw feedback as
+ *       {@code PENDING}, and enqueues it for processing. Returns immediately.</li>
+ *   <li>{@link #processFeedback} — called by the queue consumer; runs AI synthesis,
+ *       similarity search, and grouping. Retried automatically on failure.</li>
+ * </ol>
  */
 @Service
 @RequiredArgsConstructor
 public class FeedbackService {
 
     private static final Logger log = LoggerFactory.getLogger(FeedbackService.class);
+
     // word_similarity() threshold — lower than full-string similarity() because
     // word_similarity checks partial matches (sentence fragment vs. short title).
     private static final double WORD_SIMILARITY_THRESHOLD = 0.25;
@@ -40,118 +52,161 @@ public class FeedbackService {
     private final FeedbackGroupRepository feedbackGroupRepository;
     private final CanalRepository canalRepository;
     private final AiService aiService;
+    private final FeedbackProducer feedbackProducer;
+
+    // ── Public API ────────────────────────────────────────────────────────────
 
     /**
-     * Processes a feedback submission from the widget.
+     * Receives a feedback submission from the widget.
      *
-     * <p>Flow:
-     * <ol>
-     *   <li>Identify channel by API key</li>
-     *   <li>Build PageContext from request</li>
-     *   <li>AI synthesizes the raw message → {@link SynthesisResult}</li>
-     *   <li>DB trigram search finds similar existing groups</li>
-     *   <li>If a match is found → add feedback to existing group (locked write)</li>
-     *   <li>If no match → AI suggests title/summary → create new group</li>
-     * </ol>
+     * <p>Saves the raw feedback as {@code PENDING} and publishes a processing
+     * message to RabbitMQ <em>after</em> the DB transaction commits, so the
+     * consumer is guaranteed to find the record.
      *
-     * @param apiKey  the channel API key sent in X-API-Key header
-     * @param request the feedback payload from the widget
-     * @return response with feedback ID and whether it was grouped into an existing cluster
+     * @param apiKey  the channel API key from the {@code X-API-Key} header
+     * @param request the feedback payload
+     * @return response with the new feedback ID (grouped is always {@code false} at this stage)
      */
     @Transactional
-    public FeedbackSubmitResponse submitFeedback(String apiKey, FeedbackSubmitRequest request) {
+    public FeedbackSubmitResponse receiveFeedback(String apiKey, FeedbackSubmitRequest request) {
         Canal canal = canalRepository.findByApiKey(apiKey)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid API key"));
 
-        MDC.put("canalSlug", canal.getSlug());
-        MDC.put("canalId", canal.getId().toString());
-        try {
-            return processFeedback(canal, request);
-        } finally {
-            MDC.remove("canalSlug");
-            MDC.remove("canalId");
-        }
+        Feedback feedback = Feedback.builder()
+                .canal(canal)
+                .rawMessage(request.message())
+                .pageUrl(request.pageUrl())
+                .pageTitle(request.pageTitle())
+                .triggerType(request.triggerType())
+                .lastInteraction(request.lastInteraction())
+                .deviceType(request.deviceType())
+                .status(FeedbackStatus.PENDING)
+                .build();
+
+        feedback = feedbackRepository.save(feedback);
+        final UUID feedbackId = feedback.getId();
+
+        log.info("Feedback persisted as PENDING: feedbackId={}, canal={}", feedbackId, canal.getSlug());
+
+        // Publish AFTER the transaction commits to avoid a race where the consumer
+        // loads the record before it is visible in the DB.
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                feedbackProducer.send(new FeedbackProcessingMessage(feedbackId));
+            }
+        });
+
+        return new FeedbackSubmitResponse(feedbackId, false);
     }
 
-    private FeedbackSubmitResponse processFeedback(Canal canal, FeedbackSubmitRequest request) {
-        log.info("Feedback received: canal={}, page={}, device={}, trigger={}",
-                canal.getSlug(), request.pageUrl(), request.deviceType(), request.triggerType());
+    /**
+     * Processes a pending feedback message consumed from RabbitMQ.
+     *
+     * <p>Flow:
+     * <ol>
+     *   <li>Mark as {@code PROCESSING}</li>
+     *   <li>AI synthesis → {@link SynthesisResult}</li>
+     *   <li>DB trigram + tag similarity search</li>
+     *   <li>If match → add vote to existing group</li>
+     *   <li>If no match → AI suggests title/summary → create new group</li>
+     *   <li>Mark as {@code PROCESSED}</li>
+     * </ol>
+     *
+     * <p>If this method throws, the container retries up to 3 times (exponential
+     * backoff). After all retries are exhausted the message goes to the DLQ and
+     * the feedback record stays as {@code PROCESSING} for manual inspection.
+     *
+     * @param feedbackId the ID of the {@code PENDING} feedback to process
+     */
+    @Transactional
+    public void processFeedback(UUID feedbackId) {
+        Feedback feedback = feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new IllegalStateException("Feedback not found: " + feedbackId));
 
-        PageContext pageContext = new PageContext(
-                request.pageUrl(),
-                request.pageTitle(),
-                request.triggerType(),
-                request.lastInteraction(),
-                request.deviceType()
-        );
+        Canal canal = feedback.getCanal();
 
-        SynthesisResult synthesis = aiService.synthesizeFeedback(request.message(), pageContext);
-        log.info("AI synthesis complete: category={}, tags={}, text={}",
-                synthesis.category(), synthesis.tags(), synthesis.synthesizedText());
+        MDC.put("canalSlug", canal.getSlug());
+        MDC.put("canalId", canal.getId().toString());
+        MDC.put("feedbackId", feedbackId.toString());
+        try {
+            feedback.setStatus(FeedbackStatus.PROCESSING);
+            feedbackRepository.save(feedback);
 
-        String tagsString = synthesis.tags() != null ? String.join(",", synthesis.tags()) : "";
+            PageContext pageContext = new PageContext(
+                    feedback.getPageUrl(),
+                    feedback.getPageTitle(),
+                    feedback.getTriggerType(),
+                    feedback.getLastInteraction(),
+                    feedback.getDeviceType()
+            );
 
-        log.info("Similarity search: canalId={}, wordSimThreshold={}, tags='{}', searchText='{}'",
-                canal.getId(), WORD_SIMILARITY_THRESHOLD, tagsString, synthesis.synthesizedText());
+            log.info("AI synthesis starting: canal={}, page={}", canal.getSlug(), feedback.getPageUrl());
+            SynthesisResult synthesis = aiService.synthesizeFeedback(feedback.getRawMessage(), pageContext);
+            log.info("AI synthesis complete: category={}, tags={}, text={}",
+                    synthesis.category(), synthesis.tags(), synthesis.synthesizedText());
 
-        // Debug: log actual scores before applying threshold
-        List<Object[]> debugScores = feedbackGroupRepository.findTopSimilarityScores(
-                canal.getId(), synthesis.synthesizedText());
-        if (debugScores.isEmpty()) {
-            log.info("Similarity debug: no groups found in canal (canal is empty)");
-        } else {
-            debugScores.forEach(row ->
-                    log.info("Similarity debug: groupId={}, title='{}', groupTags='{}', wordSim={}, sim={}",
-                            row[0], row[1], row[3], row[4], row[5]));
-        }
+            String tagsString = synthesis.tags() != null ? String.join(",", synthesis.tags()) : "";
 
-        List<FeedbackGroup> candidates = feedbackGroupRepository.findSimilarGroups(
-                canal.getId(), synthesis.synthesizedText(), WORD_SIMILARITY_THRESHOLD, tagsString);
+            // Debug: log actual similarity scores before applying threshold
+            List<Object[]> debugScores = feedbackGroupRepository.findTopSimilarityScores(
+                    canal.getId(), synthesis.synthesizedText());
+            if (debugScores.isEmpty()) {
+                log.info("Similarity debug: no groups found in canal (canal is empty)");
+            } else {
+                debugScores.forEach(row ->
+                        log.info("Similarity debug: groupId={}, title='{}', groupTags='{}', wordSim={}, sim={}",
+                                row[0], row[1], row[3], row[4], row[5]));
+            }
 
-        log.info("Similarity search result: {} candidate(s) found (wordSimThreshold={}, tags='{}')",
-                candidates.size(), WORD_SIMILARITY_THRESHOLD, tagsString);
+            List<FeedbackGroup> candidates = feedbackGroupRepository.findSimilarGroups(
+                    canal.getId(), synthesis.synthesizedText(), WORD_SIMILARITY_THRESHOLD, tagsString);
 
-        if (!candidates.isEmpty()) {
-            // Lock the top candidate to prevent race conditions on concurrent submissions
-            FeedbackGroup matchedGroup = feedbackGroupRepository
-                    .findByIdForUpdate(candidates.get(0).getId())
-                    .orElseThrow(() -> new IllegalStateException("Feedback group not found"));
+            log.info("Similarity search: {} candidate(s) found (threshold={}, tags='{}')",
+                    candidates.size(), WORD_SIMILARITY_THRESHOLD, tagsString);
 
-            matchedGroup.setVoteCount(matchedGroup.getVoteCount() + 1);
-            feedbackGroupRepository.save(matchedGroup);
+            FeedbackGroup group;
+            if (!candidates.isEmpty()) {
+                // Lock the top candidate to prevent concurrent vote-count races.
+                group = feedbackGroupRepository.findByIdForUpdate(candidates.get(0).getId())
+                        .orElseThrow(() -> new IllegalStateException("Feedback group not found"));
 
-            Feedback feedback = buildFeedback(canal, request, synthesis, pageContext);
-            feedback.setFeedbackGroup(matchedGroup);
+                group.setVoteCount(group.getVoteCount() + 1);
+                feedbackGroupRepository.save(group);
+
+                log.info("Feedback grouped into existing cluster: groupId={}, title={}, totalVotes={}",
+                        group.getId(), group.getTitle(), group.getVoteCount());
+            } else {
+                GroupSuggestion groupSuggestion = aiService.suggestGroup(synthesis.synthesizedText(), pageContext);
+                FeedbackGroupCategory category = parseCategory(synthesis.category());
+
+                group = FeedbackGroup.builder()
+                        .canal(canal)
+                        .title(groupSuggestion.title())
+                        .summary(groupSuggestion.summary())
+                        .category(category)
+                        .tags(tagsString)
+                        .build();
+                group = feedbackGroupRepository.save(group);
+
+                log.info("New feedback group created: groupId={}, title={}, category={}",
+                        group.getId(), group.getTitle(), group.getCategory());
+            }
+
+            feedback.setSynthesizedMessage(synthesis.synthesizedText());
+            feedback.setFeedbackGroup(group);
             feedback.setStatus(FeedbackStatus.PROCESSED);
             feedbackRepository.save(feedback);
 
-            log.info("Feedback grouped into existing cluster: groupId={}, groupTitle={}, totalVotes={}",
-                    matchedGroup.getId(), matchedGroup.getTitle(), matchedGroup.getVoteCount());
-            return new FeedbackSubmitResponse(feedback.getId(), true);
+            log.info("Feedback processed successfully: feedbackId={}, groupId={}", feedbackId, group.getId());
+        } finally {
+            MDC.remove("canalSlug");
+            MDC.remove("canalId");
+            MDC.remove("feedbackId");
         }
-
-        GroupSuggestion groupSuggestion = aiService.suggestGroup(synthesis.synthesizedText(), pageContext);
-
-        FeedbackGroupCategory category = parseCategory(synthesis.category());
-
-        FeedbackGroup newGroup = FeedbackGroup.builder()
-                .canal(canal)
-                .title(groupSuggestion.title())
-                .summary(groupSuggestion.summary())
-                .category(category)
-                .tags(tagsString)
-                .build();
-        newGroup = feedbackGroupRepository.save(newGroup);
-
-        Feedback feedback = buildFeedback(canal, request, synthesis, pageContext);
-        feedback.setFeedbackGroup(newGroup);
-        feedback.setStatus(FeedbackStatus.PROCESSED);
-        feedbackRepository.save(feedback);
-
-        log.info("New feedback group created: groupId={}, groupTitle={}, category={}",
-                newGroup.getId(), newGroup.getTitle(), newGroup.getCategory());
-        return new FeedbackSubmitResponse(feedback.getId(), false);
     }
+
+    // ── Dashboard methods ─────────────────────────────────────────────────────
 
     /**
      * Lists feedback groups for the dashboard (authenticated, channel owner).
@@ -273,19 +328,7 @@ public class FeedbackService {
                 .toList();
     }
 
-    private Feedback buildFeedback(Canal canal, FeedbackSubmitRequest request,
-                                   SynthesisResult synthesis, PageContext pageContext) {
-        return Feedback.builder()
-                .canal(canal)
-                .rawMessage(request.message())
-                .synthesizedMessage(synthesis.synthesizedText())
-                .pageUrl(pageContext.pageUrl())
-                .pageTitle(pageContext.pageTitle())
-                .triggerType(pageContext.triggerType())
-                .lastInteraction(pageContext.lastInteraction())
-                .deviceType(pageContext.deviceType())
-                .build();
-    }
+    // ── Private helpers ───────────────────────────────────────────────────────
 
     private FeedbackGroupResponse toGroupResponse(FeedbackGroup group) {
         String topContext = buildTopContext(group);

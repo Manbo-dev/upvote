@@ -20,11 +20,18 @@ com preço mais acessível.
 1. Parceiro instala o widget via script tag no seu produto
 2. Usuário final escreve um feedback livremente no widget (texto livre, sem categorias)
 3. Backend recebe o comentário + contexto automático da página
-4. IA sintetiza o comentário → retorna `SynthesisResult` (texto limpo, categoria, tags)
-5. Banco busca grupos similares via pg_trgm (similaridade de texto ≥ 0.45)
-6. Se encontra similar → adiciona um voto automaticamente ao grupo existente
-7. Se não encontra → IA sugere título/resumo → cria novo grupo de feedback
-8. Dashboard do parceiro exibe padrões agrupados com contexto, não comentários individuais
+4. Feedback é persistido imediatamente como `PENDING` e enfileirado no RabbitMQ — **resposta ao widget é instantânea**
+5. Consumer assíncrono processa a mensagem da fila:
+   - IA sintetiza o comentário → retorna `SynthesisResult` (texto limpo, categoria, tags)
+   - Banco busca grupos similares via pg_trgm (similaridade de texto)
+   - Se encontra similar → adiciona um voto automaticamente ao grupo existente
+   - Se não encontra → IA sugere título/resumo → cria novo grupo de feedback
+6. Feedback atualizado para `PROCESSED` com grupo vinculado
+7. Dashboard do parceiro exibe padrões agrupados com contexto, não comentários individuais
+
+**Resiliência:** falhas no processamento são retentadas automaticamente (3x, backoff exponencial).
+Após esgotar as tentativas a mensagem vai para a Dead Letter Queue (`feedback.dlq`) e o
+feedback permanece como `PROCESSING` para inspeção manual.
 
 ### Widget
 - Experiência minimalista: caixa de texto + botão de enviar

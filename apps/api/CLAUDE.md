@@ -55,6 +55,60 @@ Apenas o owner do canal pode alterar o status.
 - Nunca usar hbm2ddl auto create/update (apenas validate em prod)
 - Seed de dados em V2__seed_data.sql (1 user, 1 org, 1 canal)
 
+## Pipeline assíncrono de feedback
+
+O recebimento e o processamento do feedback são intencionalmente desacoplados via RabbitMQ.
+
+### Fluxo
+
+```
+Widget → POST /api/widget/feedback
+            ↓
+        FeedbackService.receiveFeedback()
+          • salva Feedback como PENDING
+          • publica FeedbackProcessingMessage na fila (após commit)
+          • retorna 200 OK imediatamente
+            ↓
+        feedback.exchange → feedback.processing (queue)
+            ↓
+        FeedbackProcessingConsumer
+            ↓
+        FeedbackService.processFeedback(feedbackId)
+          • PENDING → PROCESSING → PROCESSED
+          • chama IA → busca similaridade → agrupa ou cria grupo
+```
+
+### Retry e DLQ
+
+- **3 tentativas** com backoff exponencial: 1 s → 2 s → 4 s (container-level, `SimpleRabbitListenerContainerFactory`)
+- Após esgotar as tentativas: mensagem vai para `feedback.dlq`
+- Feedback fica com status `PROCESSING` para inspeção/reprocessamento manual
+- O publish ocorre **após o commit** via `TransactionSynchronizationManager.registerSynchronization` — garante que o consumer encontre o registro no banco
+
+### Topologia RabbitMQ
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `feedback.exchange` | Direct exchange | Entrada para processamento |
+| `feedback.processing` | Queue (durable) | Fila principal; DLX aponta para `feedback.dlq.exchange` |
+| `feedback.dlq.exchange` | Direct exchange | Exchange do dead letter |
+| `feedback.dlq` | Queue (durable) | Dead Letter Queue — mensagens que esgotaram as tentativas |
+
+### Pacote
+
+`com.upvote.api.messaging`
+- `RabbitMQConfig` — declaração da topologia e configuração do container com retry
+- `FeedbackProcessingMessage` — DTO da mensagem (apenas `feedbackId`)
+- `FeedbackProducer` — publica na fila via `RabbitTemplate`
+- `FeedbackProcessingConsumer` — consome da fila, delega ao `FeedbackService`
+
+### Status do Feedback
+
+```
+PENDING → PROCESSING → PROCESSED
+                     ↘ (falha após retries) → permanece PROCESSING, mensagem vai para DLQ
+```
+
 ## Variáveis de ambiente relevantes
 
 - DB_URL, DB_USERNAME, DB_PASSWORD
