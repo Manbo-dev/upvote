@@ -86,7 +86,6 @@ export default function FeedbackGroupDetailModal({
   onClose,
   onStatusChange,
   onCategoryChange,
-  maxVotes,
 }: FeedbackGroupDetailModalProps) {
   const { data: feedbacks, isLoading } = useQuery({
     queryKey: ['feedback-group-details', group?.id],
