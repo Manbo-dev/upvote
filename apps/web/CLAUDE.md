@@ -24,7 +24,7 @@ Rotas privadas redirecionam para /login se não autenticado.
 ## Chamadas à API
 - Base URL via variável VITE_API_URL
 - Axios com interceptor que injeta Bearer token automaticamente
-- Erros 401 redirecionam para /login e limpam o store
+- Erros 401 e 403 (token expirado/inválido) redirecionam para /login e limpam o store
 - Erros tratados e exibidos ao usuário (nunca silenciados)
 
 ## Estilização
