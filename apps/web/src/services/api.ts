@@ -17,11 +17,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor para redirecionar ao login em caso de 401
+// Interceptor para redirecionar ao login em caso de 401 ou 403 (token expirado/inválido)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    if ((status === 401 || status === 403) && localStorage.getItem('token')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       if (window.location.pathname !== '/login') {
