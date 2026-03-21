@@ -87,8 +87,25 @@ public class FeedbackService {
         log.info("AI synthesis complete: category={}, tags={}, text={}",
                 synthesis.category(), synthesis.tags(), synthesis.synthesizedText());
 
+        log.info("Similarity search: canalId={}, threshold={}, searchText='{}'",
+                canal.getId(), SIMILARITY_THRESHOLD, synthesis.synthesizedText());
+
+        // Debug: log actual similarity scores before applying threshold
+        List<Object[]> debugScores = feedbackGroupRepository.findTopSimilarityScores(
+                canal.getId(), synthesis.synthesizedText());
+        if (debugScores.isEmpty()) {
+            log.info("Similarity debug: no groups found in canal (canal is empty)");
+        } else {
+            debugScores.forEach(row ->
+                    log.info("Similarity debug: groupId={}, title='{}', score={}",
+                            row[0], row[1], row[3]));
+        }
+
         List<FeedbackGroup> candidates = feedbackGroupRepository.findSimilarGroups(
                 canal.getId(), synthesis.synthesizedText(), SIMILARITY_THRESHOLD);
+
+        log.info("Similarity search result: {} candidate(s) found above threshold={}",
+                candidates.size(), SIMILARITY_THRESHOLD);
 
         if (!candidates.isEmpty()) {
             // Lock the top candidate to prevent race conditions on concurrent submissions

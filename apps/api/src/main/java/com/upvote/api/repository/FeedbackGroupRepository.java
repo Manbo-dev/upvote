@@ -52,6 +52,21 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
      * @param id the feedback group ID
      * @return the locked group, or empty if not found
      */
+    /**
+     * Debug query: returns the top 5 groups with their similarity scores against the given text,
+     * regardless of threshold. Use only for diagnostic logging.
+     */
+    @Query(value = """
+            SELECT fg.id, fg.title, fg.summary,
+                   similarity(fg.title || ' ' || COALESCE(fg.summary, ''), :text) AS score
+            FROM feedback_groups fg
+            WHERE fg.canal_id = :canalId
+            ORDER BY score DESC
+            LIMIT 5
+            """, nativeQuery = true)
+    List<Object[]> findTopSimilarityScores(@Param("canalId") UUID canalId,
+                                           @Param("text") String text);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT fg FROM FeedbackGroup fg WHERE fg.id = :id")
     Optional<FeedbackGroup> findByIdForUpdate(@Param("id") UUID id);
