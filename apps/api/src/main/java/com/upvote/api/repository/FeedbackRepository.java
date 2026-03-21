@@ -7,10 +7,14 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
+
+    @Query("SELECT COUNT(f) FROM Feedback f WHERE f.canal.user.id = :userId AND f.createdAt >= :since")
+    long countByUserIdAndCreatedAtAfter(@Param("userId") UUID userId, @Param("since") LocalDateTime since);
 
     List<Feedback> findByCanalId(UUID canalId);
 

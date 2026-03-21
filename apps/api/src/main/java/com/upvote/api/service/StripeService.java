@@ -15,8 +15,8 @@ import com.upvote.api.dto.SubscriptionResponse;
 import com.upvote.api.exception.BusinessException;
 import com.upvote.api.exception.ResourceNotFoundException;
 import com.upvote.api.repository.CanalRepository;
+import com.upvote.api.repository.FeedbackRepository;
 import com.upvote.api.repository.SubscriptionRepository;
-import com.upvote.api.repository.SuggestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +40,7 @@ public class StripeService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final CanalRepository canalRepository;
-    private final SuggestionRepository suggestionRepository;
+    private final FeedbackRepository feedbackRepository;
 
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
@@ -170,7 +170,7 @@ public class StripeService {
         LocalDateTime inicioMes = LocalDateTime.now()
                 .with(TemporalAdjusters.firstDayOfMonth())
                 .withHour(0).withMinute(0).withSecond(0).withNano(0);
-        long sugestoesUsadasMes = suggestionRepository.countByUserIdAndMesAtual(userId, inicioMes);
+        long sugestoesUsadasMes = feedbackRepository.countByUserIdAndCreatedAtAfter(userId, inicioMes);
 
         Plano plano = subscription.getPlano();
         return new SubscriptionResponse(
