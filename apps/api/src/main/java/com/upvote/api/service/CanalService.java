@@ -87,7 +87,7 @@ public class CanalService {
     }
 
     /**
-     * Renames a channel (only name, slug is immutable)
+     * Renames a channel, updating both name and slug
      */
     @Transactional
     public CanalResponse renameCanal(UUID canalId, RenameCanelRequest request, UUID userId) {
@@ -98,7 +98,12 @@ public class CanalService {
             throw new SecurityException("Você não tem permissão para renomear este canal");
         }
 
+        if (!canal.getSlug().equals(request.slug()) && canalRepository.findBySlug(request.slug()).isPresent()) {
+            throw new BusinessException("Slug já está em uso");
+        }
+
         canal.setName(request.name());
+        canal.setSlug(request.slug());
         canal = canalRepository.save(canal);
         return toResponse(canal);
     }

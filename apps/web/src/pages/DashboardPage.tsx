@@ -13,6 +13,7 @@ export default function DashboardPage() {
 
   const [renameTarget, setRenameTarget] = useState<CanalResponse | null>(null);
   const [renameName, setRenameName] = useState('');
+  const [renameSlug, setRenameSlug] = useState('');
 
   const [deleteTarget, setDeleteTarget] = useState<CanalResponse | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -45,11 +46,12 @@ export default function DashboardPage() {
   });
 
   const renameMutation = useMutation({
-    mutationFn: () => renameCanal(renameTarget!.id, renameName),
+    mutationFn: () => renameCanal(renameTarget!.id, renameName, renameSlug),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['canais'] });
       setRenameTarget(null);
       setRenameName('');
+      setRenameSlug('');
     },
   });
 
@@ -63,14 +65,20 @@ export default function DashboardPage() {
     },
   });
 
+  const toSlug = (name: string) =>
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
   const handleNameChange = (name: string) => {
     setCanalName(name);
-    setCanalSlug(
-      name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, ''),
-    );
+    setCanalSlug(toSlug(name));
+  };
+
+  const handleRenameNameChange = (name: string) => {
+    setRenameName(name);
+    setRenameSlug(toSlug(name));
   };
 
   const openRenameModal = (canal: CanalResponse, e: React.MouseEvent) => {
@@ -78,6 +86,7 @@ export default function DashboardPage() {
     e.stopPropagation();
     setRenameTarget(canal);
     setRenameName(canal.name);
+    setRenameSlug(canal.slug);
   };
 
   const openDeleteModal = (canal: CanalResponse, e: React.MouseEvent) => {
@@ -235,7 +244,7 @@ export default function DashboardPage() {
       {/* Modal: renomear canal */}
       <Modal
         isOpen={renameTarget !== null}
-        onClose={() => setRenameTarget(null)}
+        onClose={() => { setRenameTarget(null); setRenameName(''); setRenameSlug(''); }}
         title="Renomear Canal"
       >
         <form
@@ -252,23 +261,42 @@ export default function DashboardPage() {
             <input
               type="text"
               value={renameName}
-              onChange={(e) => setRenameName(e.target.value)}
+              onChange={(e) => handleRenameNameChange(e.target.value)}
               required
               autoFocus
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
             />
           </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Caminho (URL)
+            </label>
+            <div className="flex items-center rounded-lg border border-gray-300 focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500 dark:border-gray-700 dark:bg-gray-800">
+              <span className="pl-3 text-sm text-gray-400 dark:text-gray-500">/</span>
+              <input
+                type="text"
+                value={renameSlug}
+                onChange={(e) => setRenameSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                required
+                pattern="^[a-z0-9-]+$"
+                className="w-full rounded-lg bg-transparent px-2 py-2 text-sm focus:outline-none dark:text-white"
+              />
+            </div>
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+              Apenas letras minusculas, numeros e hifens
+            </p>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => setRenameTarget(null)}
+              onClick={() => { setRenameTarget(null); setRenameName(''); setRenameSlug(''); }}
               className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={renameMutation.isPending || renameName.trim() === ''}
+              disabled={renameMutation.isPending || renameName.trim() === '' || renameSlug.trim() === ''}
               className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
             >
               {renameMutation.isPending ? 'Salvando...' : 'Salvar'}

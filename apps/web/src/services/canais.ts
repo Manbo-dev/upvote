@@ -40,10 +40,10 @@ export async function getCanalBySlug(
   return data.data;
 }
 
-export async function renameCanal(id: string, name: string): Promise<CanalResponse> {
+export async function renameCanal(id: string, name: string, slug: string): Promise<CanalResponse> {
   const { data } = await api.patch<ApiResult<CanalResponse>>(
     `/canais/${id}/rename`,
-    { name },
+    { name, slug },
   );
   return data.data;
 }
