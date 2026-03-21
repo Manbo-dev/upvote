@@ -19,8 +19,8 @@ import {
   archiveFeedbackGroup,
   type FeedbackCategory,
   type FeedbackGroupResponse,
+  type FeedbackGroupStatus,
 } from '../services/feedbackGroups';
-import type { SuggestionStatus } from '../services/suggestions';
 import FeedbackGroupCard from '../components/FeedbackGroupCard';
 import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
 import KanbanColumn from '../components/KanbanColumn';
@@ -86,7 +86,7 @@ const CATEGORY_FILTERS: {
 ];
 
 const KANBAN_COLUMNS: {
-  status: SuggestionStatus;
+  status: FeedbackGroupStatus;
   title: string;
   color: string;
 }[] = [
@@ -182,7 +182,7 @@ export default function CanalDetailPage() {
   });
 
   const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: SuggestionStatus }) =>
+    mutationFn: ({ id, status }: { id: string; status: FeedbackGroupStatus }) =>
       updateFeedbackGroupStatus(id, status),
     onMutate: async ({ id, status }) => {
       await queryClient.cancelQueries({ queryKey: ['feedback-groups', slug] });
@@ -275,7 +275,7 @@ export default function CanalDetailPage() {
     ? Math.max(0, ...feedbackGroups.map((g) => g.voteCount))
     : 0;
 
-  const groupsByStatus = (status: SuggestionStatus) =>
+  const groupsByStatus = (status: FeedbackGroupStatus) =>
     filtered?.filter((g) => g.status === status) ?? [];
 
   function handleDragStart(event: DragStartEvent) {
@@ -302,7 +302,7 @@ export default function CanalDetailPage() {
             categoryMutation.mutate({ id: group.id, category: newCategory });
           }
         } else {
-          const newStatus = overId as SuggestionStatus;
+          const newStatus = overId as FeedbackGroupStatus;
           if (group.status !== newStatus) {
             // Sync optimistic update before clearing drag state to avoid visual snap-back
             queryClient.setQueryData<FeedbackGroupResponse[]>(['feedback-groups', slug], (old) =>

@@ -6,7 +6,6 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import CanalDetailPage from './pages/CanalDetailPage';
-import PublicBoardPage from './pages/PublicBoardPage';
 import SettingsPage from './pages/SettingsPage';
 import ApiKeysPage from './pages/ApiKeysPage';
 import LandingPage from './pages/LandingPage';
@@ -40,7 +39,6 @@ function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/b/:slug" element={<PublicBoardPage />} />
       <Route path="/sandbox" element={<SandboxPage />} />
       <Route
         path="/dashboard"

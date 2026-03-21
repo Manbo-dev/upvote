@@ -1,5 +1,6 @@
 import api from './api';
-import type { SuggestionStatus } from './suggestions';
+
+export type FeedbackGroupStatus = 'OPEN' | 'PLANNED' | 'IN_PROGRESS' | 'DONE' | 'CLOSED' | 'ARCHIVED';
 
 // Resposta de um grupo de feedbacks agrupados pela IA
 export type FeedbackCategory = 'BUG' | 'SUGGESTION' | 'COMPLAINT' | 'PRAISE';
@@ -9,7 +10,7 @@ export interface FeedbackGroupResponse {
   title: string;
   summary: string;
   voteCount: number;
-  status: SuggestionStatus;
+  status: FeedbackGroupStatus;
   category: FeedbackCategory;
   topContext: string; // ex: "apos 'botao Pagar' na tela de checkout"
   createdAt: string;
@@ -76,7 +77,7 @@ export async function updateFeedbackGroupCategory(
 // Atualiza o status de um grupo de feedback
 export async function updateFeedbackGroupStatus(
   groupId: string,
-  status: SuggestionStatus,
+  status: FeedbackGroupStatus,
 ): Promise<FeedbackGroupResponse> {
   const { data } = await api.patch<ApiResult<FeedbackGroupResponse>>(
     `/feedback-groups/${groupId}/status`,

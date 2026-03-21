@@ -1,11 +1,11 @@
 import { useDroppable } from '@dnd-kit/core';
 import type { FeedbackGroupResponse } from '../services/feedbackGroups';
-import type { SuggestionStatus } from '../services/suggestions';
+import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 import FeedbackGroupCard from './FeedbackGroupCard';
 
 interface KanbanColumnProps {
   title: string;
-  status: SuggestionStatus;
+  status: FeedbackGroupStatus;
   groups: FeedbackGroupResponse[];
   color: string;
   onCardClick: (group: FeedbackGroupResponse) => void;

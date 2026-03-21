@@ -1,8 +1,8 @@
 import clsx from 'clsx';
-import type { SuggestionStatus } from '../services/suggestions';
+import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 
 const statusConfig: Record<
-  SuggestionStatus,
+  FeedbackGroupStatus,
   { label: string; className: string }
 > = {
   OPEN: { label: 'Aberta', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
@@ -17,7 +17,7 @@ const statusConfig: Record<
 };
 
 interface StatusBadgeProps {
-  status: SuggestionStatus;
+  status: FeedbackGroupStatus;
 }
 
 export default function StatusBadge({ status }: StatusBadgeProps) {

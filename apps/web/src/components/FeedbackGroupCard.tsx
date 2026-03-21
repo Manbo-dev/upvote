@@ -1,9 +1,22 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { FeedbackGroupResponse } from '../services/feedbackGroups';
 import { useThemeStore } from '../store/themeStore';
-import { getVoteHeatColor } from '../utils/voteHeat';
 import CategoryBadge from './CategoryBadge';
 import StatusBadge from './StatusBadge';
+
+function getVoteHeatColor(voteCount: number, maxVotes: number, isDark: boolean) {
+  const ratio = maxVotes > 1 ? Math.min(voteCount / maxVotes, 1) : 0;
+  const hue = Math.round(220 - ratio * 180); // 220 (blue) → 40 (yellow) → 0 (red)
+  const saturation = isDark ? 70 : 80;
+  const lightness = isDark ? 35 : 88;
+  const textLightness = isDark ? 85 : 25;
+  const borderLightness = isDark ? 50 : 65;
+  return {
+    background: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+    text: `hsl(${hue}, ${saturation}%, ${textLightness}%)`,
+    border: `hsl(${hue}, ${saturation}%, ${borderLightness}%)`,
+  };
+}
 
 interface FeedbackGroupCardProps {
   group: FeedbackGroupResponse;

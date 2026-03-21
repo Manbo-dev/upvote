@@ -5,12 +5,11 @@ import {
   type FeedbackGroupResponse,
   type FeedbackDetail,
 } from '../services/feedbackGroups';
-import type { SuggestionStatus } from '../services/suggestions';
+import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 import Modal from './Modal';
 import StatusBadge from './StatusBadge';
-import { getVoteHeatColor } from '../utils/voteHeat';
 
-const ALL_STATUSES: SuggestionStatus[] = [
+const ALL_STATUSES: FeedbackGroupStatus[] = [
   'OPEN',
   'PLANNED',
   'IN_PROGRESS',
@@ -77,7 +76,7 @@ interface FeedbackGroupDetailModalProps {
   group: FeedbackGroupResponse | null;
   slug: string;
   onClose: () => void;
-  onStatusChange: (id: string, status: SuggestionStatus) => void;
+  onStatusChange: (id: string, status: FeedbackGroupStatus) => void;
   onCategoryChange: (id: string, category: FeedbackCategory) => void;
   maxVotes: number;
 }
@@ -96,9 +95,6 @@ export default function FeedbackGroupDetailModal({
   });
 
   if (!group) return null;
-
-  const isDark = document.documentElement.classList.contains('dark');
-  const heatColors = getVoteHeatColor(group.voteCount, maxVotes, isDark);
 
   return (
     <Modal isOpen={!!group} onClose={onClose} title={group.title}>
@@ -135,7 +131,7 @@ export default function FeedbackGroupDetailModal({
             <select
               value={group.status}
               onChange={(e) =>
-                onStatusChange(group.id, e.target.value as SuggestionStatus)
+                onStatusChange(group.id, e.target.value as FeedbackGroupStatus)
               }
               className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
             >
@@ -161,14 +157,7 @@ export default function FeedbackGroupDetailModal({
 
         {/* Vote count heat badge */}
         <div className="flex items-center gap-2">
-          <span
-            style={{
-              background: heatColors.background,
-              color: heatColors.text,
-              border: `1px solid ${heatColors.border}`,
-            }}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
-          >
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
             <svg
               className="h-4 w-4"
               fill="none"

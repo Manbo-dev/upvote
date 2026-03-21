@@ -9,13 +9,10 @@ import com.upvote.api.dto.RenameCanelRequest;
 import com.upvote.api.exception.BusinessException;
 import com.upvote.api.exception.ResourceNotFoundException;
 import com.upvote.api.repository.CanalRepository;
-import com.upvote.api.repository.CommentRepository;
 import com.upvote.api.repository.FeedbackGroupRepository;
 import com.upvote.api.repository.FeedbackRepository;
 import com.upvote.api.repository.SubscriptionRepository;
-import com.upvote.api.repository.SuggestionRepository;
 import com.upvote.api.repository.UserRepository;
-import com.upvote.api.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +34,6 @@ public class CanalService {
     private final UserRepository userRepository;
     private final FeedbackRepository feedbackRepository;
     private final FeedbackGroupRepository feedbackGroupRepository;
-    private final SuggestionRepository suggestionRepository;
-    private final VoteRepository voteRepository;
-    private final CommentRepository commentRepository;
 
     /**
      * Lists all channels belonging to the user
@@ -122,9 +116,6 @@ public class CanalService {
 
         feedbackRepository.deleteByCanalId(canalId);
         feedbackGroupRepository.deleteByCanalId(canalId);
-        voteRepository.deleteBySuggestionCanalId(canalId);
-        commentRepository.deleteBySuggestionCanalId(canalId);
-        suggestionRepository.deleteByCanalId(canalId);
         canalRepository.delete(canal);
     }
 
