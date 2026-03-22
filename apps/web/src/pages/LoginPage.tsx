@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { login } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +29,7 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Erro ao fazer login');
+      setError(error.response?.data?.message || t('auth.login.errorDefault'));
     } finally {
       setLoading(false);
     }
@@ -39,12 +41,12 @@ export default function LoginPage() {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-primary-600">Upvote</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
-            O melhor lugar para compartilhar e descobrir ideias incríveis!
+            {t('auth.login.subtitle')}
           </p>
         </div>
 
         <div className="rounded-xl bg-white p-8 shadow-lg dark:bg-gray-900 dark:shadow-black/40">
-          <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">Entrar</h2>
+          <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">{t('auth.login.title')}</h2>
 
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
@@ -58,7 +60,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Email
+                {t('auth.login.email')}
               </label>
               <input
                 id="email"
@@ -76,7 +78,7 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Senha
+                {t('auth.login.password')}
               </label>
               <div className="relative">
                 <input
@@ -86,12 +88,12 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                  placeholder="Sua senha"
+                  placeholder={t('auth.login.passwordPlaceholder')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  aria-label={showPassword ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
                   className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showPassword ? (
@@ -113,17 +115,17 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? t('auth.login.submitting') : t('auth.login.submit')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            Nao tem conta?{' '}
+            {t('auth.login.noAccount')}{' '}
             <Link
               to="/register"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              Criar conta
+              {t('auth.login.createAccount')}
             </Link>
           </p>
         </div>

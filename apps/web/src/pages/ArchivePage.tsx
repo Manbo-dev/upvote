@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   getFeedbackGroups,
   restoreFeedbackGroup,
@@ -10,15 +11,10 @@ import {
 import FeedbackGroupCard from '../components/FeedbackGroupCard';
 import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
 
-const CATEGORY_OPTIONS: { label: string; value: FeedbackCategory | 'ALL' }[] = [
-  { label: 'All', value: 'ALL' },
-  { label: 'Bug', value: 'BUG' },
-  { label: 'Suggestion', value: 'SUGGESTION' },
-  { label: 'Complaint', value: 'COMPLAINT' },
-  { label: 'Praise', value: 'PRAISE' },
-];
+const CATEGORY_VALUES: (FeedbackCategory | 'ALL')[] = ['ALL', 'BUG', 'SUGGESTION', 'COMPLAINT', 'PRAISE'];
 
 export default function ArchivePage() {
+  const { t } = useTranslation();
   const { canalId: slug } = useParams<{ canalId: string }>();
   const queryClient = useQueryClient();
   const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
@@ -71,32 +67,32 @@ export default function ArchivePage() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to board
+          {t('archive.backToBoard')}
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Archive</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('archive.title')}</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Feedbacks arquivados nao aparecem no board nem na busca por agrupamento
+          {t('archive.subtitle')}
         </p>
       </div>
 
       {/* Category filter */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {CATEGORY_OPTIONS.map((opt) => (
+        {CATEGORY_VALUES.map((value) => (
           <button
-            key={opt.value}
-            onClick={() => setActiveCategory(opt.value)}
+            key={value}
+            onClick={() => setActiveCategory(value)}
             className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 ${
-              activeCategory === opt.value
+              activeCategory === value
                 ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
             }`}
           >
-            {opt.label}
-            {opt.value !== 'ALL' && (
+            {t(`canal.categories.${value}`)}
+            {value !== 'ALL' && (
               <span className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${
-                activeCategory === opt.value ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
+                activeCategory === value ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
               }`}>
-                {archivedGroups?.filter((g) => g.category === opt.value).length ?? 0}
+                {archivedGroups?.filter((g) => g.category === value).length ?? 0}
               </span>
             )}
           </button>
@@ -124,10 +120,10 @@ export default function ArchivePage() {
             />
           </svg>
           <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-            Nenhum feedback arquivado
+            {t('archive.empty.title')}
           </h3>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Feedbacks concluidos podem ser arquivados no board principal.
+            {t('archive.empty.description')}
           </p>
         </div>
       ) : (

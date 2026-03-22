@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 type FeedbackCategory = 'BUG' | 'SUGGESTION' | 'COMPLAINT' | 'PRAISE';
 
 interface CategoryBadgeProps {
@@ -6,10 +8,9 @@ interface CategoryBadgeProps {
 
 const CATEGORY_CONFIG: Record<
   FeedbackCategory,
-  { label: string; bg: string; text: string; icon: React.ReactNode }
+  { bg: string; text: string; icon: React.ReactNode }
 > = {
   BUG: {
-    label: 'Bug',
     bg: 'bg-red-100 dark:bg-red-900/30',
     text: 'text-red-700 dark:text-red-400',
     icon: (
@@ -19,7 +20,6 @@ const CATEGORY_CONFIG: Record<
     ),
   },
   SUGGESTION: {
-    label: 'Suggestion',
     bg: 'bg-blue-100 dark:bg-blue-900/30',
     text: 'text-blue-700 dark:text-blue-400',
     icon: (
@@ -29,7 +29,6 @@ const CATEGORY_CONFIG: Record<
     ),
   },
   COMPLAINT: {
-    label: 'Complaint',
     bg: 'bg-orange-100 dark:bg-orange-900/30',
     text: 'text-orange-700 dark:text-orange-400',
     icon: (
@@ -39,7 +38,6 @@ const CATEGORY_CONFIG: Record<
     ),
   },
   PRAISE: {
-    label: 'Praise',
     bg: 'bg-green-100 dark:bg-green-900/30',
     text: 'text-green-700 dark:text-green-400',
     icon: (
@@ -51,6 +49,7 @@ const CATEGORY_CONFIG: Record<
 };
 
 export default function CategoryBadge({ category }: CategoryBadgeProps) {
+  const { t } = useTranslation();
   const config = CATEGORY_CONFIG[category as FeedbackCategory];
   if (!config) return null;
 
@@ -59,7 +58,7 @@ export default function CategoryBadge({ category }: CategoryBadgeProps) {
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${config.bg} ${config.text}`}
     >
       {config.icon}
-      {config.label}
+      {t(`category.${category}`)}
     </span>
   );
 }

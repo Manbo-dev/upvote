@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { getCanais, CanalResponse } from '../services/canais';
 
 export default function ApiKeysPage() {
+  const { t } = useTranslation();
+
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-        Chaves de API
+        {t('apiKeys.title')}
       </h1>
       <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-        Use a chave de API de cada canal para configurar o widget no seu site.
+        {t('apiKeys.description')}
       </p>
 
       <CanalKeyList />
@@ -18,6 +21,7 @@ export default function ApiKeysPage() {
 }
 
 function CanalKeyList() {
+  const { t } = useTranslation();
   const { data: canais, isLoading, error } = useQuery({
     queryKey: ['canais'],
     queryFn: getCanais,
@@ -26,7 +30,7 @@ function CanalKeyList() {
   if (isLoading) {
     return (
       <div className="text-sm text-gray-500 dark:text-gray-400">
-        Carregando...
+        {t('apiKeys.loading')}
       </div>
     );
   }
@@ -34,7 +38,7 @@ function CanalKeyList() {
   if (error) {
     return (
       <div className="text-sm text-red-600 dark:text-red-400">
-        Erro ao carregar canais.
+        {t('apiKeys.error')}
       </div>
     );
   }
@@ -43,7 +47,7 @@ function CanalKeyList() {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-6 text-center dark:border-gray-800 dark:bg-gray-900">
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Nenhum canal encontrado. Crie um canal primeiro.
+          {t('apiKeys.empty')}
         </p>
       </div>
     );
@@ -59,6 +63,7 @@ function CanalKeyList() {
 }
 
 function CanalKeyCard({ canal }: { canal: CanalResponse }) {
+  const { t } = useTranslation();
   const [visivel, setVisivel] = useState(false);
   const [copiado, setCopiado] = useState<'key' | 'snippet' | null>(null);
 
@@ -90,10 +95,10 @@ function CanalKeyCard({ canal }: { canal: CanalResponse }) {
         </span>
       </div>
 
-      {/* Chave de API */}
+      {/* API Key */}
       <div className="mb-4">
         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Chave de API
+          {t('apiKeys.apiKey')}
         </label>
         <div className="flex items-center gap-2">
           <code className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-mono text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
@@ -102,7 +107,7 @@ function CanalKeyCard({ canal }: { canal: CanalResponse }) {
           <button
             onClick={() => setVisivel(!visivel)}
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
-            title={visivel ? 'Ocultar' : 'Revelar'}
+            title={visivel ? t('apiKeys.hide') : t('apiKeys.reveal')}
           >
             {visivel ? (
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,7 +123,7 @@ function CanalKeyCard({ canal }: { canal: CanalResponse }) {
           <button
             onClick={() => copiar(canal.apiKey, 'key')}
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
-            title="Copiar chave"
+            title={t('apiKeys.copyKey')}
           >
             {copiado === 'key' ? (
               <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,17 +138,17 @@ function CanalKeyCard({ canal }: { canal: CanalResponse }) {
         </div>
       </div>
 
-      {/* Snippet de instalacao */}
+      {/* Installation snippet */}
       <div>
         <div className="mb-1 flex items-center justify-between">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Codigo de instalacao
+            {t('apiKeys.installCode')}
           </label>
           <button
             onClick={() => copiar(snippet, 'snippet')}
             className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            {copiado === 'snippet' ? 'Copiado!' : 'Copiar snippet'}
+            {copiado === 'snippet' ? t('apiKeys.copied') : t('apiKeys.copySnippet')}
           </button>
         </div>
         <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-green-400">

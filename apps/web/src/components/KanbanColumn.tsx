@@ -1,4 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
+import { useTranslation } from 'react-i18next';
 import type { FeedbackGroupResponse } from '../services/feedbackGroups';
 import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 import FeedbackGroupCard from './FeedbackGroupCard';
@@ -24,6 +25,7 @@ export default function KanbanColumn({
   headerAction,
   onArchive,
 }: KanbanColumnProps) {
+  const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
@@ -58,7 +60,7 @@ export default function KanbanColumn({
                 : 'border-gray-200 dark:border-gray-700'
             }`}
           >
-            <p className="text-xs text-gray-400 dark:text-gray-500">No feedbacks</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{t('kanbanColumn.noFeedbacks')}</p>
           </div>
         ) : (
           groups.map((group) => (

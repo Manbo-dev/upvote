@@ -1,0 +1,421 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "Error",
+    "delete": "Delete",
+    "rename": "Rename",
+    "create": "Create",
+    "close": "Close",
+    "back": "Back",
+    "search": "Search",
+    "noResults": "No results",
+    "createdAt": "Created on"
+  },
+  "nav": {
+    "channels": "Channels",
+    "apiKeys": "API Keys",
+    "subscription": "Subscription",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "toggleSidebar": "Toggle sidebar",
+    "toggleTheme": "Toggle theme"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "The best place to share and discover incredible ideas!",
+      "email": "Email",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "errorDefault": "Error signing in"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Create your account for free",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "password": "Password",
+      "passwordPlaceholder": "Minimum 6 characters",
+      "submit": "Create Account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "errorDefault": "Error creating account"
+    }
+  },
+  "dashboard": {
+    "title": "My Channels",
+    "newChannel": "New Channel",
+    "limitReached": "Limit reached - Upgrade",
+    "empty": {
+      "title": "No channels yet",
+      "description": "Create your first channel to start collecting feedback."
+    },
+    "channelCreatedAt": "Created on",
+    "renameChannel": "Rename channel",
+    "deleteChannel": "Delete channel",
+    "modals": {
+      "createTitle": "New Channel",
+      "channelName": "Channel Name",
+      "channelSlug": "Slug (URL)",
+      "slugHint": "Lowercase letters, numbers and hyphens only",
+      "creating": "Creating...",
+      "createSubmit": "Create Channel",
+      "renameTitle": "Rename Channel",
+      "newName": "New name",
+      "slugPath": "Path (URL)",
+      "saving": "Saving...",
+      "deleteTitle": "Delete Channel",
+      "deleteWarning": "This action is irreversible. All feedbacks and data for the channel",
+      "deleteWarningEnd": "will be permanently deleted.",
+      "deleteConfirmLabel": "Type",
+      "deleteConfirmWord": "delete",
+      "deleteConfirmSuffix": "to confirm",
+      "deleteSubmit": "Delete Channel",
+      "deleting": "Deleting..."
+    }
+  },
+  "canal": {
+    "title": "Feedbacks",
+    "subtitle": "Feedbacks captured by the widget are automatically grouped by AI",
+    "export": "Export",
+    "exportReport": "Export report",
+    "exportFormat": "Format",
+    "exportStatus": "Status",
+    "exportIncludeDetails": "Include individual feedbacks",
+    "exportActiveFilters": "Active filters applied:",
+    "exporting": "Exporting...",
+    "download": "Download",
+    "archive": "Archive",
+    "searchPlaceholder": "Search feedbacks...",
+    "allStatuses": "All statuses",
+    "datePresets": {
+      "ALL": "All time",
+      "TODAY": "Today",
+      "LAST_7": "Last 7 days",
+      "LAST_30": "Last 30 days",
+      "THIS_MONTH": "This month",
+      "CUSTOM": "Custom range"
+    },
+    "customDateFrom": "From",
+    "customDateTo": "To",
+    "kanban": {
+      "OPEN": "Open",
+      "PLANNED": "Planned",
+      "IN_PROGRESS": "In Progress",
+      "DONE": "Done"
+    },
+    "categories": {
+      "ALL": "All",
+      "BUG": "Bug",
+      "SUGGESTION": "Suggestion",
+      "COMPLAINT": "Complaint",
+      "PRAISE": "Praise"
+    },
+    "archiveAll": "Archive all",
+    "archiving": "Archiving...",
+    "clearFilters": "Clear filters",
+    "empty": {
+      "title": "No feedback received yet",
+      "description": "Install the widget on your product to start capturing feedback."
+    }
+  },
+  "archive": {
+    "backToBoard": "Back to board",
+    "title": "Archive",
+    "subtitle": "Archived feedbacks don't appear on the board or in grouping searches",
+    "empty": {
+      "title": "No archived feedbacks",
+      "description": "Done feedbacks can be archived from the main board."
+    }
+  },
+  "billing": {
+    "title": "Subscription",
+    "currentPlan": "Current plan",
+    "currentUsage": "Current usage",
+    "channels": "Channels",
+    "suggestionsThisMonth": "Suggestions this month",
+    "upgradeAvailable": "Upgrade available",
+    "doUpgrade": "Upgrade",
+    "manageSubscription": "Manage subscription",
+    "opening": "Opening...",
+    "renewsOn": "Renews on",
+    "stripeStatus": {
+      "ACTIVE": "Active",
+      "PAST_DUE": "Payment overdue"
+    },
+    "plans": {
+      "starter": {
+        "features": ["3 channels", "Unlimited suggestions", "Basic widget"]
+      },
+      "pro": {
+        "popular": "Popular",
+        "features": ["10 channels", "Unlimited suggestions", "Advanced AI + Changelog", "Priority support"]
+      },
+      "business": {
+        "description": "Unlimited channels, SSO, API, white-label and dedicated SLA.",
+        "contact": "Contact us"
+      }
+    },
+    "perMonth": "/month",
+    "subscribeTo": "Subscribe to",
+    "redirecting": "Redirecting...",
+    "banners": {
+      "success": "Subscription activated successfully! Updating data...",
+      "successFinal": "Subscription activated successfully!",
+      "canceled": "Checkout canceled. You can try again whenever you want.",
+      "processing": "Processing subscription... Please refresh the page in a few moments."
+    },
+    "errors": {
+      "checkout": "Error starting checkout",
+      "portal": "Error opening portal"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "widgetSection": "Feedback Widget",
+    "widgetDescription": "Copy the code below and add it to your site to activate the feedback widget."
+  },
+  "apiKeys": {
+    "title": "API Keys",
+    "description": "Use the API key for each channel to configure the widget on your site.",
+    "loading": "Loading...",
+    "error": "Error loading channels.",
+    "empty": "No channels found. Create a channel first.",
+    "apiKey": "API Key",
+    "installCode": "Installation code",
+    "reveal": "Reveal",
+    "hide": "Hide",
+    "copyKey": "Copy key",
+    "copySnippet": "Copy snippet",
+    "copied": "Copied!"
+  },
+  "status": {
+    "OPEN": "Open",
+    "PLANNED": "Planned",
+    "IN_PROGRESS": "In Progress",
+    "DONE": "Done",
+    "CLOSED": "Closed",
+    "ARCHIVED": "Archived"
+  },
+  "category": {
+    "BUG": "Bug",
+    "SUGGESTION": "Suggestion",
+    "COMPLAINT": "Complaint",
+    "PRAISE": "Praise"
+  },
+  "modal": {
+    "feedbackDetail": {
+      "category": "Category",
+      "status": "Status",
+      "mainContext": "Main context:",
+      "reports": "report",
+      "reportsPlural": "reports",
+      "groupedFeedbacks": "Grouped feedbacks",
+      "noFeedbacks": "No individual feedbacks found.",
+      "originalMessage": "Original message:",
+      "aiSynthesis": "AI synthesis:",
+      "triggerLabels": {
+        "manual": "Button",
+        "automatic": "Automatic",
+        "event": "Event"
+      }
+    }
+  },
+  "card": {
+    "updatedAgo": "Updated",
+    "archive": "Archive",
+    "restore": "Restore",
+    "justNow": "just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
+  },
+  "kanbanColumn": {
+    "noFeedbacks": "No feedbacks"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "blog": "Blog",
+      "tryWidget": "Try widget",
+      "signIn": "Sign in",
+      "startFree": "Get started free",
+      "openMenu": "Open menu",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode"
+    },
+    "hero": {
+      "badge": "New — AI grouping now available",
+      "title1": "Feedback",
+      "title2": "without noise.",
+      "subtitle": "Install the widget, AI does the rest. Actionable patterns, not raw comments. Decide clearly what to build next.",
+      "startFree": "Get started free",
+      "tryWidget": "Try widget",
+      "noCreditCard": "No credit card · Free plan available forever",
+      "mockup": {
+        "patterns": "Feedback patterns · My App",
+        "lastDays": "last 7 days",
+        "items": [
+          { "title": "Payment button not responding on mobile", "status": "Under review" },
+          { "title": "Export reports as PDF", "status": "Planned" },
+          { "title": "Dark mode for the registration screen", "status": "Open" }
+        ]
+      }
+    },
+    "stats": [
+      { "value": "+500", "label": "Monitored channels" },
+      { "value": "+12k", "label": "Processed feedbacks" },
+      { "value": "98%", "label": "Partner satisfaction" },
+      { "value": "3x", "label": "Faster than manual feedback" }
+    ],
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Three steps to turn what your users say into product decisions.",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Install the widget",
+          "description": "Paste one line of script into your product. Done. No additional configuration needed."
+        },
+        {
+          "number": "02",
+          "title": "AI groups the feedback",
+          "description": "Our AI synthesizes, deduplicates and automatically groups similar feedbacks. No noise."
+        },
+        {
+          "number": "03",
+          "title": "Make decisions with data",
+          "description": "See actionable patterns on the dashboard. Know exactly what your users need most."
+        }
+      ]
+    },
+    "features": {
+      "title": "Everything you need to listen to your users",
+      "subtitle": "From widget to dashboard, every detail was designed to reduce manual work and increase clarity.",
+      "items": [
+        {
+          "title": "Smart widget",
+          "description": "One line of code. The widget automatically captures page context — URL, clicked element, device."
+        },
+        {
+          "title": "Deduplication AI",
+          "description": "Similar feedbacks are automatically grouped. No duplicates in the backlog, no manual analysis."
+        },
+        {
+          "title": "Pattern dashboard",
+          "description": "See what your users report most, with context: \"8 reports after Pay button this week\"."
+        },
+        {
+          "title": "Automatic context",
+          "description": "Each feedback arrives with URL, page title, last element interacted, and device type."
+        },
+        {
+          "title": "Multi-channel",
+          "description": "Manage multiple channels in one account. Each channel has its own dashboard and isolated widget."
+        },
+        {
+          "title": "Privacy ready",
+          "description": "Consent built into the widget. You are the data controller, Upvote is the processor."
+        }
+      ]
+    },
+    "testimonials": {
+      "title": "Those who use it, never go back",
+      "subtitle": "PMs and founders who turned feedback chaos into clarity.",
+      "items": [
+        {
+          "name": "Ana Lima",
+          "role": "Product Manager",
+          "company": "Fintech Startup",
+          "initials": "AL",
+          "text": "I used to spend hours reading repetitive feedback. Now I open the dashboard and already know what to prioritize. Upvote changed my discovery routine."
+        },
+        {
+          "name": "Carlos Mendes",
+          "role": "Co-founder",
+          "company": "SaaS B2B",
+          "initials": "CM",
+          "text": "The widget was installed in 5 minutes. The following week we already had insights we didn't know existed. Easiest decision we ever made."
+        },
+        {
+          "name": "Beatriz Santos",
+          "role": "Head of Product",
+          "company": "E-commerce",
+          "initials": "BS",
+          "text": "The AI that groups similar feedbacks is an incredible differentiator. We never see duplicates in the backlog anymore. Our sprint planning became 2x faster."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Fair pricing",
+      "subtitle": "Start free. Scale as you grow.",
+      "mostPopular": "Most popular",
+      "forever": "forever",
+      "plans": [
+        {
+          "name": "Free",
+          "price": "$0",
+          "period": "forever",
+          "features": ["1 channel", "50 suggestions/month", "Public board", "No widget"],
+          "cta": "Get started free"
+        },
+        {
+          "name": "Starter",
+          "price": "$12",
+          "period": "/month",
+          "features": ["3 channels", "Unlimited suggestions", "Basic widget", "Pattern dashboard"],
+          "cta": "Get started"
+        },
+        {
+          "name": "Pro",
+          "price": "$34",
+          "period": "/month",
+          "features": ["10 channels", "Integrated changelog", "Public roadmap", "Advanced AI", "Priority support"],
+          "cta": "Get started"
+        },
+        {
+          "name": "Business",
+          "price": "Custom",
+          "period": "",
+          "features": ["Unlimited channels", "SSO", "Public API", "White-label", "Guaranteed SLA"],
+          "cta": "Talk to sales"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to truly listen to your users?",
+      "subtitle": "Start free today. No credit card required.",
+      "startFree": "Get started free",
+      "tryWidget": "Try widget"
+    },
+    "footer": {
+      "tagline": "Feedback without noise.",
+      "product": "Product",
+      "features": "Features",
+      "pricing": "Pricing",
+      "changelog": "Changelog",
+      "company": "Company",
+      "blog": "Blog",
+      "about": "About",
+      "contact": "Contact",
+      "legal": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "rights": "All rights reserved."
+    }
+  }
+}

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { register } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +29,7 @@ export default function RegisterPage() {
       navigate('/dashboard');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Erro ao criar conta');
+      setError(error.response?.data?.message || t('auth.register.errorDefault'));
     } finally {
       setLoading(false);
     }
@@ -38,12 +40,12 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-primary-600">Upvote</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Crie sua conta gratuitamente</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">{t('auth.register.subtitle')}</p>
         </div>
 
         <div className="rounded-xl bg-white p-8 shadow-lg dark:bg-gray-900 dark:shadow-black/40">
           <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
-            Criar Conta
+            {t('auth.register.title')}
           </h2>
 
           {error && (
@@ -58,7 +60,7 @@ export default function RegisterPage() {
                 htmlFor="name"
                 className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Nome
+                {t('auth.register.name')}
               </label>
               <input
                 id="name"
@@ -67,7 +69,7 @@ export default function RegisterPage() {
                 onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                placeholder="Seu nome"
+                placeholder={t('auth.register.namePlaceholder')}
               />
             </div>
 
@@ -76,7 +78,7 @@ export default function RegisterPage() {
                 htmlFor="email"
                 className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Email
+                {t('auth.register.email')}
               </label>
               <input
                 id="email"
@@ -94,7 +96,7 @@ export default function RegisterPage() {
                 htmlFor="password"
                 className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Senha
+                {t('auth.register.password')}
               </label>
               <input
                 id="password"
@@ -104,7 +106,7 @@ export default function RegisterPage() {
                 required
                 minLength={6}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                placeholder="Minimo 6 caracteres"
+                placeholder={t('auth.register.passwordPlaceholder')}
               />
             </div>
 
@@ -113,17 +115,17 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
             >
-              {loading ? 'Criando conta...' : 'Criar Conta'}
+              {loading ? t('auth.register.submitting') : t('auth.register.submit')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            Ja tem conta?{' '}
+            {t('auth.register.hasAccount')}{' '}
             <Link
               to="/login"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              Entrar
+              {t('auth.register.signIn')}
             </Link>
           </p>
         </div>

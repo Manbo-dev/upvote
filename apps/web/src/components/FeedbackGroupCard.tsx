@@ -1,4 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { FeedbackGroupResponse } from '../services/feedbackGroups';
 import { useThemeStore } from '../store/themeStore';
 import CategoryBadge from './CategoryBadge';
@@ -35,10 +37,11 @@ export default function FeedbackGroupCard({
   onArchive,
   onRestore,
 }: FeedbackGroupCardProps) {
+  const { t, i18n } = useTranslation();
   const { theme } = useThemeStore();
   const isDark = theme === 'dark';
   const heatColor = getVoteHeatColor(group.voteCount, maxVotes, isDark);
-  const timeAgo = getRelativeTime(group.updatedAt);
+  const timeAgo = getRelativeTime(group.updatedAt, t, i18n.language);
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: group.id,
@@ -74,7 +77,7 @@ export default function FeedbackGroupCard({
             <button
               onClick={(e) => { e.stopPropagation(); onArchive(); }}
               className="flex-shrink-0 rounded p-1 text-gray-400 opacity-0 transition-all hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-              title="Archive"
+              title={t('card.archive')}
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -85,7 +88,7 @@ export default function FeedbackGroupCard({
             <button
               onClick={(e) => { e.stopPropagation(); onRestore(); }}
               className="flex-shrink-0 rounded p-1 text-gray-400 opacity-0 transition-all hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-              title="Restore"
+              title={t('card.restore')}
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -167,14 +170,14 @@ export default function FeedbackGroupCard({
               {group.topContext}
             </span>
           )}
-          <span>Atualizado {timeAgo}</span>
+          <span>{t('card.updatedAgo')} {timeAgo}</span>
         </div>
       </div>
     </div>
   );
 }
 
-function getRelativeTime(dateStr: string): string {
+function getRelativeTime(dateStr: string, t: TFunction, lang: string): string {
   const now = new Date();
   const date = new Date(dateStr);
   const diffMs = now.getTime() - date.getTime();
@@ -182,9 +185,9 @@ function getRelativeTime(dateStr: string): string {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffMinutes < 1) return 'agora';
-  if (diffMinutes < 60) return `ha ${diffMinutes} min`;
-  if (diffHours < 24) return `ha ${diffHours}h`;
-  if (diffDays < 7) return `ha ${diffDays}d`;
-  return date.toLocaleDateString('pt-BR');
+  if (diffMinutes < 1) return t('card.justNow');
+  if (diffMinutes < 60) return t('card.minutesAgo', { count: diffMinutes });
+  if (diffHours < 24) return t('card.hoursAgo', { count: diffHours });
+  if (diffDays < 7) return t('card.daysAgo', { count: diffDays });
+  return date.toLocaleDateString(lang === 'pt-BR' ? 'pt-BR' : 'en-US');
 }

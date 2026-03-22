@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   DndContext,
   DragOverlay,
@@ -27,21 +28,18 @@ import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
 import KanbanColumn from '../components/KanbanColumn';
 
 const CATEGORY_FILTERS: {
-  label: string;
   value: FeedbackCategory | 'ALL';
   icon: React.ReactNode;
   activeClasses: string;
   dropClasses: string;
 }[] = [
   {
-    label: 'All',
     value: 'ALL',
     icon: null,
     activeClasses: 'bg-gray-900 text-white dark:bg-white dark:text-gray-900',
     dropClasses: '',
   },
   {
-    label: 'Bug',
     value: 'BUG',
     icon: (
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,7 +50,6 @@ const CATEGORY_FILTERS: {
     dropClasses: 'ring-2 ring-red-400 bg-red-50 dark:bg-red-900/20 dark:ring-red-500',
   },
   {
-    label: 'Suggestion',
     value: 'SUGGESTION',
     icon: (
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,7 +60,6 @@ const CATEGORY_FILTERS: {
     dropClasses: 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:ring-blue-500',
   },
   {
-    label: 'Complaint',
     value: 'COMPLAINT',
     icon: (
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,7 +70,6 @@ const CATEGORY_FILTERS: {
     dropClasses: 'ring-2 ring-orange-400 bg-orange-50 dark:bg-orange-900/20 dark:ring-orange-500',
   },
   {
-    label: 'Praise',
     value: 'PRAISE',
     icon: (
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,13 +83,12 @@ const CATEGORY_FILTERS: {
 
 const KANBAN_COLUMNS: {
   status: FeedbackGroupStatus;
-  title: string;
   color: string;
 }[] = [
-  { status: 'OPEN', title: 'Open', color: 'bg-blue-500' },
-  { status: 'PLANNED', title: 'Planned', color: 'bg-yellow-500' },
-  { status: 'IN_PROGRESS', title: 'In Progress', color: 'bg-orange-500' },
-  { status: 'DONE', title: 'Done', color: 'bg-green-500' },
+  { status: 'OPEN', color: 'bg-blue-500' },
+  { status: 'PLANNED', color: 'bg-yellow-500' },
+  { status: 'IN_PROGRESS', color: 'bg-orange-500' },
+  { status: 'DONE', color: 'bg-green-500' },
 ];
 
 // Drop ID prefix to distinguish category drops from status drops
@@ -102,14 +96,7 @@ const CAT_DROP_PREFIX = 'cat:';
 
 type DatePreset = 'ALL' | 'TODAY' | 'LAST_7' | 'LAST_30' | 'THIS_MONTH' | 'CUSTOM';
 
-const DATE_PRESETS: { value: DatePreset; label: string }[] = [
-  { value: 'ALL', label: 'All time' },
-  { value: 'TODAY', label: 'Today' },
-  { value: 'LAST_7', label: 'Last 7 days' },
-  { value: 'LAST_30', label: 'Last 30 days' },
-  { value: 'THIS_MONTH', label: 'This month' },
-  { value: 'CUSTOM', label: 'Custom range' },
-];
+const DATE_PRESET_VALUES: DatePreset[] = ['ALL', 'TODAY', 'LAST_7', 'LAST_30', 'THIS_MONTH', 'CUSTOM'];
 
 function getDateRange(preset: DatePreset): { from: Date | null; to: Date | null } {
   const now = new Date();
@@ -150,6 +137,8 @@ function DroppableCategoryPill({
   count,
   onClick,
 }: DroppableCategoryPillProps) {
+  const { t } = useTranslation();
+  const label = t(`canal.categories.${filter.value}`);
   const droppableId = filter.value === 'ALL' ? 'cat:ALL' : `${CAT_DROP_PREFIX}${filter.value}`;
   const { setNodeRef, isOver } = useDroppable({
     id: droppableId,
@@ -173,7 +162,7 @@ function DroppableCategoryPill({
           {filter.icon}
         </span>
         <span className={`text-xs font-semibold ${isOvering ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
-          {filter.label}
+          {label}
         </span>
       </div>
     );
@@ -190,7 +179,7 @@ function DroppableCategoryPill({
       `}
     >
       {filter.icon}
-      {filter.label}
+      {label}
       {isDroppable && (
         <span className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${isActive ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'}`}>
           {count}
@@ -201,6 +190,7 @@ function DroppableCategoryPill({
 }
 
 export default function CanalDetailPage() {
+  const { t } = useTranslation();
   const { canalId: slug } = useParams<{ canalId: string }>();
   const queryClient = useQueryClient();
   const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
@@ -348,7 +338,7 @@ export default function CanalDetailPage() {
       }
     : getDateRange(datePreset);
 
-  const activeDateLabel = DATE_PRESETS.find((p) => p.value === datePreset)?.label ?? 'All time';
+  const activeDateLabel = t(`canal.datePresets.${datePreset}`);
 
   const filtered = feedbackGroups?.filter((g) => {
     const matchesCategory = activeCategory === 'ALL' || g.category === activeCategory;
@@ -445,9 +435,9 @@ export default function CanalDetailPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Feedbacks</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('canal.title')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Feedbacks capturados pelo widget sao agrupados automaticamente pela IA
+            {t('canal.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -460,16 +450,16 @@ export default function CanalDetailPage() {
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              Export
+              {t('canal.export')}
             </button>
 
             {exportOpen && (
               <div className="absolute right-0 z-50 mt-1 w-64 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Export report</p>
+                <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">{t('canal.exportReport')}</p>
 
                 {/* Format selector */}
                 <div className="mb-3">
-                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Format</label>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{t('canal.exportFormat')}</label>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setExportFormat('csv')}
@@ -493,19 +483,19 @@ export default function CanalDetailPage() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Status</label>
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{t('canal.exportStatus')}</label>
                   <select
                     value={exportStatus}
                     onChange={(e) => setExportStatus(e.target.value as FeedbackGroupStatus | 'ALL')}
                     className="w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                   >
-                    <option value="ALL">All statuses</option>
-                    <option value="OPEN">Open</option>
-                    <option value="PLANNED">Planned</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="DONE">Done</option>
-                    <option value="CLOSED">Closed</option>
-                    <option value="ARCHIVED">Archived</option>
+                    <option value="ALL">{t('canal.allStatuses')}</option>
+                    <option value="OPEN">{t('status.OPEN')}</option>
+                    <option value="PLANNED">{t('status.PLANNED')}</option>
+                    <option value="IN_PROGRESS">{t('status.IN_PROGRESS')}</option>
+                    <option value="DONE">{t('status.DONE')}</option>
+                    <option value="CLOSED">{t('status.CLOSED')}</option>
+                    <option value="ARCHIVED">{t('status.ARCHIVED')}</option>
                   </select>
                 </div>
 
@@ -516,12 +506,12 @@ export default function CanalDetailPage() {
                     onChange={(e) => setExportIncludeDetails(e.target.checked)}
                     className="rounded border-gray-300 text-primary-600 dark:border-gray-600"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Include individual feedbacks</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('canal.exportIncludeDetails')}</span>
                 </label>
 
                 {(activeCategory !== 'ALL' || datePreset !== 'ALL') && (
                   <p className="mb-3 rounded-md bg-gray-50 px-2 py-1.5 text-xs text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
-                    Active filters applied:{' '}
+                    {t('canal.exportActiveFilters')}{' '}
                     {activeCategory !== 'ALL' && <span className="font-medium">{activeCategory.toLowerCase()}</span>}
                     {activeCategory !== 'ALL' && datePreset !== 'ALL' && ' · '}
                     {datePreset !== 'ALL' && <span className="font-medium">{activeDateLabel.toLowerCase()}</span>}
@@ -533,7 +523,7 @@ export default function CanalDetailPage() {
                   disabled={exporting}
                   className="w-full rounded-md bg-primary-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-60"
                 >
-                  {exporting ? 'Exporting...' : `Download ${exportFormat.toUpperCase()}`}
+                  {exporting ? t('canal.exporting') : `${t('canal.download')} ${exportFormat.toUpperCase()}`}
                 </button>
               </div>
             )}
@@ -546,7 +536,7 @@ export default function CanalDetailPage() {
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
-            Archive
+            {t('canal.archive')}
           </Link>
         </div>
       </div>
@@ -569,7 +559,7 @@ export default function CanalDetailPage() {
                 (e.target as HTMLInputElement).blur();
               }
             }}
-            placeholder="Search feedbacks..."
+            placeholder={t('canal.searchPlaceholder')}
             className="block w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-primary-500"
           />
           {searchQuery && (
@@ -605,21 +595,21 @@ export default function CanalDetailPage() {
 
           {dateDropdownOpen && (
             <div className="absolute right-0 z-50 mt-1 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-              {DATE_PRESETS.filter((p) => p.value !== 'CUSTOM').map((preset) => (
+              {DATE_PRESET_VALUES.filter((v) => v !== 'CUSTOM').map((presetValue) => (
                 <button
-                  key={preset.value}
+                  key={presetValue}
                   onClick={() => {
-                    setDatePreset(preset.value);
-                    if (preset.value !== 'CUSTOM') setDateDropdownOpen(false);
+                    setDatePreset(presetValue);
+                    setDateDropdownOpen(false);
                   }}
                   className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors ${
-                    datePreset === preset.value
+                    datePreset === presetValue
                       ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
                       : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
                   }`}
                 >
-                  {preset.label}
-                  {datePreset === preset.value && (
+                  {t(`canal.datePresets.${presetValue}`)}
+                  {datePreset === presetValue && (
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -635,7 +625,7 @@ export default function CanalDetailPage() {
                     : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
                 }`}
               >
-                Custom range
+                {t('canal.datePresets.CUSTOM')}
                 {datePreset === 'CUSTOM' && (
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -645,7 +635,7 @@ export default function CanalDetailPage() {
               {datePreset === 'CUSTOM' && (
                 <div className="space-y-2 px-3 pb-2 pt-1">
                   <div>
-                    <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">From</label>
+                    <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">{t('canal.customDateFrom')}</label>
                     <input
                       type="date"
                       value={customFrom}
@@ -654,7 +644,7 @@ export default function CanalDetailPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">To</label>
+                    <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">{t('canal.customDateTo')}</label>
                     <input
                       type="date"
                       value={customTo}
@@ -666,7 +656,7 @@ export default function CanalDetailPage() {
                     onClick={() => setDateDropdownOpen(false)}
                     className="w-full rounded-md bg-primary-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-700"
                   >
-                    Apply
+                    {t('common.save')}
                   </button>
                 </div>
               )}
@@ -715,10 +705,10 @@ export default function CanalDetailPage() {
               />
             </svg>
             <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-              Nenhum feedback recebido ainda
+              {t('canal.empty.title', 'No feedback received yet')}
             </h3>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Instale o widget no seu produto para comecar a capturar feedbacks.
+              {t('canal.empty.description', 'Install the widget on your product to start capturing feedback.')}
             </p>
           </div>
         ) : (
@@ -727,7 +717,7 @@ export default function CanalDetailPage() {
               {KANBAN_COLUMNS.map((col) => (
                 <KanbanColumn
                   key={col.status}
-                  title={col.title}
+                  title={t(`canal.kanban.${col.status}`)}
                   status={col.status}
                   color={col.color}
                   groups={groupsByStatus(col.status)}
@@ -740,12 +730,12 @@ export default function CanalDetailPage() {
                         onClick={() => archiveAllMutation.mutate()}
                         disabled={archiveAllMutation.isPending}
                         className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
-                        title="Archive all done feedbacks"
+                        title={t('canal.archiveAll')}
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                         </svg>
-                        {archiveAllMutation.isPending ? 'Archiving...' : 'Archive all'}
+                        {archiveAllMutation.isPending ? t('canal.archiving') : t('canal.archiveAll')}
                       </button>
                     ) : undefined
                   }
@@ -756,20 +746,20 @@ export default function CanalDetailPage() {
             {filtered?.length === 0 && (
               <div className="col-span-full mt-2 rounded-xl border border-gray-200 p-8 text-center dark:border-gray-700">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  No feedbacks match
+                  {t('common.noResults')}
                   {debouncedQuery && <span className="font-medium"> "{debouncedQuery}"</span>}
                   {activeCategory !== 'ALL' && (
-                    <span className="font-medium"> in {activeCategory.toLowerCase()}</span>
+                    <span className="font-medium"> · {t(`canal.categories.${activeCategory}`)}</span>
                   )}
                   {datePreset !== 'ALL' && (
-                    <span className="font-medium"> for {activeDateLabel.toLowerCase()}</span>
+                    <span className="font-medium"> · {activeDateLabel}</span>
                   )}
                 </p>
                 <button
                   onClick={() => { setSearchQuery(''); setActiveCategory('ALL'); setDatePreset('ALL'); }}
                   className="mt-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
                 >
-                  Clear filters
+                  {t('canal.clearFilters', 'Clear filters')}
                 </button>
               </div>
             )}

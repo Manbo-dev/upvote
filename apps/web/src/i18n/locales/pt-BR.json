@@ -1,0 +1,421 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "delete": "Deletar",
+    "rename": "Renomear",
+    "create": "Criar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "search": "Buscar",
+    "noResults": "Nenhum resultado",
+    "createdAt": "Criado em"
+  },
+  "nav": {
+    "channels": "Canais",
+    "apiKeys": "Chaves de API",
+    "subscription": "Assinatura",
+    "settings": "Configurações",
+    "logout": "Sair",
+    "toggleSidebar": "Alternar sidebar",
+    "toggleTheme": "Alternar tema"
+  },
+  "auth": {
+    "login": {
+      "title": "Entrar",
+      "subtitle": "O melhor lugar para compartilhar e descobrir ideias incríveis!",
+      "email": "Email",
+      "password": "Senha",
+      "passwordPlaceholder": "Sua senha",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "showPassword": "Mostrar senha",
+      "hidePassword": "Ocultar senha",
+      "noAccount": "Não tem conta?",
+      "createAccount": "Criar conta",
+      "errorDefault": "Erro ao fazer login"
+    },
+    "register": {
+      "title": "Criar Conta",
+      "subtitle": "Crie sua conta gratuitamente",
+      "name": "Nome",
+      "namePlaceholder": "Seu nome",
+      "email": "Email",
+      "password": "Senha",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "submit": "Criar Conta",
+      "submitting": "Criando conta...",
+      "hasAccount": "Já tem conta?",
+      "signIn": "Entrar",
+      "errorDefault": "Erro ao criar conta"
+    }
+  },
+  "dashboard": {
+    "title": "Meus Canais",
+    "newChannel": "Novo Canal",
+    "limitReached": "Limite atingido - Fazer upgrade",
+    "empty": {
+      "title": "Nenhum canal ainda",
+      "description": "Crie seu primeiro canal para começar a coletar feedback."
+    },
+    "channelCreatedAt": "Criado em",
+    "renameChannel": "Renomear canal",
+    "deleteChannel": "Deletar canal",
+    "modals": {
+      "createTitle": "Novo Canal",
+      "channelName": "Nome do Canal",
+      "channelSlug": "Slug (URL)",
+      "slugHint": "Apenas letras minúsculas, números e hifens",
+      "creating": "Criando...",
+      "createSubmit": "Criar Canal",
+      "renameTitle": "Renomear Canal",
+      "newName": "Novo nome",
+      "slugPath": "Caminho (URL)",
+      "saving": "Salvando...",
+      "deleteTitle": "Deletar Canal",
+      "deleteWarning": "Esta ação é irreversível. Todos os feedbacks e dados do canal",
+      "deleteWarningEnd": "serão permanentemente deletados.",
+      "deleteConfirmLabel": "Digite",
+      "deleteConfirmWord": "deletar",
+      "deleteConfirmSuffix": "para confirmar",
+      "deleteSubmit": "Deletar Canal",
+      "deleting": "Deletando..."
+    }
+  },
+  "canal": {
+    "title": "Feedbacks",
+    "subtitle": "Feedbacks capturados pelo widget são agrupados automaticamente pela IA",
+    "export": "Exportar",
+    "exportReport": "Exportar relatório",
+    "exportFormat": "Formato",
+    "exportStatus": "Status",
+    "exportIncludeDetails": "Incluir feedbacks individuais",
+    "exportActiveFilters": "Filtros ativos:",
+    "exporting": "Exportando...",
+    "download": "Baixar",
+    "archive": "Arquivo",
+    "searchPlaceholder": "Buscar feedbacks...",
+    "allStatuses": "Todos os status",
+    "datePresets": {
+      "ALL": "Todo o período",
+      "TODAY": "Hoje",
+      "LAST_7": "Últimos 7 dias",
+      "LAST_30": "Últimos 30 dias",
+      "THIS_MONTH": "Este mês",
+      "CUSTOM": "Período personalizado"
+    },
+    "customDateFrom": "De",
+    "customDateTo": "Até",
+    "kanban": {
+      "OPEN": "Aberto",
+      "PLANNED": "Planejado",
+      "IN_PROGRESS": "Em Progresso",
+      "DONE": "Concluído"
+    },
+    "categories": {
+      "ALL": "Todos",
+      "BUG": "Bug",
+      "SUGGESTION": "Sugestão",
+      "COMPLAINT": "Reclamação",
+      "PRAISE": "Elogio"
+    },
+    "archiveAll": "Arquivar todos",
+    "archiving": "Arquivando...",
+    "clearFilters": "Limpar filtros",
+    "empty": {
+      "title": "Nenhum feedback recebido ainda",
+      "description": "Instale o widget no seu produto para começar a capturar feedbacks."
+    }
+  },
+  "archive": {
+    "backToBoard": "Voltar ao board",
+    "title": "Arquivo",
+    "subtitle": "Feedbacks arquivados não aparecem no board nem na busca por agrupamento",
+    "empty": {
+      "title": "Nenhum feedback arquivado",
+      "description": "Feedbacks concluídos podem ser arquivados no board principal."
+    }
+  },
+  "billing": {
+    "title": "Assinatura",
+    "currentPlan": "Plano atual",
+    "currentUsage": "Uso atual",
+    "channels": "Canais",
+    "suggestionsThisMonth": "Sugestões este mês",
+    "upgradeAvailable": "Upgrade disponível",
+    "doUpgrade": "Fazer upgrade",
+    "manageSubscription": "Gerenciar assinatura",
+    "opening": "Abrindo...",
+    "renewsOn": "Renova em",
+    "stripeStatus": {
+      "ACTIVE": "Ativa",
+      "PAST_DUE": "Pagamento pendente"
+    },
+    "plans": {
+      "starter": {
+        "features": ["3 canais", "Sugestões ilimitadas", "Widget básico"]
+      },
+      "pro": {
+        "popular": "Popular",
+        "features": ["10 canais", "Sugestões ilimitadas", "IA avançada + Changelog", "Suporte prioritário"]
+      },
+      "business": {
+        "description": "Canais ilimitados, SSO, API, white-label e SLA dedicado.",
+        "contact": "Fale conosco"
+      }
+    },
+    "perMonth": "/mês",
+    "subscribeTo": "Assinar",
+    "redirecting": "Redirecionando...",
+    "banners": {
+      "success": "Assinatura ativada com sucesso! Atualizando dados...",
+      "successFinal": "Assinatura ativada com sucesso!",
+      "canceled": "Checkout cancelado. Você pode tentar novamente quando quiser.",
+      "processing": "Processando assinatura... Atualize a página em alguns instantes."
+    },
+    "errors": {
+      "checkout": "Erro ao iniciar checkout",
+      "portal": "Erro ao abrir portal"
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "profile": "Perfil",
+    "name": "Nome",
+    "email": "Email",
+    "widgetSection": "Widget de Feedback",
+    "widgetDescription": "Copie o código abaixo e adicione ao seu site para ativar o widget de feedback."
+  },
+  "apiKeys": {
+    "title": "Chaves de API",
+    "description": "Use a chave de API de cada canal para configurar o widget no seu site.",
+    "loading": "Carregando...",
+    "error": "Erro ao carregar canais.",
+    "empty": "Nenhum canal encontrado. Crie um canal primeiro.",
+    "apiKey": "Chave de API",
+    "installCode": "Código de instalação",
+    "reveal": "Revelar",
+    "hide": "Ocultar",
+    "copyKey": "Copiar chave",
+    "copySnippet": "Copiar snippet",
+    "copied": "Copiado!"
+  },
+  "status": {
+    "OPEN": "Aberta",
+    "PLANNED": "Planejada",
+    "IN_PROGRESS": "Em Progresso",
+    "DONE": "Concluída",
+    "CLOSED": "Fechada",
+    "ARCHIVED": "Arquivada"
+  },
+  "category": {
+    "BUG": "Bug",
+    "SUGGESTION": "Sugestão",
+    "COMPLAINT": "Reclamação",
+    "PRAISE": "Elogio"
+  },
+  "modal": {
+    "feedbackDetail": {
+      "category": "Categoria",
+      "status": "Status",
+      "mainContext": "Contexto principal:",
+      "reports": "relato",
+      "reportsPlural": "relatos",
+      "groupedFeedbacks": "Feedbacks agrupados",
+      "noFeedbacks": "Nenhum feedback individual encontrado.",
+      "originalMessage": "Mensagem original:",
+      "aiSynthesis": "Síntese da IA:",
+      "triggerLabels": {
+        "manual": "Botão",
+        "automatic": "Automático",
+        "event": "Evento"
+      }
+    }
+  },
+  "card": {
+    "updatedAgo": "Atualizado",
+    "archive": "Arquivar",
+    "restore": "Restaurar",
+    "justNow": "agora",
+    "minutesAgo": "há {{count}} min",
+    "hoursAgo": "há {{count}}h",
+    "daysAgo": "há {{count}}d"
+  },
+  "kanbanColumn": {
+    "noFeedbacks": "Sem feedbacks"
+  },
+  "landing": {
+    "nav": {
+      "features": "Funcionalidades",
+      "pricing": "Preços",
+      "blog": "Blog",
+      "tryWidget": "Testar widget",
+      "signIn": "Entrar",
+      "startFree": "Começar grátis",
+      "openMenu": "Abrir menu",
+      "lightMode": "Modo claro",
+      "darkMode": "Modo escuro"
+    },
+    "hero": {
+      "badge": "Novo — Agrupamento por IA disponível",
+      "title1": "Feedback",
+      "title2": "sem ruído.",
+      "subtitle": "Instale o widget, a IA faz o resto. Padrões acionáveis, não comentários brutos. Decida com clareza o que construir a seguir.",
+      "startFree": "Começar grátis",
+      "tryWidget": "Testar widget",
+      "noCreditCard": "Sem cartão de crédito · Plano Free para sempre disponível",
+      "mockup": {
+        "patterns": "Padrões de feedback · Meu App",
+        "lastDays": "últimos 7 dias",
+        "items": [
+          { "title": "Botão de pagamento não responde no mobile", "status": "Em análise" },
+          { "title": "Exportar relatórios em PDF", "status": "Planejado" },
+          { "title": "Modo escuro para a tela de cadastro", "status": "Aberto" }
+        ]
+      }
+    },
+    "stats": [
+      { "value": "+500", "label": "Canais monitorados" },
+      { "value": "+12 mil", "label": "Feedbacks processados" },
+      { "value": "98%", "label": "Satisfação dos parceiros" },
+      { "value": "3x", "label": "Mais rápido que feedback manual" }
+    ],
+    "howItWorks": {
+      "title": "Como funciona",
+      "subtitle": "Três passos para transformar o que seus usuários dizem em decisões de produto.",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Instale o widget",
+          "description": "Cole uma linha de script no seu produto. Pronto. Nenhuma configuração adicional necessária."
+        },
+        {
+          "number": "02",
+          "title": "IA agrupa o feedback",
+          "description": "Nossa IA sintetiza, deduplica e agrupa feedbacks similares automaticamente. Sem ruído."
+        },
+        {
+          "number": "03",
+          "title": "Tome decisões com dados",
+          "description": "Veja padrões acionáveis no dashboard. Saiba exatamente o que seus usuários mais precisam."
+        }
+      ]
+    },
+    "features": {
+      "title": "Tudo que você precisa para ouvir seus usuários",
+      "subtitle": "Do widget ao dashboard, cada detalhe foi pensado para reduzir o trabalho manual e ampliar a clareza.",
+      "items": [
+        {
+          "title": "Widget inteligente",
+          "description": "Uma linha de código. O widget captura o contexto da página automaticamente — URL, elemento clicado, dispositivo."
+        },
+        {
+          "title": "IA de deduplicação",
+          "description": "Feedbacks similares são agrupados automaticamente. Sem duplicatas no backlog, sem análise manual."
+        },
+        {
+          "title": "Dashboard de padrões",
+          "description": "Veja o que seus usuários mais relatam, com contexto: \"8 relatos após botão Pagar esta semana\"."
+        },
+        {
+          "title": "Contexto automático",
+          "description": "Cada feedback chega com URL, título da página, último elemento interagido e tipo de dispositivo."
+        },
+        {
+          "title": "Multi-canal",
+          "description": "Gerencie vários canais em uma conta só. Cada canal tem seu dashboard e widget isolados."
+        },
+        {
+          "title": "LGPD ready",
+          "description": "Consentimento embutido no widget. Você é o controlador dos dados, o Upvote é o operador."
+        }
+      ]
+    },
+    "testimonials": {
+      "title": "Quem já usa, não volta atrás",
+      "subtitle": "PMs e fundadores brasileiros que transformaram o caos de feedback em clareza.",
+      "items": [
+        {
+          "name": "Ana Lima",
+          "role": "Product Manager",
+          "company": "Fintech Startup",
+          "initials": "AL",
+          "text": "Antes gastava horas lendo feedback repetido. Hoje abro o dashboard e já sei o que priorizar. O Upvote mudou minha rotina de discovery."
+        },
+        {
+          "name": "Carlos Mendes",
+          "role": "Co-founder",
+          "company": "SaaS B2B",
+          "initials": "CM",
+          "text": "O widget foi instalado em 5 minutos. Na semana seguinte já tínhamos insights que não sabíamos que existiam. Decisão mais fácil que já tomamos."
+        },
+        {
+          "name": "Beatriz Santos",
+          "role": "Head of Product",
+          "company": "E-commerce",
+          "initials": "BS",
+          "text": "A IA que agrupa feedbacks similares é um diferencial absurdo. Nunca mais vimos duplicatas no backlog. Nosso sprint planning ficou 2x mais rápido."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Preço justo para o mercado brasileiro",
+      "subtitle": "Comece grátis. Escale conforme cresce.",
+      "mostPopular": "Mais popular",
+      "forever": "para sempre",
+      "plans": [
+        {
+          "name": "Free",
+          "price": "R$ 0",
+          "period": "para sempre",
+          "features": ["1 canal", "50 sugestões/mês", "Board público", "Sem widget"],
+          "cta": "Começar grátis"
+        },
+        {
+          "name": "Starter",
+          "price": "R$ 49",
+          "period": "/mês",
+          "features": ["3 canais", "Sugestões ilimitadas", "Widget básico", "Dashboard de padrões"],
+          "cta": "Começar"
+        },
+        {
+          "name": "Pro",
+          "price": "R$ 129",
+          "period": "/mês",
+          "features": ["10 canais", "Changelog integrado", "Roadmap público", "IA avançada", "Suporte prioritário"],
+          "cta": "Começar"
+        },
+        {
+          "name": "Business",
+          "price": "R$ 299",
+          "period": "/mês",
+          "features": ["Canais ilimitados", "SSO", "API pública", "White-label", "SLA garantido"],
+          "cta": "Falar com vendas"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Pronto para ouvir seus usuários de verdade?",
+      "subtitle": "Comece grátis hoje. Sem cartão de crédito.",
+      "startFree": "Começar grátis",
+      "tryWidget": "Testar widget"
+    },
+    "footer": {
+      "tagline": "Feedback sem ruído.",
+      "product": "Produto",
+      "features": "Funcionalidades",
+      "pricing": "Preços",
+      "changelog": "Changelog",
+      "company": "Empresa",
+      "blog": "Blog",
+      "about": "Sobre",
+      "contact": "Contato",
+      "legal": "Legal",
+      "privacy": "Privacidade",
+      "terms": "Termos",
+      "rights": "Todos os direitos reservados."
+    }
+  }
+}

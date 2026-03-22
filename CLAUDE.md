@@ -318,3 +318,72 @@ echo -n "novo-valor" | gcloud secrets versions add NOME_DO_SECRET --data-file=- 
 ### Domínios
 - app.upvote.com (frontend)
 - api.upvote.com (backend)
+
+## Internacionalização (i18n) — Frontend
+
+### Stack
+- **i18next** + **react-i18next** — biblioteca principal
+- **i18next-browser-languagedetector** — detecta idioma do browser automaticamente
+- **Zustand** — `languageStore.ts` sincroniza estado React com i18next
+
+### Idiomas suportados
+| Código | Idioma |
+|--------|--------|
+| `pt-BR` | Português (Brasil) — fallback padrão |
+| `en` | Inglês |
+
+### Arquivos relevantes
+- `apps/web/src/i18n/index.ts` — configuração do i18next (inicialização, detection, recursos)
+- `apps/web/src/i18n/locales/pt-BR.json` — traduções em português
+- `apps/web/src/i18n/locales/en.json` — traduções em inglês
+- `apps/web/src/store/languageStore.ts` — Zustand store com `language` e `setLanguage()`
+
+### Como funciona
+1. Na inicialização, o i18next detecta o idioma na ordem: `localStorage` → `navigator.language`
+2. Persistência via `localStorage` key `'language'`
+3. O toggle PT/EN fica no header (`Layout.tsx`) ao lado do botão de tema
+4. Ao trocar idioma: `setLanguage()` atualiza localStorage + chama `i18n.changeLanguage()` + atualiza Zustand store
+
+### Como usar em novos componentes
+```typescript
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+  const { t } = useTranslation();
+  return <p>{t('namespace.key')}</p>;
+}
+```
+
+### Regras para adicionar traduções
+- **Toda string visual** deve usar `t()` — sem hardcode de texto em português ou inglês
+- **Arrays estáticos com labels** (ex: opções de filtro, colunas de kanban): remover o campo `label`, derivar o label via `t('namespace.key')` no render
+- **Arrays fora de componentes React** não podem chamar `t()` — usar só values e traduzir no JSX
+- **Strings que vão para o backend** (valores de enum, slugs, chaves de API) ficam em inglês e **não** são traduzidas
+- A palavra de confirmação de delete permanece `'delete'` (inglês) independente do idioma ativo — evita ambiguidade
+- Para arrays de strings nas traduções, usar `t('key', { returnObjects: true }) as string[]`
+
+### Estrutura dos namespaces (translation keys)
+```
+common.*       — ações genéricas (save, cancel, delete, loading…)
+nav.*          — itens de navegação
+auth.*         — login, registro, erros de autenticação
+dashboard.*    — página de canais/dashboard principal
+canal.*        — página de detalhe do canal (kanban, filtros, export…)
+archive.*      — página de arquivo
+billing.*      — planos, assinatura, uso
+settings.*     — configurações de perfil
+apiKeys.*      — gerenciamento de API keys
+status.*       — labels dos status (OPEN, PLANNED, IN_PROGRESS, DONE, ARCHIVED, CLOSED)
+category.*     — labels das categorias (BUG, FEATURE_REQUEST, UX…)
+modal.*        — modal de detalhe do feedback group
+card.*         — FeedbackGroupCard (relative time, botões de ação)
+kanbanColumn.* — KanbanColumn (estado vazio)
+landing.*      — LandingPage (nav, hero, stats, how it works, features, pricing, footer)
+```
+
+### Adicionar um novo idioma
+1. Criar `apps/web/src/i18n/locales/<codigo>.json` com todas as keys
+2. Importar e registrar em `apps/web/src/i18n/index.ts` no objeto `resources`
+3. Adicionar o código em `supportedLngs`
+4. Atualizar `languageStore.ts` com o novo tipo `Language` e a lógica de detecção
+5. Adicionar o botão de toggle correspondente em `Layout.tsx`

@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getSubscription, createCheckoutSession, createPortalSession } from '../services/subscriptions';
 
 /**
- * Página de gerenciamento de assinatura e billing.
- * Detecta retorno do Stripe checkout via query params e faz polling
- * até o webhook processar a atualização da assinatura.
+ * Subscription and billing management page.
+ * Detects return from Stripe checkout via query params and polls
+ * until the webhook processes the subscription update.
  */
 export default function BillingPage() {
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [banner, setBanner] = useState<{ type: 'success' | 'info' | 'error'; message: string } | null>(null);
@@ -20,50 +22,45 @@ export default function BillingPage() {
   const { data: subscription, isLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: getSubscription,
-    // Polling a cada 2s quando retorna do checkout, para aguardar o webhook processar
     refetchInterval: isPolling ? 2000 : false,
   });
 
-  // Detecta retorno do Stripe checkout via query params
   useEffect(() => {
     const success = searchParams.get('success');
     const canceled = searchParams.get('canceled');
 
     if (success === 'true') {
-      setBanner({ type: 'success', message: 'Assinatura ativada com sucesso! Atualizando dados...' });
+      setBanner({ type: 'success', message: t('billing.banners.success') });
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       setIsPolling(true);
-      // Limpa query params da URL
       setSearchParams({}, { replace: true });
     } else if (canceled === 'true') {
-      setBanner({ type: 'info', message: 'Checkout cancelado. Você pode tentar novamente quando quiser.' });
+      setBanner({ type: 'info', message: t('billing.banners.canceled') });
       setSearchParams({}, { replace: true });
     }
-  }, [searchParams, setSearchParams, queryClient]);
+  }, [searchParams, setSearchParams, queryClient, t]);
 
-  // Para o polling quando a assinatura mudar de FREE para um plano pago
   const stopPollingIfUpdated = useCallback(() => {
     if (isPolling && subscription && subscription.plano !== 'FREE') {
       setIsPolling(false);
-      setBanner({ type: 'success', message: 'Assinatura ativada com sucesso!' });
+      setBanner({ type: 'success', message: t('billing.banners.successFinal') });
     }
-  }, [isPolling, subscription]);
+  }, [isPolling, subscription, t]);
 
   useEffect(() => {
     stopPollingIfUpdated();
   }, [stopPollingIfUpdated]);
 
-  // Timeout de segurança: para o polling após 15s
   useEffect(() => {
     if (!isPolling) return;
     const timeout = setTimeout(() => {
       setIsPolling(false);
       if (subscription?.plano === 'FREE') {
-        setBanner({ type: 'info', message: 'Processando assinatura... Atualize a página em alguns instantes.' });
+        setBanner({ type: 'info', message: t('billing.banners.processing') });
       }
     }, 30000);
     return () => clearTimeout(timeout);
-  }, [isPolling, subscription?.plano]);
+  }, [isPolling, subscription?.plano, t]);
 
   const handleCheckout = async (plano: string) => {
     setLoading(plano);
@@ -73,7 +70,7 @@ export default function BillingPage() {
       window.location.href = url;
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      setError(e.response?.data?.message || 'Erro ao iniciar checkout');
+      setError(e.response?.data?.message || t('billing.errors.checkout'));
       setLoading(null);
     }
   };
@@ -86,7 +83,7 @@ export default function BillingPage() {
       window.location.href = url;
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      setError(e.response?.data?.message || 'Erro ao abrir portal');
+      setError(e.response?.data?.message || t('billing.errors.portal'));
       setLoading(null);
     }
   };
@@ -110,11 +107,13 @@ export default function BillingPage() {
     PRO: 'Pro',
   };
 
+  const locale = i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US';
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Assinatura</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('billing.title')}</h1>
 
-      {/* Banner de feedback do checkout */}
+      {/* Checkout feedback banner */}
       {banner && (
         <div className={`rounded-lg p-4 text-sm ${
           banner.type === 'success'
@@ -141,11 +140,11 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Plano atual */}
+      {/* Current plan */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Plano atual</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t('billing.currentPlan')}</p>
             <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
               {planoLabels[planoAtual] || planoAtual}
             </p>
@@ -157,9 +156,11 @@ export default function BillingPage() {
                     ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                     : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
               }`}>
-                {subscription.stripeStatus === 'ACTIVE' ? 'Ativa' :
-                 subscription.stripeStatus === 'PAST_DUE' ? 'Pagamento pendente' :
-                 subscription.stripeStatus}
+                {subscription.stripeStatus === 'ACTIVE'
+                  ? t('billing.stripeStatus.ACTIVE')
+                  : subscription.stripeStatus === 'PAST_DUE'
+                    ? t('billing.stripeStatus.PAST_DUE')
+                    : subscription.stripeStatus}
               </span>
             )}
           </div>
@@ -169,26 +170,26 @@ export default function BillingPage() {
               disabled={loading === 'portal'}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
             >
-              {loading === 'portal' ? 'Abrindo...' : 'Gerenciar assinatura'}
+              {loading === 'portal' ? t('billing.opening') : t('billing.manageSubscription')}
             </button>
           )}
         </div>
 
         {subscription.currentPeriodEnd && (
           <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-            Renova em {new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')}
+            {t('billing.renewsOn')} {new Date(subscription.currentPeriodEnd).toLocaleDateString(locale)}
           </p>
         )}
       </div>
 
-      {/* Uso atual */}
+      {/* Current usage */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Uso atual</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t('billing.currentUsage')}</h2>
         <div className="space-y-4">
-          {/* Canais */}
+          {/* Channels */}
           <div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Canais</span>
+              <span className="text-gray-600 dark:text-gray-400">{t('billing.channels')}</span>
               <span className="font-medium text-gray-900 dark:text-white">
                 {subscription.canaisAtivos} de {subscription.limiteCanais}
               </span>
@@ -201,11 +202,11 @@ export default function BillingPage() {
             </div>
           </div>
 
-          {/* Sugestoes (apenas se tem limite) */}
+          {/* Suggestions (only if has limit) */}
           {subscription.limiteSugestoesMes < 2147483647 && (
             <div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Sugestoes este mes</span>
+                <span className="text-gray-600 dark:text-gray-400">{t('billing.suggestionsThisMonth')}</span>
                 <span className="font-medium text-gray-900 dark:text-white">
                   {subscription.sugestoesUsadasMes} de {subscription.limiteSugestoesMes}
                 </span>
@@ -225,11 +226,11 @@ export default function BillingPage() {
         </div>
       </div>
 
-      {/* Cards de upgrade (se não está no PRO) */}
+      {/* Upgrade cards (if not on PRO) */}
       {planoAtual !== 'PRO' && (
         <div>
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-            {planoAtual === 'FREE' ? 'Faça upgrade' : 'Upgrade disponível'}
+            {planoAtual === 'FREE' ? t('billing.doUpgrade') : t('billing.upgradeAvailable')}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Starter */}
@@ -237,34 +238,24 @@ export default function BillingPage() {
               <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">Starter</h3>
                 <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
-                  R$49<span className="text-base font-normal text-gray-500 dark:text-gray-400">/mes</span>
+                  R$49<span className="text-base font-normal text-gray-500 dark:text-gray-400">{t('billing.perMonth')}</span>
                 </p>
                 <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-center gap-2">
-                    <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    3 canais
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Sugestoes ilimitadas
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Widget basico
-                  </li>
+                  {(t('billing.plans.starter.features', { returnObjects: true }) as string[]).map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {feature}
+                    </li>
+                  ))}
                 </ul>
                 <button
                   onClick={() => handleCheckout('STARTER')}
                   disabled={loading === 'STARTER'}
                   className="mt-6 w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
                 >
-                  {loading === 'STARTER' ? 'Redirecionando...' : 'Assinar Starter'}
+                  {loading === 'STARTER' ? t('billing.redirecting') : `${t('billing.subscribeTo')} Starter`}
                 </button>
               </div>
             )}
@@ -274,64 +265,48 @@ export default function BillingPage() {
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">Pro</h3>
                 <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
-                  Popular
+                  {t('billing.plans.pro.popular')}
                 </span>
               </div>
               <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
-                R$129<span className="text-base font-normal text-gray-500 dark:text-gray-400">/mes</span>
+                R$129<span className="text-base font-normal text-gray-500 dark:text-gray-400">{t('billing.perMonth')}</span>
               </p>
               <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  10 canais
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Sugestoes ilimitadas
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  IA avancada + Changelog
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Suporte prioritario
-                </li>
+                {(t('billing.plans.pro.features', { returnObjects: true }) as string[]).map((feature) => (
+                  <li key={feature} className="flex items-center gap-2">
+                    <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {feature}
+                  </li>
+                ))}
               </ul>
               <button
                 onClick={() => handleCheckout('PRO')}
                 disabled={loading === 'PRO'}
                 className="mt-6 w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
               >
-                {loading === 'PRO' ? 'Redirecionando...' : 'Assinar Pro'}
+                {loading === 'PRO' ? t('billing.redirecting') : `${t('billing.subscribeTo')} Pro`}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Plano Business */}
+      {/* Business plan */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Business</h3>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Canais ilimitados, SSO, API, white-label e SLA dedicado.
+              {t('billing.plans.business.description')}
             </p>
           </div>
           <a
             href="mailto:contato@upvote.com"
             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
           >
-            Fale conosco
+            {t('billing.plans.business.contact')}
           </a>
         </div>
       </div>
