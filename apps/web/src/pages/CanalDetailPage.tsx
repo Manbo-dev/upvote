@@ -17,6 +17,7 @@ import {
   updateFeedbackGroupCategory,
   archiveAllDone,
   archiveFeedbackGroup,
+  exportFeedbackGroups,
   type FeedbackCategory,
   type FeedbackGroupResponse,
   type FeedbackGroupStatus,
@@ -212,6 +213,12 @@ export default function CanalDetailPage() {
   const [customTo, setCustomTo] = useState('');
   const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
   const dateRef = useRef<HTMLDivElement>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv');
+  const [exportStatus, setExportStatus] = useState<FeedbackGroupStatus | 'ALL'>('ALL');
+  const [exportIncludeDetails, setExportIncludeDetails] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(searchQuery), 200);
@@ -229,6 +236,18 @@ export default function CanalDetailPage() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [dateDropdownOpen]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
+        setExportOpen(false);
+      }
+    }
+    if (exportOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [exportOpen]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -398,6 +417,30 @@ export default function CanalDetailPage() {
     setDraggingGroup(null);
   }
 
+  function toDateParam(d: Date | null): string | undefined {
+    if (!d) return undefined;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      await exportFeedbackGroups(slug!, {
+        status: exportStatus !== 'ALL' ? exportStatus : undefined,
+        category: activeCategory !== 'ALL' ? activeCategory : undefined,
+        from: toDateParam(dateRange.from),
+        to: toDateParam(dateRange.to),
+        includeDetails: exportIncludeDetails,
+      });
+      setExportOpen(false);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -407,15 +450,105 @@ export default function CanalDetailPage() {
             Feedbacks capturados pelo widget sao agrupados automaticamente pela IA
           </p>
         </div>
-        <Link
-          to={`/dashboard/${slug}/arquivo`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-          </svg>
-          Archive
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Export CSV button + dropdown */}
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setExportOpen((o) => !o)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Export
+            </button>
+
+            {exportOpen && (
+              <div className="absolute right-0 z-50 mt-1 w-64 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Export report</p>
+
+                {/* Format selector */}
+                <div className="mb-3">
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Format</label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setExportFormat('csv')}
+                      className={`flex-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                        exportFormat === 'csv'
+                          ? 'border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                          : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      CSV
+                    </button>
+                    <button
+                      disabled
+                      className="flex-1 cursor-not-allowed rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-400 dark:border-gray-700 dark:text-gray-600"
+                      title="Coming soon"
+                    >
+                      PDF
+                      <span className="ml-1 text-[10px] opacity-60">soon</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Status</label>
+                  <select
+                    value={exportStatus}
+                    onChange={(e) => setExportStatus(e.target.value as FeedbackGroupStatus | 'ALL')}
+                    className="w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                  >
+                    <option value="ALL">All statuses</option>
+                    <option value="OPEN">Open</option>
+                    <option value="PLANNED">Planned</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="DONE">Done</option>
+                    <option value="CLOSED">Closed</option>
+                    <option value="ARCHIVED">Archived</option>
+                  </select>
+                </div>
+
+                <label className="mb-3 flex cursor-pointer items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={exportIncludeDetails}
+                    onChange={(e) => setExportIncludeDetails(e.target.checked)}
+                    className="rounded border-gray-300 text-primary-600 dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Include individual feedbacks</span>
+                </label>
+
+                {(activeCategory !== 'ALL' || datePreset !== 'ALL') && (
+                  <p className="mb-3 rounded-md bg-gray-50 px-2 py-1.5 text-xs text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                    Active filters applied:{' '}
+                    {activeCategory !== 'ALL' && <span className="font-medium">{activeCategory.toLowerCase()}</span>}
+                    {activeCategory !== 'ALL' && datePreset !== 'ALL' && ' · '}
+                    {datePreset !== 'ALL' && <span className="font-medium">{activeDateLabel.toLowerCase()}</span>}
+                  </p>
+                )}
+
+                <button
+                  onClick={handleExport}
+                  disabled={exporting}
+                  className="w-full rounded-md bg-primary-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-60"
+                >
+                  {exporting ? 'Exporting...' : `Download ${exportFormat.toUpperCase()}`}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <Link
+            to={`/dashboard/${slug}/arquivo`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            Archive
+          </Link>
+        </div>
       </div>
 
       {/* Search bar + date filter */}

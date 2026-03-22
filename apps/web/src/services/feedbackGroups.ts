@@ -115,3 +115,45 @@ export async function restoreFeedbackGroup(
   );
   return data.data;
 }
+
+// Downloads a CSV report of feedback groups with optional filters
+export async function exportFeedbackGroups(
+  slug: string,
+  options: {
+    status?: string;
+    category?: string;
+    from?: string;
+    to?: string;
+    includeDetails?: boolean;
+  },
+): Promise<void> {
+  const params = new URLSearchParams();
+  if (options.status && options.status !== 'ALL') params.set('status', options.status);
+  if (options.category && options.category !== 'ALL') params.set('category', options.category);
+  if (options.from) params.set('from', options.from);
+  if (options.to) params.set('to', options.to);
+  if (options.includeDetails) params.set('includeDetails', 'true');
+
+  const token = localStorage.getItem('token');
+  const baseUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
+  const query = params.toString();
+  const url = `${baseUrl}/api/canais/${slug}/report.csv${query ? '?' + query : ''}`;
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token ?? ''}` },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to export report');
+  }
+
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = `feedback-${slug}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(blobUrl);
+}
