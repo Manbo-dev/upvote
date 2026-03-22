@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -170,6 +170,13 @@ export default function CanalDetailPage() {
   const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [draggingGroup, setDraggingGroup] = useState<FeedbackGroupResponse | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 200);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -263,10 +270,17 @@ export default function CanalDetailPage() {
     },
   });
 
-  const filtered =
-    activeCategory === 'ALL'
-      ? feedbackGroups
-      : feedbackGroups?.filter((g) => g.category === activeCategory);
+  const filtered = feedbackGroups?.filter((g) => {
+    const matchesCategory = activeCategory === 'ALL' || g.category === activeCategory;
+    if (!matchesCategory) return false;
+    if (!debouncedQuery.trim()) return true;
+    const q = debouncedQuery.toLowerCase();
+    return (
+      g.title.toLowerCase().includes(q) ||
+      g.summary?.toLowerCase().includes(q) ||
+      g.topContext?.toLowerCase().includes(q)
+    );
+  });
 
   // Derive selectedGroup from live cache so modal reflects optimistic updates
   const selectedGroup = feedbackGroups?.find((g) => g.id === selectedGroupId) ?? null;
@@ -336,6 +350,38 @@ export default function CanalDetailPage() {
           </svg>
           Archive
         </Link>
+      </div>
+
+      {/* Search bar */}
+      <div className="relative mb-4">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+          <svg className="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setSearchQuery('');
+              (e.target as HTMLInputElement).blur();
+            }
+          }}
+          placeholder="Search feedbacks..."
+          className="block w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-primary-500"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <DndContext
@@ -415,6 +461,25 @@ export default function CanalDetailPage() {
                 />
               ))}
             </div>
+
+            {filtered?.length === 0 && (
+              <div className="col-span-full mt-2 rounded-xl border border-gray-200 p-8 text-center dark:border-gray-700">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  No feedbacks match{' '}
+                  {debouncedQuery && <span className="font-medium">"{debouncedQuery}"</span>}
+                  {debouncedQuery && activeCategory !== 'ALL' && ' in '}
+                  {activeCategory !== 'ALL' && (
+                    <span className="font-medium">{activeCategory.toLowerCase()}</span>
+                  )}
+                </p>
+                <button
+                  onClick={() => { setSearchQuery(''); setActiveCategory('ALL'); }}
+                  className="mt-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
 
             <DragOverlay>
               {draggingGroup ? (
