@@ -7,14 +7,18 @@ import {
 } from '../services/feedbackGroups';
 import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 import Modal from './Modal';
-import StatusBadge from './StatusBadge';
 
-const ALL_STATUSES: FeedbackGroupStatus[] = [
-  'OPEN',
-  'PLANNED',
-  'IN_PROGRESS',
-  'DONE',
-  'CLOSED',
+const STATUS_OPTIONS: {
+  value: FeedbackGroupStatus;
+  label: string;
+  dotClass: string;
+  activeClasses: string;
+}[] = [
+  { value: 'OPEN', label: 'Aberta', dotClass: 'bg-blue-500', activeClasses: 'bg-blue-100 text-blue-700 ring-blue-400 dark:bg-blue-900/40 dark:text-blue-300 dark:ring-blue-600' },
+  { value: 'PLANNED', label: 'Planejada', dotClass: 'bg-yellow-500', activeClasses: 'bg-yellow-100 text-yellow-700 ring-yellow-400 dark:bg-yellow-900/40 dark:text-yellow-300 dark:ring-yellow-600' },
+  { value: 'IN_PROGRESS', label: 'Em progresso', dotClass: 'bg-orange-500', activeClasses: 'bg-orange-100 text-orange-700 ring-orange-400 dark:bg-orange-900/40 dark:text-orange-300 dark:ring-orange-600' },
+  { value: 'DONE', label: 'Concluída', dotClass: 'bg-green-500', activeClasses: 'bg-green-100 text-green-700 ring-green-400 dark:bg-green-900/40 dark:text-green-300 dark:ring-green-600' },
+  { value: 'CLOSED', label: 'Fechada', dotClass: 'bg-gray-400', activeClasses: 'bg-gray-100 text-gray-700 ring-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600' },
 ];
 
 const CATEGORY_OPTIONS: {
@@ -122,25 +126,32 @@ export default function FeedbackGroupDetailModal({
           </div>
         </div>
 
-        {/* Resumo e status */}
+        {/* Resumo */}
         <div>
           <p className="text-sm text-gray-600 dark:text-gray-400">{group.summary}</p>
-          <div className="mt-3 flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
-            <select
-              value={group.status}
-              onChange={(e) =>
-                onStatusChange(group.id, e.target.value as FeedbackGroupStatus)
-              }
-              className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-            >
-              {ALL_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <StatusBadge status={group.status} />
+        </div>
+
+        {/* Status */}
+        <div>
+          <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">Status</p>
+          <div className="flex flex-wrap gap-2">
+            {STATUS_OPTIONS.map((opt) => {
+              const isActive = group.status === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => onStatusChange(group.id, opt.value)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                    isActive
+                      ? `ring-2 ${opt.activeClasses}`
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <span className={`h-2 w-2 rounded-full ${isActive ? opt.dotClass : 'bg-gray-400 dark:bg-gray-500'}`} />
+                  {opt.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 

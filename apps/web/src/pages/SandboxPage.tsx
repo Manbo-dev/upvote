@@ -129,7 +129,7 @@ export default function SandboxPage() {
                   <div className="flex-1 h-8 rounded-md border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 flex items-center px-3">
                     <span className="text-[11px] text-gray-400 dark:text-gray-500">Código de cupom</span>
                   </div>
-                  <button className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 px-3 rounded-md border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 h-8">
+                  <button className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 px-3 rounded-md border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 h-8">
                     Aplicar
                   </button>
                 </div>
@@ -151,7 +151,7 @@ export default function SandboxPage() {
                 </div>
 
                 {/* Botão pagar */}
-                <button className="w-full h-9 bg-indigo-600 rounded-lg flex items-center justify-center gap-2">
+                <button className="w-full h-9 bg-blue-600 rounded-lg flex items-center justify-center gap-2">
                   <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                   </svg>
