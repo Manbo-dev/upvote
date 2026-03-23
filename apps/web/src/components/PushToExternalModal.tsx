@@ -7,7 +7,6 @@ import {
   listProjects,
   pushToExternal,
   type IntegrationResponse,
-  type ProjectOption,
 } from '../services/integrations';
 
 interface PushToExternalModalProps {
