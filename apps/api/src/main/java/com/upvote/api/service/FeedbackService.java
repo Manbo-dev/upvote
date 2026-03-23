@@ -53,6 +53,7 @@ public class FeedbackService {
     private final CanalRepository canalRepository;
     private final AiService aiService;
     private final FeedbackProducer feedbackProducer;
+    private final IntegrationService integrationService;
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -237,8 +238,11 @@ public class FeedbackService {
                     canal.getId(), List.of(FeedbackGroupStatus.ARCHIVED));
         }
 
+        List<UUID> groupIds = groups.stream().map(FeedbackGroup::getId).toList();
+        var externalIssuesMap = integrationService.getExternalIssuesForGroups(groupIds);
+
         return groups.stream()
-                .map(this::toGroupResponse)
+                .map(g -> toGroupResponse(g, externalIssuesMap.getOrDefault(g.getId(), List.of())))
                 .toList();
     }
 
@@ -331,6 +335,10 @@ public class FeedbackService {
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private FeedbackGroupResponse toGroupResponse(FeedbackGroup group) {
+        return toGroupResponse(group, List.of());
+    }
+
+    private FeedbackGroupResponse toGroupResponse(FeedbackGroup group, List<com.upvote.api.dto.ExternalIssueResponse> externalIssues) {
         String topContext = buildTopContext(group);
         return new FeedbackGroupResponse(
                 group.getId(),
@@ -340,6 +348,7 @@ public class FeedbackService {
                 group.getStatus().name(),
                 group.getCategory().name(),
                 topContext,
+                externalIssues.isEmpty() ? null : externalIssues,
                 group.getCreatedAt(),
                 group.getUpdatedAt()
         );

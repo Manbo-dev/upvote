@@ -256,6 +256,104 @@ STRIPE_PRO_PRICE_ID=price_...
 ### Migration
 - `V6__create_subscriptions.sql` — cria tabela `subscriptions` e popula todas Organizations existentes com plano FREE
 
+## Integrações Externas (Jira / ClickUp)
+
+### Visão geral
+Permite que feedback groups do Upvote sejam enviados (push) como issues no Jira ou tasks no ClickUp.
+Integração bidirecional: push do Upvote → ferramenta externa, e webhooks para sincronizar mudanças de status de volta.
+
+### Fluxo
+1. Usuário conecta Jira ou ClickUp via OAuth2 em Configurações → Integrações
+2. No modal de detalhe de um feedback group, clica em "Push" para criar uma issue/task
+3. Seleciona o projeto (Jira) ou lista (ClickUp) de destino
+4. Issue/task é criada na ferramenta externa com título, descrição, votos e contexto
+5. Badge linkado aparece no card e no modal
+6. Webhooks recebem mudanças de status e sincronizam de volta para o Upvote
+
+### Arquitetura backend
+
+- **Entidade `Integration`** — credenciais OAuth por usuário/provedor. Um registro por provedor por usuário.
+- **Entidade `ExternalIssue`** — vínculo entre FeedbackGroup e issue/task externa. Um por provedor por grupo.
+- **Enum `IntegrationProvider`** — JIRA, CLICKUP
+- **`JiraIntegrationService`** — OAuth token exchange, refresh, create issue, list projects via REST API v3
+- **`ClickUpIntegrationService`** — OAuth token exchange, create task, list spaces/folders/lists via API v2
+- **`IntegrationService`** — orquestrador central: CRUD de integrações, push-to-external, processamento de webhooks, mapeamento de status
+- **`IntegrationController`** — endpoints autenticados para gestão de integrações e push
+- **`IntegrationWebhookController`** — endpoints públicos para receber webhooks do Jira e ClickUp
+
+### Endpoints da API
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| GET | `/api/integrations` | JWT | Lista integrações conectadas |
+| GET | `/api/integrations/jira/authorize` | JWT | Retorna URL de autorização OAuth Jira |
+| GET | `/api/integrations/clickup/authorize` | JWT | Retorna URL de autorização OAuth ClickUp |
+| GET | `/api/integrations/jira/callback` | Público | Callback OAuth Jira (troca code por tokens) |
+| GET | `/api/integrations/clickup/callback` | Público | Callback OAuth ClickUp |
+| DELETE | `/api/integrations/{id}` | JWT | Desconecta uma integração |
+| GET | `/api/integrations/{id}/projects` | JWT | Lista projetos (Jira) ou lists (ClickUp) |
+| POST | `/api/integrations/push/{feedbackGroupId}` | JWT | Cria issue/task na ferramenta externa |
+| GET | `/api/integrations/external-issues/{feedbackGroupId}` | JWT | Lista issues externas de um grupo |
+| DELETE | `/api/integrations/external-issues/{externalIssueId}` | JWT | Remove vínculo com issue externa |
+| POST | `/api/webhooks/jira` | Público | Webhook Jira (status updates) |
+| POST | `/api/webhooks/clickup` | Público | Webhook ClickUp (status updates) |
+
+### Mapeamento de status (webhook → Upvote)
+
+#### Jira → Upvote
+| Jira Status | Upvote Status |
+|-------------|---------------|
+| To Do, Backlog, Open | OPEN |
+| Selected for Development, Planned | PLANNED |
+| In Progress, In Review | IN_PROGRESS |
+| Done, Closed, Resolved | DONE |
+
+#### ClickUp → Upvote
+| ClickUp Status | Upvote Status |
+|----------------|---------------|
+| Open, To Do | OPEN |
+| Planned | PLANNED |
+| In Progress | IN_PROGRESS |
+| Complete, Done, Closed | DONE |
+
+**Nota:** Feedbacks com status ARCHIVED ou CLOSED no Upvote **não** são atualizados por webhooks.
+
+### Frontend
+- **`IntegrationsPage.tsx`** — página dedicada no sidebar (`/dashboard/integrations`)
+- **`IntegrationsSettings.tsx`** — componente com cards para conectar/desconectar Jira e ClickUp
+- **`PushToExternalModal.tsx`** — modal para selecionar integração, projeto/lista e criar issue/task
+- **`IntegrationCallbackPage.tsx`** — página de callback OAuth (troca code por tokens e redireciona)
+- **`FeedbackGroupCard.tsx`** — badges clicáveis para issues externas vinculadas (azul=Jira, roxo=ClickUp)
+- **`FeedbackGroupDetailModal.tsx`** — botão "Push" e badges de issues externas no modal de detalhe
+
+### Variáveis de ambiente necessárias
+```
+JIRA_CLIENT_ID=...           # Jira OAuth App Client ID
+JIRA_CLIENT_SECRET=...       # Jira OAuth App Client Secret
+CLICKUP_CLIENT_ID=...        # ClickUp OAuth App Client ID
+CLICKUP_CLIENT_SECRET=...    # ClickUp OAuth App Client Secret
+OAUTH_CALLBACK_BASE_URL=http://localhost:5173  # Base URL for OAuth redirects
+```
+
+Sem essas variáveis, os botões de conectar continuam visíveis mas o OAuth falha graciosamente.
+
+### Configurar OAuth Apps
+
+#### Jira
+1. Acessar https://developer.atlassian.com/console/myapps/
+2. Criar um OAuth 2.0 (3LO) app
+3. Scopes necessários: `read:jira-work`, `write:jira-work`, `offline_access`
+4. Callback URL: `{OAUTH_CALLBACK_BASE_URL}/integrations/jira/callback`
+5. Copiar Client ID e Secret para as variáveis de ambiente
+
+#### ClickUp
+1. Acessar https://app.clickup.com/settings/integrations → Create an App
+2. Redirect URL: `{OAUTH_CALLBACK_BASE_URL}/integrations/clickup/callback`
+3. Copiar Client ID e Secret para as variáveis de ambiente
+
+### Migration
+- `V20260322000000__create_integrations_tables.sql` — cria tabelas `integrations` e `external_issues` com constraints e índices
+
 ## Infraestrutura
 
 ### Stack de infraestrutura
@@ -308,7 +406,7 @@ echo -n "novo-valor" | gcloud secrets versions add NOME_DO_SECRET --data-file=- 
 - Rollout aguardado com `kubectl rollout status`
 
 ### Secrets gerenciados pelo Google Secret Manager
-`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `CORS_ORIGINS`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_STARTER_PRICE_ID`, `STRIPE_PRO_PRICE_ID`, `GEMINI_API_KEY`
+`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `CORS_ORIGINS`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_STARTER_PRICE_ID`, `STRIPE_PRO_PRICE_ID`, `GEMINI_API_KEY`, `JIRA_CLIENT_ID`, `JIRA_CLIENT_SECRET`, `CLICKUP_CLIENT_ID`, `CLICKUP_CLIENT_SECRET`, `OAUTH_CALLBACK_BASE_URL`
 
 ### GitHub Actions secrets necessários
 - `GCP_PROJECT_ID` = `project-38c32df4-c37c-41d9-b5d`
@@ -379,6 +477,7 @@ modal.*        — modal de detalhe do feedback group
 card.*         — FeedbackGroupCard (relative time, botões de ação)
 kanbanColumn.* — KanbanColumn (estado vazio)
 landing.*      — LandingPage (nav, hero, stats, how it works, features, pricing, footer)
+integrations.* — Integrations settings + push modal (connect, disconnect, push, errors)
 ```
 
 ### Adicionar um novo idioma

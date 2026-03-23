@@ -48,6 +48,9 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/api/stripe/webhook").permitAll()
+                        .requestMatchers("/api/integrations/jira/callback").permitAll()
+                        .requestMatchers("/api/integrations/clickup/callback").permitAll()
+                        .requestMatchers("/api/webhooks/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

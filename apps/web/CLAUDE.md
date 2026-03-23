@@ -19,6 +19,8 @@
 - /dashboard → privado, lista canais do owner autenticado
 - /dashboard/:canalId → privado, gerencia feedbacks do canal (kanban board)
 - /dashboard/:canalId/arquivo → privado, feedbacks arquivados do canal
+- /dashboard/integrations → privado, conectar/desconectar Jira e ClickUp
+- /integrations/:provider/callback → público, callback OAuth (Jira/ClickUp)
 - /b/:slug → público, board de sugestões (acesso sem login)
 Rotas privadas redirecionam para /login se não autenticado.
 

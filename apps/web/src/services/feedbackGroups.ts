@@ -5,6 +5,14 @@ export type FeedbackGroupStatus = 'OPEN' | 'PLANNED' | 'IN_PROGRESS' | 'DONE' | 
 // Resposta de um grupo de feedbacks agrupados pela IA
 export type FeedbackCategory = 'BUG' | 'SUGGESTION' | 'COMPLAINT' | 'PRAISE';
 
+export interface ExternalIssueInfo {
+  id: string;
+  provider: 'JIRA' | 'CLICKUP';
+  externalId: string;
+  externalUrl: string;
+  externalStatus: string;
+}
+
 export interface FeedbackGroupResponse {
   id: string;
   title: string;
@@ -13,6 +21,7 @@ export interface FeedbackGroupResponse {
   status: FeedbackGroupStatus;
   category: FeedbackCategory;
   topContext: string; // ex: "apos 'botao Pagar' na tela de checkout"
+  externalIssues?: ExternalIssueInfo[];
   createdAt: string;
   updatedAt: string;
 }

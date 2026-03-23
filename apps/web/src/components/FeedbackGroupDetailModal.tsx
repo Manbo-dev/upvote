@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,6 +9,7 @@ import {
 } from '../services/feedbackGroups';
 import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 import Modal from './Modal';
+import PushToExternalModal from './PushToExternalModal';
 
 interface FeedbackGroupDetailModalProps {
   group: FeedbackGroupResponse | null;
@@ -72,6 +74,7 @@ export default function FeedbackGroupDetailModal({
   onCategoryChange,
 }: FeedbackGroupDetailModalProps) {
   const { t, i18n } = useTranslation();
+  const [showPushModal, setShowPushModal] = useState(false);
 
   const { data: feedbacks, isLoading } = useQuery({
     queryKey: ['feedback-group-details', group?.id],
@@ -149,8 +152,8 @@ export default function FeedbackGroupDetailModal({
           </div>
         )}
 
-        {/* Vote count */}
-        <div className="flex items-center gap-2">
+        {/* Vote count + Push to external */}
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -160,6 +163,40 @@ export default function FeedbackGroupDetailModal({
               ? t('modal.feedbackDetail.reports')
               : t('modal.feedbackDetail.reportsPlural')}
           </span>
+
+          {/* External issue badges */}
+          {group.externalIssues?.map((issue) => (
+            <a
+              key={issue.id}
+              href={issue.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-all hover:opacity-80 ${
+                issue.provider === 'JIRA'
+                  ? 'border border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                  : 'border border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+              }`}
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              {issue.externalId}
+              {issue.externalStatus && (
+                <span className="text-xs opacity-70">· {issue.externalStatus}</span>
+              )}
+            </a>
+          ))}
+
+          {/* Push button */}
+          <button
+            onClick={() => setShowPushModal(true)}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            {t('integrations.push.pushButton')}
+          </button>
         </div>
 
         {/* Individual feedbacks list */}
@@ -185,6 +222,14 @@ export default function FeedbackGroupDetailModal({
           )}
         </div>
       </div>
+      {showPushModal && (
+        <PushToExternalModal
+          isOpen={showPushModal}
+          feedbackGroupId={group.id}
+          feedbackGroupTitle={group.title}
+          onClose={() => setShowPushModal(false)}
+        />
+      )}
     </Modal>
   );
 }

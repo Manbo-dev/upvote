@@ -12,6 +12,8 @@ import LandingPage from './pages/LandingPage';
 import SandboxPage from './pages/SandboxPage';
 import BillingPage from './pages/BillingPage';
 import ArchivePage from './pages/ArchivePage';
+import IntegrationsPage from './pages/IntegrationsPage';
+import IntegrationCallbackPage from './pages/IntegrationCallbackPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import { useThemeStore } from './store/themeStore';
@@ -40,6 +42,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/sandbox" element={<SandboxPage />} />
+      <Route path="/integrations/:provider/callback" element={<IntegrationCallbackPage />} />
       <Route
         path="/dashboard"
         element={
@@ -53,6 +56,7 @@ function App() {
         <Route path=":canalId/arquivo" element={<ArchivePage />} />
         <Route path="api-keys" element={<ApiKeysPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="integrations" element={<IntegrationsPage />} />
         <Route path="billing" element={<BillingPage />} />
       </Route>
       <Route path="/" element={<RootRoute />} />

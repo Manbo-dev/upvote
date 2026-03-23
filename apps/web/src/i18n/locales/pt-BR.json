@@ -17,6 +17,7 @@
     "channels": "Canais",
     "apiKeys": "Chaves de API",
     "subscription": "Assinatura",
+    "integrations": "Integrações",
     "settings": "Configurações",
     "logout": "Sair",
     "toggleSidebar": "Alternar sidebar",
@@ -187,6 +188,30 @@
     "email": "Email",
     "widgetSection": "Widget de Feedback",
     "widgetDescription": "Copie o código abaixo e adicione ao seu site para ativar o widget de feedback."
+  },
+  "integrations": {
+    "title": "Integrações",
+    "description": "Conecte ferramentas externas para enviar grupos de feedback como issues ou tarefas.",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "connectedTo": "Conectado a",
+    "notConnected": "Não conectado",
+    "connecting": "Conectando...",
+    "callbackError": "Falha ao completar a integração. Tente novamente.",
+    "push": {
+      "title": "Enviar para ferramenta externa",
+      "pushButton": "Enviar",
+      "pushingItem": "Criando issue para",
+      "selectIntegration": "Selecionar integração",
+      "project": "Projeto",
+      "list": "Lista",
+      "issueType": "Tipo de issue",
+      "selectProject": "Selecione um projeto",
+      "selectList": "Selecione uma lista",
+      "createIssue": "Criar issue",
+      "noIntegrations": "Nenhuma integração conectada. Vá em Configurações → Integrações para conectar Jira ou ClickUp.",
+      "error": "Falha ao criar issue. Tente novamente."
+    }
   },
   "apiKeys": {
     "title": "Chaves de API",

@@ -105,6 +105,26 @@ export default function FeedbackGroupCard({
 
         <div className="flex flex-wrap items-center gap-1.5">
           <CategoryBadge category={group.category} />
+          {group.externalIssues?.map((issue) => (
+            <a
+              key={issue.id}
+              href={issue.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium transition-all hover:opacity-80 ${
+                issue.provider === 'JIRA'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                  : 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
+              }`}
+              title={`${issue.provider}: ${issue.externalStatus || ''}`}
+            >
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              {issue.externalId}
+            </a>
+          ))}
           {group.topContext && (
             <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
               {group.topContext}
@@ -153,6 +173,26 @@ export default function FeedbackGroupCard({
           </h3>
           <CategoryBadge category={group.category} />
           <StatusBadge status={group.status} />
+          {group.externalIssues?.map((issue) => (
+            <a
+              key={issue.id}
+              href={issue.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium transition-all hover:opacity-80 ${
+                issue.provider === 'JIRA'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                  : 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
+              }`}
+              title={`${issue.provider}: ${issue.externalStatus || ''}`}
+            >
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              {issue.externalId}
+            </a>
+          ))}
         </div>
 
         {group.summary && (
