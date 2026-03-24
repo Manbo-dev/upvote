@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
@@ -159,13 +160,13 @@ public class JiraIntegrationService {
         ensureTokenValid(integration);
         String url = API_BASE + integration.getCloudId() + "/rest/api/3/project/search";
 
-        String response = restClient.get()
-                .uri(url)
-                .header("Authorization", "Bearer " + integration.getAccessToken())
-                .retrieve()
-                .body(String.class);
-
         try {
+            String response = restClient.get()
+                    .uri(url)
+                    .header("Authorization", "Bearer " + integration.getAccessToken())
+                    .retrieve()
+                    .body(String.class);
+
             JsonNode root = objectMapper.readTree(response);
             List<Map<String, String>> projects = new ArrayList<>();
             for (JsonNode p : root.path("values")) {
@@ -176,6 +177,9 @@ public class JiraIntegrationService {
                 ));
             }
             return projects;
+        } catch (HttpStatusCodeException e) {
+            log.error("[JIRA] HTTP error listing projects: status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new BusinessException("Failed to list Jira projects: " + e.getStatusCode());
         } catch (Exception e) {
             log.error("[JIRA] Failed to list projects", e);
             throw new BusinessException("Failed to list Jira projects");
@@ -211,15 +215,15 @@ public class JiraIntegrationService {
                 )
         );
 
-        String response = restClient.post()
-                .uri(url)
-                .header("Authorization", "Bearer " + integration.getAccessToken())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .body(String.class);
-
         try {
+            String response = restClient.post()
+                    .uri(url)
+                    .header("Authorization", "Bearer " + integration.getAccessToken())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .body(String.class);
+
             JsonNode node = objectMapper.readTree(response);
             String issueKey = node.path("key").asText();
             String issueUrl = integration.getSiteUrl() + "/browse/" + issueKey;
@@ -228,6 +232,9 @@ public class JiraIntegrationService {
                     "issueUrl", issueUrl,
                     "issueId", node.path("id").asText()
             );
+        } catch (HttpStatusCodeException e) {
+            log.error("[JIRA] HTTP error creating issue: status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new BusinessException("Failed to create Jira issue: " + e.getStatusCode());
         } catch (Exception e) {
             log.error("[JIRA] Failed to create issue", e);
             throw new BusinessException("Failed to create Jira issue");

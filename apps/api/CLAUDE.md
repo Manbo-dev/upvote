@@ -48,6 +48,17 @@ Apenas o owner do canal pode alterar o status.
     - GET /api/suggestions/{id}/comments
 - Todo o resto exige Bearer token no header Authorization
 
+## Logging
+
+- Use `@Slf4j` (Lombok) in all new classes — never `LoggerFactory.getLogger()` manually
+- Every controller endpoint must log at `INFO` on entry with key request params
+- Every service method that calls an external API must log on success **and** on error
+- Use structured parameters, not string concatenation: `log.info("...: id={}, status={}", id, status)`
+- Use context prefix in integration/external-call logs: `[JIRA]`, `[INTEGRATION]`, `[STRIPE]`
+- HTTP errors from `RestClient` must be caught explicitly (`HttpStatusCodeException`) and logged with status + response body before re-throwing as `BusinessException`
+- `GlobalExceptionHandler.handleGeneric()` must log at `ERROR` level before returning 500 — otherwise unhandled exceptions are invisible in production
+- All requests are automatically logged by `RequestLoggingFilter` (`@Order(3)`) — method, URI, query string, response status and elapsed time. `transactionId` (set by `TransactionFilter`) is included automatically via MDC
+
 ## Banco de dados
 
 - PostgreSQL 15
