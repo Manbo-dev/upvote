@@ -206,6 +206,7 @@
       "project": "Project",
       "list": "List",
       "issueType": "Issue type",
+      "selectIssueType": "Select an issue type",
       "selectProject": "Select a project",
       "selectList": "Select a list",
       "createIssue": "Create issue",

@@ -187,6 +187,41 @@ public class JiraIntegrationService {
     }
 
     /**
+     * Lists issue types available for a specific project.
+     * Returns a list of maps with keys: id, name.
+     */
+    public List<Map<String, String>> listIssueTypes(Integration integration, String projectKey) {
+        ensureTokenValid(integration);
+        String url = API_BASE + integration.getCloudId() + "/rest/api/3/project/" + projectKey;
+
+        try {
+            String response = restClient.get()
+                    .uri(url)
+                    .header("Authorization", "Bearer " + integration.getAccessToken())
+                    .retrieve()
+                    .body(String.class);
+
+            JsonNode root = objectMapper.readTree(response);
+            List<Map<String, String>> issueTypes = new ArrayList<>();
+            for (JsonNode t : root.path("issueTypes")) {
+                if (!t.path("subtask").asBoolean(false)) {
+                    issueTypes.add(Map.of(
+                            "id", t.path("id").asText(),
+                            "name", t.path("name").asText()
+                    ));
+                }
+            }
+            return issueTypes;
+        } catch (HttpStatusCodeException e) {
+            log.error("[JIRA] HTTP error listing issue types for project={}: status={}, body={}", projectKey, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new BusinessException("Failed to list Jira issue types: " + e.getStatusCode());
+        } catch (Exception e) {
+            log.error("[JIRA] Failed to list issue types for project={}", projectKey, e);
+            throw new BusinessException("Failed to list Jira issue types");
+        }
+    }
+
+    /**
      * Creates an issue in Jira and returns the issue key and URL.
      */
     public Map<String, String> createIssue(Integration integration, String projectKey,

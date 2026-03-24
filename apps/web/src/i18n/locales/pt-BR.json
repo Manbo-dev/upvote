@@ -206,6 +206,7 @@
       "project": "Projeto",
       "list": "Lista",
       "issueType": "Tipo de issue",
+      "selectIssueType": "Selecione o tipo de issue",
       "selectProject": "Selecione um projeto",
       "selectList": "Selecione uma lista",
       "createIssue": "Criar issue",

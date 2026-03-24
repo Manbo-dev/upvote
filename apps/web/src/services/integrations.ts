@@ -57,6 +57,18 @@ export async function listProjects(integrationId: string): Promise<ProjectOption
   return data.data;
 }
 
+export interface IssueTypeOption {
+  id: string;
+  name: string;
+}
+
+export async function listIssueTypes(integrationId: string, projectKey: string): Promise<IssueTypeOption[]> {
+  const { data } = await api.get<ApiResult<IssueTypeOption[]>>(
+    `/integrations/${integrationId}/projects/${projectKey}/issue-types`,
+  );
+  return data.data;
+}
+
 // ── Push to external ────────────────────────────────────────────────────────
 
 export async function pushToExternal(

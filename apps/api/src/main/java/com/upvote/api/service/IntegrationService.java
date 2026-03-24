@@ -166,6 +166,19 @@ public class IntegrationService {
         };
     }
 
+    // ── List issue types (Jira only) ────────────────────────────────────────
+
+    @Transactional
+    public List<Map<String, String>> listIssueTypes(UUID userId, UUID integrationId, String projectKey) {
+        Integration integration = getIntegrationForUser(userId, integrationId);
+
+        if (integration.getProvider() != IntegrationProvider.JIRA) {
+            throw new BusinessException("Issue types are only available for Jira integrations");
+        }
+
+        return jiraService.listIssueTypes(integration, projectKey);
+    }
+
     // ── Push to external ────────────────────────────────────────────────────
 
     @Transactional

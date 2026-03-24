@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import Modal from './Modal';
 import {
   getIntegrations,
   listProjects,
+  listIssueTypes,
   pushToExternal,
   type IntegrationResponse,
 } from '../services/integrations';
@@ -27,7 +28,7 @@ export default function PushToExternalModal({
 
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationResponse | null>(null);
   const [selectedProject, setSelectedProject] = useState('');
-  const [issueType, setIssueType] = useState('Task');
+  const [issueType, setIssueType] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const { data: integrations = [], isLoading: loadingIntegrations } = useQuery({
@@ -41,6 +42,18 @@ export default function PushToExternalModal({
     queryFn: () => listProjects(selectedIntegration!.id),
     enabled: !!selectedIntegration,
   });
+
+  const { data: issueTypes = [], isLoading: loadingIssueTypes } = useQuery({
+    queryKey: ['integration-issue-types', selectedIntegration?.id, selectedProject],
+    queryFn: () => listIssueTypes(selectedIntegration!.id, selectedProject),
+    enabled: !!selectedIntegration && selectedIntegration.provider === 'JIRA' && !!selectedProject,
+  });
+
+  useEffect(() => {
+    if (issueTypes.length > 0 && !issueType) {
+      setIssueType(issueTypes[0].name);
+    }
+  }, [issueTypes]);
 
   const pushMutation = useMutation({
     mutationFn: () => {
@@ -70,6 +83,10 @@ export default function PushToExternalModal({
       );
       return;
     }
+    if (selectedIntegration?.provider === 'JIRA' && !issueType) {
+      setError(t('integrations.push.selectIssueType'));
+      return;
+    }
     setError(null);
     pushMutation.mutate();
   };
@@ -77,7 +94,13 @@ export default function PushToExternalModal({
   const handleIntegrationSelect = (integration: IntegrationResponse) => {
     setSelectedIntegration(integration);
     setSelectedProject('');
+    setIssueType('');
     setError(null);
+  };
+
+  const handleProjectSelect = (projectKey: string) => {
+    setSelectedProject(projectKey);
+    setIssueType('');
   };
 
   return (
@@ -145,7 +168,7 @@ export default function PushToExternalModal({
             ) : (
               <select
                 value={selectedProject}
-                onChange={(e) => setSelectedProject(e.target.value)}
+                onChange={(e) => handleProjectSelect(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               >
                 <option value="">
@@ -164,21 +187,27 @@ export default function PushToExternalModal({
         )}
 
         {/* Issue type (Jira only) */}
-        {selectedIntegration?.provider === 'JIRA' && (
+        {selectedIntegration?.provider === 'JIRA' && selectedProject && (
           <div>
             <label className="mb-2 block text-xs font-medium text-gray-500 dark:text-gray-400">
               {t('integrations.push.issueType')}
             </label>
-            <select
-              value={issueType}
-              onChange={(e) => setIssueType(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-            >
-              <option value="Task">Task</option>
-              <option value="Story">Story</option>
-              <option value="Bug">Bug</option>
-              <option value="Epic">Epic</option>
-            </select>
+            {loadingIssueTypes ? (
+              <div className="flex justify-center py-3">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-200 border-t-primary-600" />
+              </div>
+            ) : (
+              <select
+                value={issueType}
+                onChange={(e) => setIssueType(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              >
+                <option value="">{t('integrations.push.selectIssueType')}</option>
+                {issueTypes.map((it) => (
+                  <option key={it.id} value={it.name}>{it.name}</option>
+                ))}
+              </select>
+            )}
           </div>
         )}
 

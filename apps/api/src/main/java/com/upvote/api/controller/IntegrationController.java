@@ -108,6 +108,19 @@ public class IntegrationController {
     }
 
     /**
+     * Lists issue types for a specific Jira project.
+     */
+    @GetMapping("/{id}/projects/{projectKey}/issue-types")
+    public ResponseEntity<ApiResponse<List<Map<String, String>>>> listIssueTypes(
+            @PathVariable UUID id,
+            @PathVariable String projectKey,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = getUserId(userDetails);
+        List<Map<String, String>> issueTypes = integrationService.listIssueTypes(userId, id, projectKey);
+        return ResponseEntity.ok(ApiResponse.ok(issueTypes));
+    }
+
+    /**
      * Pushes a feedback group to an external tool as an issue/task.
      */
     @PostMapping("/push/{feedbackGroupId}")
