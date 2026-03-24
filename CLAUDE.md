@@ -263,7 +263,7 @@ Permite que feedback groups do Upvote sejam enviados (push) como issues no Jira 
 Integração bidirecional: push do Upvote → ferramenta externa, e webhooks para sincronizar mudanças de status de volta.
 
 ### Fluxo
-1. Usuário conecta Jira ou ClickUp via OAuth2 em Configurações → Integrações
+1. Usuário conecta Jira ou ClickUp via OAuth2 em **Integrações** (item dedicado no sidebar)
 2. No modal de detalhe de um feedback group, clica em "Push" para criar uma issue/task
 3. Seleciona o projeto (Jira) ou lista (ClickUp) de destino
 4. Issue/task é criada na ferramenta externa com título, descrição, votos e contexto
@@ -332,7 +332,7 @@ JIRA_CLIENT_ID=...           # Jira OAuth App Client ID
 JIRA_CLIENT_SECRET=...       # Jira OAuth App Client Secret
 CLICKUP_CLIENT_ID=...        # ClickUp OAuth App Client ID
 CLICKUP_CLIENT_SECRET=...    # ClickUp OAuth App Client Secret
-OAUTH_CALLBACK_BASE_URL=http://localhost:5173  # Base URL for OAuth redirects
+OAUTH_CALLBACK_BASE_URL=http://localhost:5173  # dev | https://upvote.pro em produção
 ```
 
 Sem essas variáveis, os botões de conectar continuam visíveis mas o OAuth falha graciosamente.
@@ -341,14 +341,18 @@ Sem essas variáveis, os botões de conectar continuam visíveis mas o OAuth fal
 
 #### Jira
 1. Acessar https://developer.atlassian.com/console/myapps/
-2. Criar um OAuth 2.0 (3LO) app
-3. Scopes necessários: `read:jira-work`, `write:jira-work`, `offline_access`
-4. Callback URL: `{OAUTH_CALLBACK_BASE_URL}/integrations/jira/callback`
-5. Copiar Client ID e Secret para as variáveis de ambiente
+2. Criar um OAuth 2.0 (3LO) app chamado "upvote"
+3. Em **Authorization**, adicionar as duas Callback URLs (uma por linha):
+   - `https://upvote.pro/integrations/jira/callback` (produção)
+   - `http://localhost:5173/integrations/jira/callback` (dev)
+4. Em **Permissions → Jira API**, adicionar scopes: `read:jira-work`, `write:jira-work`
+5. Em **Settings**, copiar Client ID e Secret para as variáveis de ambiente
 
 #### ClickUp
 1. Acessar https://app.clickup.com/settings/integrations → Create an App
-2. Redirect URL: `{OAUTH_CALLBACK_BASE_URL}/integrations/clickup/callback`
+2. Adicionar as duas Redirect URLs:
+   - `https://upvote.pro/integrations/clickup/callback` (produção)
+   - `http://localhost:5173/integrations/clickup/callback` (dev)
 3. Copiar Client ID e Secret para as variáveis de ambiente
 
 ### Migration
