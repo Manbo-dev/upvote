@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/widget/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/canais/*").permitAll()
-                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/api/stripe/webhook").permitAll()
                         .requestMatchers("/api/integrations/jira/callback").permitAll()

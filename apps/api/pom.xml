@@ -124,6 +124,12 @@
             <version>31.4.1</version>
         </dependency>
 
+        <!-- Prometheus metrics via Micrometer -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
         <!-- Logging estruturado (JSON) para Cloud Logging -->
         <dependency>
             <groupId>net.logstash.logback</groupId>

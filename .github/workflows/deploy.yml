@@ -184,6 +184,9 @@ jobs:
       - name: Aplicar HPA
         run: kubectl apply -f infra/k8s/hpa.yaml
 
+      - name: Aplicar PodMonitoring (Managed Prometheus)
+        run: kubectl apply -f infra/k8s/pod-monitor.yaml
+
       - name: Aguardar rollout da API
         run: kubectl rollout status deployment/api -n ${{ env.NAMESPACE }} --timeout=300s
 

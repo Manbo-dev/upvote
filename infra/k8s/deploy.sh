@@ -54,6 +54,9 @@ kubectl apply -f "${MANIFEST_DIR}/deployment.yaml"
 echo "==> Aplicando HPA..."
 kubectl apply -f "${MANIFEST_DIR}/hpa.yaml"
 
+echo "==> Aplicando PodMonitoring (Managed Prometheus)..."
+kubectl apply -f "${MANIFEST_DIR}/pod-monitor.yaml"
+
 echo "==> Aguardando API ficar pronta..."
 kubectl rollout status deployment/api -n "${NAMESPACE}" --timeout=180s
 
