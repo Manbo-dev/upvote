@@ -126,6 +126,34 @@ spec:
                 secretKeyRef:
                   name: upvote-secrets
                   key: GEMINI_API_KEY
+            # Jira Integration
+            - name: JIRA_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: JIRA_CLIENT_ID
+            - name: JIRA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: JIRA_CLIENT_SECRET
+            # ClickUp Integration
+            - name: CLICKUP_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: CLICKUP_CLIENT_ID
+            - name: CLICKUP_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: CLICKUP_CLIENT_SECRET
+            # OAuth Callback Base URL
+            - name: OAUTH_CALLBACK_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: OAUTH_CALLBACK_BASE_URL
             # Redis
             - name: SPRING_DATA_REDIS_HOST
               value: "redis"
