@@ -225,7 +225,8 @@ public class JiraIntegrationService {
      * Creates an issue in Jira and returns the issue key and URL.
      */
     public Map<String, String> createIssue(Integration integration, String projectKey,
-                                            String issueType, String title, String description) {
+                                            String issueType, String title,
+                                            Map<String, Object> adfDescription) {
         ensureTokenValid(integration);
         String url = API_BASE + integration.getCloudId() + "/rest/api/3/issue";
 
@@ -235,17 +236,7 @@ public class JiraIntegrationService {
                 "fields", Map.of(
                         "project", Map.of("key", projectKey),
                         "summary", title,
-                        "description", Map.of(
-                                "type", "doc",
-                                "version", 1,
-                                "content", List.of(Map.of(
-                                        "type", "paragraph",
-                                        "content", List.of(Map.of(
-                                                "type", "text",
-                                                "text", description
-                                        ))
-                                ))
-                        ),
+                        "description", adfDescription,
                         "issuetype", Map.of("name", effectiveIssueType)
                 )
         );

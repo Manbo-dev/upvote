@@ -7,6 +7,7 @@ import com.upvote.api.exception.BusinessException;
 import com.upvote.api.exception.ResourceNotFoundException;
 import com.upvote.api.repository.ExternalIssueRepository;
 import com.upvote.api.repository.FeedbackGroupRepository;
+import com.upvote.api.repository.FeedbackRepository;
 import com.upvote.api.repository.IntegrationRepository;
 import com.upvote.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Orchestrates integration CRUD, OAuth flows, and push-to-external operations.
@@ -30,9 +31,15 @@ public class IntegrationService {
     private final IntegrationRepository integrationRepository;
     private final ExternalIssueRepository externalIssueRepository;
     private final FeedbackGroupRepository feedbackGroupRepository;
+    private final FeedbackRepository feedbackRepository;
     private final UserRepository userRepository;
     private final JiraIntegrationService jiraService;
     private final ClickUpIntegrationService clickUpService;
+
+    private static final int MAX_FEEDBACKS_FOR_DESCRIPTION = 50;
+    private static final int MAX_RECENT_REPORTS = 20;
+    private static final int MAX_INTERACTIONS = 5;
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     // ── List / Get ──────────────────────────────────────────────────────────
 
@@ -196,7 +203,7 @@ public class IntegrationService {
                     throw new BusinessException("This feedback group is already linked to " + integration.getProvider());
                 });
 
-        String description = buildDescription(group);
+        List<Feedback> feedbacks = feedbackRepository.findTop50ByFeedbackGroupIdOrderByCreatedAtDesc(feedbackGroupId);
 
         ExternalIssue externalIssue;
 
@@ -205,8 +212,9 @@ public class IntegrationService {
                 if (projectKey == null || projectKey.isBlank()) {
                     throw new BusinessException("Project key is required for Jira");
                 }
+                Map<String, Object> adfDescription = buildAdfDescription(group, feedbacks);
                 Map<String, String> result = jiraService.createIssue(
-                        integration, projectKey, issueType, group.getTitle(), description);
+                        integration, projectKey, issueType, group.getTitle(), adfDescription);
                 externalIssue = ExternalIssue.builder()
                         .feedbackGroup(group)
                         .integration(integration)
@@ -221,8 +229,9 @@ public class IntegrationService {
                 if (listId == null || listId.isBlank()) {
                     throw new BusinessException("List ID is required for ClickUp");
                 }
+                String markdownDescription = buildMarkdownDescription(group, feedbacks);
                 Map<String, String> result = clickUpService.createTask(
-                        integration, listId, group.getTitle(), description);
+                        integration, listId, group.getTitle(), markdownDescription);
                 externalIssue = ExternalIssue.builder()
                         .feedbackGroup(group)
                         .integration(integration)
@@ -312,15 +321,206 @@ public class IntegrationService {
         return integration;
     }
 
-    private String buildDescription(FeedbackGroup group) {
+    // ── Description builders ───────────────────────────────────────────────
+
+    private record AggregatedContext(
+            LinkedHashMap<String, String> pagesByUrl,
+            LinkedHashMap<String, Integer> pageCounts,
+            LinkedHashMap<String, Integer> deviceCounts,
+            LinkedHashMap<String, Integer> interactionCounts,
+            List<Feedback> recentFeedbacks,
+            int totalVotes
+    ) {}
+
+    private AggregatedContext aggregateContext(List<Feedback> feedbacks, int totalVotes) {
+        LinkedHashMap<String, String> pagesByUrl = new LinkedHashMap<>();
+        LinkedHashMap<String, Integer> pageCounts = new LinkedHashMap<>();
+        LinkedHashMap<String, Integer> deviceCounts = new LinkedHashMap<>();
+        Map<String, Integer> interactionRaw = new LinkedHashMap<>();
+
+        for (Feedback f : feedbacks) {
+            if (f.getPageUrl() != null && !f.getPageUrl().isBlank()) {
+                pagesByUrl.putIfAbsent(f.getPageUrl(), f.getPageTitle() != null ? f.getPageTitle() : f.getPageUrl());
+                pageCounts.merge(f.getPageUrl(), 1, Integer::sum);
+            }
+            if (f.getDeviceType() != null && !f.getDeviceType().isBlank()) {
+                deviceCounts.merge(f.getDeviceType(), 1, Integer::sum);
+            }
+            if (f.getLastInteraction() != null && !f.getLastInteraction().isBlank()) {
+                interactionRaw.merge(f.getLastInteraction(), 1, Integer::sum);
+            }
+        }
+
+        LinkedHashMap<String, Integer> topInteractions = interactionRaw.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(MAX_INTERACTIONS)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+
+        List<Feedback> recent = feedbacks.stream()
+                .limit(MAX_RECENT_REPORTS)
+                .toList();
+
+        return new AggregatedContext(pagesByUrl, pageCounts, deviceCounts, topInteractions, recent, totalVotes);
+    }
+
+    // ── Markdown (ClickUp) ──────────────────────────────────────────────────
+
+    private String buildMarkdownDescription(FeedbackGroup group, List<Feedback> feedbacks) {
         StringBuilder sb = new StringBuilder();
         sb.append(group.getSummary() != null ? group.getSummary() : group.getTitle());
         sb.append("\n\n");
-        sb.append("Votes: ").append(group.getVoteCount()).append("\n");
-        sb.append("Category: ").append(group.getCategory().name()).append("\n");
-        sb.append("Status: ").append(group.getStatus().name()).append("\n");
-        sb.append("\n--- Synced from Upvote ---");
+        sb.append("**Votes:** ").append(group.getVoteCount());
+        sb.append(" | **Category:** ").append(group.getCategory().name());
+        sb.append(" | **Status:** ").append(group.getStatus().name());
+        if (group.getTags() != null && !group.getTags().isBlank()) {
+            sb.append("\n**Tags:** ").append(group.getTags());
+        }
+
+        if (feedbacks.isEmpty()) {
+            sb.append("\n\n---\n*Synced from Upvote*");
+            return sb.toString();
+        }
+
+        AggregatedContext ctx = aggregateContext(feedbacks, group.getVoteCount());
+
+        if (!ctx.pageCounts().isEmpty()) {
+            sb.append("\n\n---\n\n### Affected Pages\n");
+            ctx.pageCounts().forEach((url, count) -> {
+                String title = ctx.pagesByUrl().get(url);
+                sb.append("- **").append(title).append("** (`").append(url).append("`) — ").append(count)
+                        .append(count == 1 ? " report" : " reports").append("\n");
+            });
+        }
+
+        if (!ctx.deviceCounts().isEmpty()) {
+            sb.append("\n### Devices\n");
+            ctx.deviceCounts().forEach((device, count) ->
+                    sb.append("- ").append(device).append(" — ").append(count)
+                            .append(count == 1 ? " report" : " reports").append("\n"));
+        }
+
+        if (!ctx.interactionCounts().isEmpty()) {
+            sb.append("\n### Common Interactions\n");
+            ctx.interactionCounts().forEach((interaction, count) ->
+                    sb.append("- \"").append(interaction).append("\" — ").append(count)
+                            .append(count == 1 ? " report" : " reports").append("\n"));
+        }
+
+        if (!ctx.recentFeedbacks().isEmpty()) {
+            sb.append("\n### Recent Reports");
+            if (ctx.totalVotes() > ctx.recentFeedbacks().size()) {
+                sb.append(" (").append(ctx.totalVotes()).append(" total, showing latest ").append(ctx.recentFeedbacks().size()).append(")");
+            }
+            sb.append("\n");
+            int i = 1;
+            for (Feedback f : ctx.recentFeedbacks()) {
+                String message = f.getSynthesizedMessage() != null ? f.getSynthesizedMessage() : f.getRawMessage();
+                String date = f.getCreatedAt() != null ? f.getCreatedAt().format(DATE_FMT) : "—";
+                sb.append(i++).append(". **").append(date).append("** — ").append(message).append("\n");
+            }
+        }
+
+        sb.append("\n---\n*Synced from Upvote*");
         return sb.toString();
+    }
+
+    // ── ADF (Jira) ──────────────────────────────────────────────────────────
+
+    private Map<String, Object> buildAdfDescription(FeedbackGroup group, List<Feedback> feedbacks) {
+        List<Map<String, Object>> content = new ArrayList<>();
+
+        // Summary paragraph
+        content.add(adfParagraph(group.getSummary() != null ? group.getSummary() : group.getTitle()));
+
+        // Overview paragraph
+        String overview = "Votes: " + group.getVoteCount()
+                + " | Category: " + group.getCategory().name()
+                + " | Status: " + group.getStatus().name();
+        if (group.getTags() != null && !group.getTags().isBlank()) {
+            overview += "\nTags: " + group.getTags();
+        }
+        content.add(adfParagraph(overview));
+
+        if (feedbacks.isEmpty()) {
+            content.add(adfRule());
+            content.add(adfParagraph("— Synced from Upvote —"));
+            return Map.of("type", "doc", "version", 1, "content", content);
+        }
+
+        AggregatedContext ctx = aggregateContext(feedbacks, group.getVoteCount());
+
+        content.add(adfRule());
+
+        if (!ctx.pageCounts().isEmpty()) {
+            content.add(adfHeading(3, "Affected Pages"));
+            List<String> items = new ArrayList<>();
+            ctx.pageCounts().forEach((url, count) -> {
+                String title = ctx.pagesByUrl().get(url);
+                items.add(title + " (" + url + ") — " + count + (count == 1 ? " report" : " reports"));
+            });
+            content.add(adfBulletList(items));
+        }
+
+        if (!ctx.deviceCounts().isEmpty()) {
+            content.add(adfHeading(3, "Devices"));
+            List<String> items = new ArrayList<>();
+            ctx.deviceCounts().forEach((device, count) ->
+                    items.add(device + " — " + count + (count == 1 ? " report" : " reports")));
+            content.add(adfBulletList(items));
+        }
+
+        if (!ctx.interactionCounts().isEmpty()) {
+            content.add(adfHeading(3, "Common Interactions"));
+            List<String> items = new ArrayList<>();
+            ctx.interactionCounts().forEach((interaction, count) ->
+                    items.add("\"" + interaction + "\" — " + count + (count == 1 ? " report" : " reports")));
+            content.add(adfBulletList(items));
+        }
+
+        if (!ctx.recentFeedbacks().isEmpty()) {
+            String heading = "Recent Reports";
+            if (ctx.totalVotes() > ctx.recentFeedbacks().size()) {
+                heading += " (" + ctx.totalVotes() + " total, showing latest " + ctx.recentFeedbacks().size() + ")";
+            }
+            content.add(adfHeading(3, heading));
+            List<String> items = new ArrayList<>();
+            for (Feedback f : ctx.recentFeedbacks()) {
+                String message = f.getSynthesizedMessage() != null ? f.getSynthesizedMessage() : f.getRawMessage();
+                String date = f.getCreatedAt() != null ? f.getCreatedAt().format(DATE_FMT) : "—";
+                items.add("[" + date + "] " + message);
+            }
+            content.add(adfBulletList(items));
+        }
+
+        content.add(adfRule());
+        content.add(adfParagraph("— Synced from Upvote —"));
+
+        return Map.of("type", "doc", "version", 1, "content", content);
+    }
+
+    // ── ADF node helpers ────────────────────────────────────────────────────
+
+    private static Map<String, Object> adfParagraph(String text) {
+        return Map.of("type", "paragraph",
+                "content", List.of(Map.of("type", "text", "text", text)));
+    }
+
+    private static Map<String, Object> adfHeading(int level, String text) {
+        return Map.of("type", "heading",
+                "attrs", Map.of("level", level),
+                "content", List.of(Map.of("type", "text", "text", text)));
+    }
+
+    private static Map<String, Object> adfBulletList(List<String> items) {
+        List<Map<String, Object>> listItems = items.stream()
+                .map(item -> Map.<String, Object>of("type", "listItem",
+                        "content", List.of(adfParagraph(item))))
+                .toList();
+        return Map.of("type", "bulletList", "content", listItems);
+    }
+
+    private static Map<String, Object> adfRule() {
+        return Map.of("type", "rule");
     }
 
     private FeedbackGroupStatus mapJiraStatus(String jiraStatus) {

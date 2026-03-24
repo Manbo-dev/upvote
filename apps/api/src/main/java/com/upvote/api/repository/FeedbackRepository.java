@@ -20,6 +20,8 @@ public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
 
     List<Feedback> findByFeedbackGroupId(UUID feedbackGroupId);
 
+    List<Feedback> findTop50ByFeedbackGroupIdOrderByCreatedAtDesc(UUID feedbackGroupId);
+
     List<Feedback> findByStatus(FeedbackStatus status);
 
     @Modifying
