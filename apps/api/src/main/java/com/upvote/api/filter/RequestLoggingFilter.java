@@ -35,10 +35,6 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
                                     FilterChain chain) throws ServletException, IOException {
         String method = request.getMethod();
         String uri = request.getRequestURI();
-        String query = request.getQueryString();
-
-        String fullPath = query != null ? uri + "?" + query : uri;
-        log.info("[REQUEST] {} {}", method, fullPath);
 
         long start = System.currentTimeMillis();
         try {
