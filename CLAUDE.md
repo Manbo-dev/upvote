@@ -421,6 +421,127 @@ echo -n "novo-valor" | gcloud secrets versions add NOME_DO_SECRET --data-file=- 
 - app.upvote.com (frontend)
 - api.upvote.com (backend)
 
+## Observabilidade (Grafana Cloud)
+
+### Visão geral
+Métricas (Prometheus) e logs (Loki) são coletados pelo Grafana Alloy rodando no cluster GKE e enviados para o Grafana Cloud.
+Dashboard: `https://upvote.grafana.net`
+
+### Stack de observabilidade
+
+| Componente | Função |
+|---|---|
+| Spring Boot Actuator + Micrometer | Expõe métricas em `/actuator/prometheus` |
+| Grafana Alloy (Helm, DaemonSet) | Scrapa métricas dos pods e coleta logs de containers |
+| GKE Managed Prometheus + PodMonitoring | Scrape nativo do GKE (backup) |
+| Grafana Cloud Prometheus | Armazena métricas (remote write) |
+| Grafana Cloud Loki | Armazena logs |
+| Grafana Cloud Dashboards | Visualização |
+
+### Dependências backend (pom.xml)
+```xml
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
+```
+
+### Configuração do Actuator (application.yml)
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: upvote-api
+```
+
+### Arquivos de infra
+- `infra/k8s/alloy-values.yaml` — Helm values do Grafana Alloy (métricas + logs)
+- `infra/k8s/pod-monitor.yaml` — PodMonitoring CRD para GKE Managed Prometheus
+
+### Alloy — como funciona
+- Roda como **DaemonSet** (1 pod por node) para coletar logs de todos os containers
+- **Métricas**: descobre pods com annotation `prometheus.io/scrape=true`, scrapa a cada 30s, remote-write para Grafana Cloud
+- **Logs**: coleta logs de todos os containers no namespace `upvote` via Kubernetes API, envia para Loki
+- Labels adicionados automaticamente: `namespace`, `pod`, `app`, `container`, `node`, `cluster`
+
+### Secrets no cluster
+Secret `grafana-cloud-credentials` com keys:
+- `username` — Prometheus remote write user ID (`3064086`)
+- `password` — Grafana Cloud API token (escrita de métricas e logs)
+- `loki-username` — Loki user ID (`1527718`)
+
+### Endpoints Grafana Cloud
+- Prometheus: `https://prometheus-prod-68-prod-eu-west-6.grafana.net/api/prom/push`
+- Loki: `https://logs-prod-043.grafana.net/loki/api/v1/push`
+
+### Dashboards importados
+
+| ID | Nome | Descrição |
+|---|---|---|
+| 19004 | Spring Boot 3.x Statistics | JVM, CPU, memória, HikariCP, uptime |
+| 17175 | Spring Boot Observability | HTTP requests, latência, error rate |
+
+### Queries úteis no Grafana
+
+```promql
+# Métricas — verificar se pods estão sendo scrapados
+up{namespace="upvote"}
+
+# Métricas — request rate por endpoint
+rate(http_server_requests_seconds_count{namespace="upvote"}[5m])
+
+# Métricas — latência p95
+histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{namespace="upvote"}[5m]))
+```
+
+```logql
+# Logs — todos os logs da API (formato limpo)
+{namespace="upvote", app="api"} | json | line_format "{{.severity}} [{{.thread_name}}] {{.message}}"
+
+# Logs — apenas erros
+{namespace="upvote", app="api"} | json | severity="ERROR"
+
+# Logs — filtrar por endpoint
+{namespace="upvote", app="api"} | json | message=~".*feedback.*"
+
+# Logs — todos os serviços
+{namespace="upvote"}
+```
+
+### Comandos úteis
+
+```bash
+# Verificar pods do Alloy
+kubectl get pods -n upvote -l app.kubernetes.io/name=alloy
+
+# Ver logs do Alloy (debug)
+kubectl logs daemonset/alloy -n upvote --tail=50
+
+# Upgrade do Alloy após mudar alloy-values.yaml
+helm upgrade alloy grafana/alloy -n upvote -f infra/k8s/alloy-values.yaml
+
+# Atualizar secret do Grafana Cloud
+kubectl get secret grafana-cloud-credentials -n upvote -o json | \
+  python3 -c "import sys,json,base64; s=json.loads(sys.stdin.read()); s['data']['key']=base64.b64encode(b'value').decode(); print(json.dumps(s))" | \
+  kubectl apply -f -
+```
+
+### Helm chart
+```bash
+# Repo
+helm repo add grafana https://grafana.github.io/helm-charts
+
+# Instalar
+helm install alloy grafana/alloy -n upvote -f infra/k8s/alloy-values.yaml
+
+# Upgrade
+helm upgrade alloy grafana/alloy -n upvote -f infra/k8s/alloy-values.yaml
+```
+
 ## Internacionalização (i18n) — Frontend
 
 ### Stack
