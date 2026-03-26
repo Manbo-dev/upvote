@@ -112,21 +112,16 @@ alloy:
 
       // Process logs: detect JSON and extract severity as label
       loki.process "pods" {
-        // Try to parse JSON — extracts fields for JSON lines, no-op for plain text
-        stage.json {
-          expressions = {
-            severity      = "severity",
-            message       = "message",
-            transactionId = "transactionId",
-            thread        = "thread_name",
-            logger        = "logger_name",
-          }
+        // Extract level and transactionId from the log line pattern:
+        // "2026-03-26 11:19:22.681  INFO [tx:abc123] [RESPONSE] GET ..."
+        stage.regex {
+          expression = "^\\S+ \\S+ +(?P<level>\\w+) \\[tx:(?P<transactionId>[^\\]]+)\\]"
         }
 
-        // Promote severity and transactionId to labels (enables filtering in Grafana)
+        // Promote extracted fields to labels (enables filtering in Grafana)
         stage.labels {
           values = {
-            level         = "severity",
+            level         = "",
             transactionId = "",
           }
         }
@@ -135,17 +130,6 @@ alloy:
           values = {
             cluster = "upvote-cluster",
           }
-        }
-
-        // For JSON logs: rewrite as clean one-liner with txid
-        // For non-JSON logs: keep the original line
-        stage.template {
-          source   = "output_line"
-          template = "{{ if .transactionId }}[{{ .transactionId }}] {{ end }}{{ .message }}"
-        }
-
-        stage.output {
-          source = "output_line"
         }
 
         forward_to = [loki.write.grafanacloud.receiver]

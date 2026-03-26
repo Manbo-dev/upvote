@@ -24,40 +24,20 @@
     </springProfile>
 
     <!--
-        Perfil de produção: saída JSON estruturado compatível com Cloud Logging.
-        O GKE coleta stdout automaticamente via Fluent Bit e envia ao Cloud Logging.
-        O campo "severity" é reconhecido pelo Cloud Logging para filtrar por nível.
+        Production profile: human-readable one-liner format for Grafana Cloud (Loki).
+        Structured fields (transactionId, severity) are extracted as Loki labels by Alloy.
+        Format: TIMESTAMP LEVEL [txid] MESSAGE
     -->
     <springProfile name="prod">
-        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-
-                <!-- Renomeia "level" para "severity" — padrão do Cloud Logging -->
-                <fieldNames>
-                    <level>severity</level>
-                    <levelValue>[ignore]</levelValue>
-                </fieldNames>
-
-                <!-- Converte o nível para uppercase (INFO, WARN, ERROR) -->
-                <provider class="net.logstash.logback.composite.loggingevent.LogLevelJsonProvider">
-                    <fieldName>severity</fieldName>
-                </provider>
-
-                <!-- Inclui contexto MDC (ex: requestId, userId, canalSlug) -->
-                <includeMdc>true</includeMdc>
-
-                <!-- Inclui stack trace completo em caso de exceção -->
-                <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                    <maxDepthPerCause>20</maxDepthPerCause>
-                    <shortenedClassNameLength>20</shortenedClassNameLength>
-                    <exclude>sun\.reflect\..*\.invoke.*</exclude>
-                </throwableConverter>
-
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [tx:%X{transactionId:--}] %m%n%ex{short}</pattern>
+                <charset>UTF-8</charset>
             </encoder>
         </appender>
 
         <root level="INFO">
-            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="CONSOLE"/>
         </root>
 
         <!-- Silenciar logs verbosos desnecessários em produção -->
