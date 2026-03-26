@@ -1,0 +1,5 @@
+project_id     = "project-38c32df4-c37c-41d9-b5d"
+project_number = "223057559224"
+region         = "europe-west1"
+cluster_name   = "upvote-cluster"
+github_repo    = "Manbo-dev/upvote"

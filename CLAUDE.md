@@ -369,7 +369,71 @@ Sem essas variáveis, os botões de conectar continuam visíveis mas o OAuth fal
 - Banco de dados: PostgreSQL gerenciado no Neon.tech (externo ao cluster)
 - Registry de imagens: Google Artifact Registry (europe-west1-docker.pkg.dev/project-38c32df4-c37c-41d9-b5d/upvote/api)
 - Secrets: Google Secret Manager
+- IaC: Terraform (infra/terraform/)
 - CI/CD: GitHub Actions (.github/workflows/deploy.yml)
+
+### Terraform (Infrastructure as Code)
+
+Toda a infraestrutura GCP é declarada em Terraform para reprodutibilidade e preparação para futura migração AWS.
+
+#### Estrutura
+```
+infra/terraform/
+  main.tf              # Root module — conecta todos os módulos
+  backend.tf           # GCS backend para state
+  providers.tf         # Google provider config
+  variables.tf         # Variáveis de entrada
+  terraform.tfvars     # Valores concretos (sem secrets)
+  outputs.tf           # Outputs (cluster endpoint, AR URL, WIF provider)
+  import.sh            # Script one-time para importar recursos existentes
+  modules/
+    gke/               # GKE Autopilot cluster
+    artifact-registry/ # Artifact Registry (Docker images)
+    secret-manager/    # Secret Manager (estrutura only, sem valores)
+    iam/               # Service accounts + IAM bindings
+    workload-identity/ # WIF pool + provider para GitHub Actions
+```
+
+#### O que o Terraform gerencia
+- GKE Autopilot cluster
+- Artifact Registry repository
+- Secret Manager secrets (estrutura — valores são gerenciados manualmente)
+- Service accounts (github-actions, grafana-metrics-reader)
+- IAM role bindings
+- Workload Identity Federation (pool + provider)
+
+#### O que NÃO é gerenciado pelo Terraform
+- Kubernetes manifests (deployments, services, HPA) → `infra/k8s/`
+- Helm releases (Grafana Alloy) → `helm upgrade`
+- Banco Neon.tech (PostgreSQL externo)
+- Stripe, Jira, ClickUp configs (SaaS)
+
+#### Comandos
+```bash
+cd infra/terraform
+
+# Primeira vez: criar bucket de state e inicializar
+gsutil mb -l europe-west1 gs://upvote-terraform-state
+gsutil versioning set on gs://upvote-terraform-state
+terraform init
+
+# Importar recursos existentes (one-time)
+./import.sh
+
+# Ver o que vai mudar
+terraform plan
+
+# Aplicar mudanças
+terraform apply
+
+# Destruir (cuidado!)
+terraform destroy
+```
+
+#### State
+- Backend: GCS bucket `upvote-terraform-state`
+- O state contém info sensível — nunca commitar `*.tfstate`
+- Lock automático via GCS
 
 ### Serviços rodando no cluster
 - **api** — Spring Boot 3.4.3, Java 21, 2 réplicas, HPA 2-10, porta 8080, Service tipo LoadBalancer
