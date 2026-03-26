@@ -110,13 +110,35 @@ alloy:
         forward_to = [loki.process.pods.receiver]
       }
 
-      // Process logs: add static labels
+      // Process logs: detect JSON and extract severity as label
       loki.process "pods" {
+        // Try to parse JSON — extracts fields for JSON lines, no-op for plain text
+        stage.json {
+          expressions = {
+            severity = "severity",
+            message  = "message",
+          }
+        }
+
+        // Promote severity to a label (enables filtering by severity in Grafana)
+        stage.labels {
+          values = {
+            level = "severity",
+          }
+        }
+
         stage.static_labels {
           values = {
             cluster = "upvote-cluster",
           }
         }
+
+        // For JSON logs: rewrite the log line as a clean one-liner
+        // For non-JSON logs: keep the original line (stage.output only runs if template produces content)
+        stage.output {
+          source = "message"
+        }
+
         forward_to = [loki.write.grafanacloud.receiver]
       }
 
