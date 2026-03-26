@@ -1,8 +1,10 @@
-# Grafana Alloy — scrapes Prometheus metrics from API pods and remote-writes to Grafana Cloud
+# Grafana Alloy — scrapes Prometheus metrics and collects logs, sends to Grafana Cloud
 alloy:
   configMap:
     create: true
     content: |
+      // ==================== METRICS ====================
+
       // Discover pods with prometheus.io annotations in the upvote namespace
       discovery.kubernetes "pods" {
         role = "pod"
@@ -54,13 +56,77 @@ alloy:
         scrape_interval = "30s"
       }
 
-      // Remote write to Grafana Cloud
+      // Remote write metrics to Grafana Cloud
       prometheus.remote_write "grafanacloud" {
         endpoint {
           url = "https://prometheus-prod-68-prod-eu-west-6.grafana.net/api/prom/push"
 
           basic_auth {
             username = env("GRAFANA_CLOUD_USERNAME")
+            password = env("GRAFANA_CLOUD_PASSWORD")
+          }
+        }
+      }
+
+      // ==================== LOGS ====================
+
+      // Discover pods for log collection
+      discovery.kubernetes "log_pods" {
+        role = "pod"
+        namespaces {
+          names = ["upvote"]
+        }
+      }
+
+      // Add labels from Kubernetes metadata
+      discovery.relabel "log_pods" {
+        targets = discovery.kubernetes.log_pods.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label  = "app"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label  = "node"
+        }
+      }
+
+      // Collect logs from pod containers
+      loki.source.kubernetes "pods" {
+        targets    = discovery.relabel.log_pods.output
+        forward_to = [loki.process.pods.receiver]
+      }
+
+      // Process logs: add static labels
+      loki.process "pods" {
+        stage.static_labels {
+          values = {
+            cluster = "upvote-cluster",
+          }
+        }
+        forward_to = [loki.write.grafanacloud.receiver]
+      }
+
+      // Send logs to Grafana Cloud Loki
+      loki.write "grafanacloud" {
+        endpoint {
+          url = "https://logs-prod-043.grafana.net/loki/api/v1/push"
+
+          basic_auth {
+            username = env("LOKI_USERNAME")
             password = env("GRAFANA_CLOUD_PASSWORD")
           }
         }
@@ -77,15 +143,22 @@ alloy:
         secretKeyRef:
           name: grafana-cloud-credentials
           key: password
+    - name: LOKI_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: grafana-cloud-credentials
+          key: loki-username
+
+  mounts:
+    varlog: true
 
 controller:
-  type: deployment
-  replicas: 1
+  type: daemonset
 
 resources:
   requests:
     cpu: 50m
-    memory: 64Mi
+    memory: 128Mi
   limits:
     cpu: 200m
     memory: 256Mi
