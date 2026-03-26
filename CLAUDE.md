@@ -141,6 +141,7 @@ OPEN → PLANNED → IN_PROGRESS → DONE → ARCHIVED
 - Widget: TypeScript puro embarcável via script tag
 - Cache: Redis
 - Filas: RabbitMQ
+- IaC: OpenTofu (fork open-source do Terraform)
 - Infra: GKE Autopilot + GitHub Actions CI/CD
 - Testes backend: JUnit 5 + Mockito + Testcontainers
 - Testes frontend: Vitest + React Testing Library + MSW
@@ -150,6 +151,7 @@ OPEN → PLANNED → IN_PROGRESS → DONE → ARCHIVED
 - apps/api → backend Spring Boot (porta 8080 em dev)
 - packages/widget → widget JS embarcável
 - infra/k8s → manifests Kubernetes + scripts de deploy
+- infra/terraform → OpenTofu modules (IaC para GCP)
 - infra/scripts → scripts de setup (Secret Manager, GitHub Actions, start/stop)
 - .github/workflows → GitHub Actions CI/CD
 
@@ -369,12 +371,13 @@ Sem essas variáveis, os botões de conectar continuam visíveis mas o OAuth fal
 - Banco de dados: PostgreSQL gerenciado no Neon.tech (externo ao cluster)
 - Registry de imagens: Google Artifact Registry (europe-west1-docker.pkg.dev/project-38c32df4-c37c-41d9-b5d/upvote/api)
 - Secrets: Google Secret Manager
-- IaC: Terraform (infra/terraform/)
+- IaC: OpenTofu (infra/terraform/)
 - CI/CD: GitHub Actions (.github/workflows/deploy.yml)
 
-### Terraform (Infrastructure as Code)
+### OpenTofu (Infrastructure as Code)
 
-Toda a infraestrutura GCP é declarada em Terraform para reprodutibilidade e preparação para futura migração AWS.
+Toda a infraestrutura GCP é declarada em OpenTofu (fork open-source do Terraform, 100% compatível) para reprodutibilidade e preparação para futura migração AWS.
+CLI: `tofu` (instalado via `brew install opentofu`). Arquivos `.tf` são idênticos aos do Terraform.
 
 #### Estrutura
 ```
@@ -394,19 +397,20 @@ infra/terraform/
     workload-identity/ # WIF pool + provider para GitHub Actions
 ```
 
-#### O que o Terraform gerencia
+#### O que o OpenTofu gerencia
 - GKE Autopilot cluster
 - Artifact Registry repository
-- Secret Manager secrets (estrutura — valores são gerenciados manualmente)
+- Secret Manager secrets (estrutura — valores são gerenciados manualmente via gcloud)
 - Service accounts (github-actions, grafana-metrics-reader)
 - IAM role bindings
 - Workload Identity Federation (pool + provider)
 
-#### O que NÃO é gerenciado pelo Terraform
+#### O que NÃO é gerenciado pelo OpenTofu
 - Kubernetes manifests (deployments, services, HPA) → `infra/k8s/`
 - Helm releases (Grafana Alloy) → `helm upgrade`
 - Banco Neon.tech (PostgreSQL externo)
 - Stripe, Jira, ClickUp configs (SaaS)
+- DNS / domínios
 
 #### Comandos
 ```bash
@@ -415,19 +419,19 @@ cd infra/terraform
 # Primeira vez: criar bucket de state e inicializar
 gsutil mb -l europe-west1 gs://upvote-terraform-state
 gsutil versioning set on gs://upvote-terraform-state
-terraform init
+tofu init
 
 # Importar recursos existentes (one-time)
 ./import.sh
 
 # Ver o que vai mudar
-terraform plan
+tofu plan
 
 # Aplicar mudanças
-terraform apply
+tofu apply
 
 # Destruir (cuidado!)
-terraform destroy
+tofu destroy
 ```
 
 #### State
@@ -474,7 +478,7 @@ echo -n "novo-valor" | gcloud secrets versions add NOME_DO_SECRET --data-file=- 
 - Rollout aguardado com `kubectl rollout status`
 
 ### Secrets gerenciados pelo Google Secret Manager
-`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `CORS_ORIGINS`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_STARTER_PRICE_ID`, `STRIPE_PRO_PRICE_ID`, `GEMINI_API_KEY`, `JIRA_CLIENT_ID`, `JIRA_CLIENT_SECRET`, `CLICKUP_CLIENT_ID`, `CLICKUP_CLIENT_SECRET`, `OAUTH_CALLBACK_BASE_URL`
+Lista completa em `infra/terraform/variables.tf` (variável `secret_names`). Valores gerenciados manualmente via `gcloud secrets versions add` — o OpenTofu gerencia apenas a existência dos secrets, nunca os valores.
 
 ### GitHub Actions secrets necessários
 - `GCP_PROJECT_ID` = `project-38c32df4-c37c-41d9-b5d`
