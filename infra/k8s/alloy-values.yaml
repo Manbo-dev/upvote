@@ -1,0 +1,98 @@
+# Grafana Alloy — scrapes Prometheus metrics from API pods and remote-writes to Grafana Cloud
+alloy:
+  configMap:
+    create: true
+    content: |
+      // Discover pods with prometheus.io annotations in the upvote namespace
+      discovery.kubernetes "pods" {
+        role = "pod"
+        namespaces {
+          names = ["upvote"]
+        }
+      }
+
+      // Filter to only pods with prometheus.io/scrape=true
+      discovery.relabel "pods" {
+        targets = discovery.kubernetes.pods.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+          regex         = "true"
+          action        = "keep"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+          target_label  = "__metrics_path__"
+          regex         = "(.+)"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_ip", "__meta_kubernetes_pod_annotation_prometheus_io_port"]
+          separator     = ":"
+          target_label  = "__address__"
+          regex         = "(.+):(.+)"
+          replacement   = "$1:$2"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label  = "app"
+        }
+      }
+
+      // Scrape the discovered targets
+      prometheus.scrape "pods" {
+        targets    = discovery.relabel.pods.output
+        forward_to = [prometheus.remote_write.grafanacloud.receiver]
+
+        scrape_interval = "30s"
+      }
+
+      // Remote write to Grafana Cloud
+      prometheus.remote_write "grafanacloud" {
+        endpoint {
+          url = "https://prometheus-prod-68-prod-eu-west-6.grafana.net/api/prom/push"
+
+          basic_auth {
+            username = env("GRAFANA_CLOUD_USERNAME")
+            password = env("GRAFANA_CLOUD_PASSWORD")
+          }
+        }
+      }
+
+  extraEnv:
+    - name: GRAFANA_CLOUD_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: grafana-cloud-credentials
+          key: username
+    - name: GRAFANA_CLOUD_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: grafana-cloud-credentials
+          key: password
+
+controller:
+  type: deployment
+  replicas: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+serviceAccount:
+  create: true
+  name: alloy
+
+rbac:
+  create: true
