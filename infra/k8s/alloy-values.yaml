@@ -115,15 +115,19 @@ alloy:
         // Try to parse JSON — extracts fields for JSON lines, no-op for plain text
         stage.json {
           expressions = {
-            severity = "severity",
-            message  = "message",
+            severity      = "severity",
+            message       = "message",
+            transactionId = "transactionId",
+            thread        = "thread_name",
+            logger        = "logger_name",
           }
         }
 
-        // Promote severity to a label (enables filtering by severity in Grafana)
+        // Promote severity and transactionId to labels (enables filtering in Grafana)
         stage.labels {
           values = {
-            level = "severity",
+            level         = "severity",
+            transactionId = "",
           }
         }
 
@@ -133,10 +137,15 @@ alloy:
           }
         }
 
-        // For JSON logs: rewrite the log line as a clean one-liner
-        // For non-JSON logs: keep the original line (stage.output only runs if template produces content)
+        // For JSON logs: rewrite as clean one-liner with txid
+        // For non-JSON logs: keep the original line
+        stage.template {
+          source   = "output_line"
+          template = "{{ if .transactionId }}[{{ .transactionId }}] {{ end }}{{ .message }}"
+        }
+
         stage.output {
-          source = "message"
+          source = "output_line"
         }
 
         forward_to = [loki.write.grafanacloud.receiver]
