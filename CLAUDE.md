@@ -417,8 +417,8 @@ infra/terraform/
 cd infra/terraform
 
 # Primeira vez: criar bucket de state e inicializar
-gsutil mb -l europe-west1 gs://upvote-terraform-state
-gsutil versioning set on gs://upvote-terraform-state
+gsutil mb -l europe-west1 gs://upvote-tofu-state-38c32df4
+gsutil versioning set on gs://upvote-tofu-state-38c32df4
 tofu init
 
 # Importar recursos existentes (one-time)
@@ -435,7 +435,7 @@ tofu destroy
 ```
 
 #### State
-- Backend: GCS bucket `upvote-terraform-state`
+- Backend: GCS bucket `upvote-tofu-state-38c32df4`
 - O state contém info sensível — nunca commitar `*.tfstate`
 - Lock automático via GCS
 

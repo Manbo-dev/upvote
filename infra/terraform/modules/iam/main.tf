@@ -8,7 +8,8 @@ resource "google_service_account" "github_actions" {
 # Service account for Grafana Cloud metrics reader
 resource "google_service_account" "grafana_metrics_reader" {
   account_id   = "grafana-metrics-reader"
-  display_name = "Grafana Cloud Metrics Reader"
+  display_name = "Grafana Metrics Reader"
+  description  = "Read-only access to Prometheus metrics for Grafana Cloud"
   project      = var.project_id
 }
 
