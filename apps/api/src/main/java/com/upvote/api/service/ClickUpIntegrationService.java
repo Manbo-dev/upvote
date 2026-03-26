@@ -77,7 +77,7 @@ public class ClickUpIntegrationService {
             );
         } catch (Exception e) {
             log.error("[CLICKUP] Failed to parse token response", e);
-            throw new BusinessException("Failed to complete ClickUp authentication");
+            throw new BusinessException("Failed to complete ClickUp authentication", e);
         }
     }
 
@@ -107,7 +107,7 @@ public class ClickUpIntegrationService {
             throw e;
         } catch (Exception e) {
             log.error("[CLICKUP] Failed to fetch team info", e);
-            throw new BusinessException("Failed to fetch ClickUp workspace information");
+            throw new BusinessException("Failed to fetch ClickUp workspace information", e);
         }
     }
 
@@ -169,7 +169,7 @@ public class ClickUpIntegrationService {
             }
         } catch (Exception e) {
             log.error("[CLICKUP] Failed to list lists for teamId={}", teamId, e);
-            throw new BusinessException("Failed to list ClickUp lists");
+            throw new BusinessException("Failed to list ClickUp lists", e);
         }
 
         return allLists;
@@ -203,7 +203,7 @@ public class ClickUpIntegrationService {
             );
         } catch (Exception e) {
             log.error("[CLICKUP] Failed to create task", e);
-            throw new BusinessException("Failed to create ClickUp task");
+            throw new BusinessException("Failed to create ClickUp task", e);
         }
     }
 
@@ -231,7 +231,7 @@ public class ClickUpIntegrationService {
             return node.path("id").asText();
         } catch (Exception e) {
             log.error("[CLICKUP] Failed to register webhook", e);
-            throw new BusinessException("Failed to register ClickUp webhook");
+            throw new BusinessException("Failed to register ClickUp webhook", e);
         }
     }
 }

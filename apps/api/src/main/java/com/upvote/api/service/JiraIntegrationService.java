@@ -88,7 +88,7 @@ public class JiraIntegrationService {
             );
         } catch (Exception e) {
             log.error("[JIRA] Failed to parse token response", e);
-            throw new BusinessException("Failed to complete Jira authentication");
+            throw new BusinessException("Failed to complete Jira authentication", e);
         }
     }
 
@@ -119,7 +119,7 @@ public class JiraIntegrationService {
             );
         } catch (Exception e) {
             log.error("[JIRA] Failed to refresh token", e);
-            throw new BusinessException("Failed to refresh Jira credentials");
+            throw new BusinessException("Failed to refresh Jira credentials", e);
         }
     }
 
@@ -149,7 +149,7 @@ public class JiraIntegrationService {
             throw e;
         } catch (Exception e) {
             log.error("[JIRA] Failed to fetch accessible resources", e);
-            throw new BusinessException("Failed to fetch Jira site information");
+            throw new BusinessException("Failed to fetch Jira site information", e);
         }
     }
 
@@ -179,10 +179,10 @@ public class JiraIntegrationService {
             return projects;
         } catch (HttpStatusCodeException e) {
             log.error("[JIRA] HTTP error listing projects: status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new BusinessException("Failed to list Jira projects: " + e.getStatusCode());
+            throw new BusinessException("Failed to list Jira projects: " + e.getStatusCode(), e);
         } catch (Exception e) {
             log.error("[JIRA] Failed to list projects", e);
-            throw new BusinessException("Failed to list Jira projects");
+            throw new BusinessException("Failed to list Jira projects", e);
         }
     }
 
@@ -214,10 +214,10 @@ public class JiraIntegrationService {
             return issueTypes;
         } catch (HttpStatusCodeException e) {
             log.error("[JIRA] HTTP error listing issue types for project={}: status={}, body={}", projectKey, e.getStatusCode(), e.getResponseBodyAsString());
-            throw new BusinessException("Failed to list Jira issue types: " + e.getStatusCode());
+            throw new BusinessException("Failed to list Jira issue types: " + e.getStatusCode(), e);
         } catch (Exception e) {
             log.error("[JIRA] Failed to list issue types for project={}", projectKey, e);
-            throw new BusinessException("Failed to list Jira issue types");
+            throw new BusinessException("Failed to list Jira issue types", e);
         }
     }
 
@@ -260,10 +260,10 @@ public class JiraIntegrationService {
             );
         } catch (HttpStatusCodeException e) {
             log.error("[JIRA] HTTP error creating issue: status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new BusinessException("Failed to create Jira issue: " + e.getStatusCode());
+            throw new BusinessException("Failed to create Jira issue: " + e.getStatusCode(), e);
         } catch (Exception e) {
             log.error("[JIRA] Failed to create issue", e);
-            throw new BusinessException("Failed to create Jira issue");
+            throw new BusinessException("Failed to create Jira issue", e);
         }
     }
 

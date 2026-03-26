@@ -539,10 +539,11 @@ O backend usa `PatternLayoutEncoder` (não JSON) em produção. Formato:
 2026-03-26 11:30:15.040  INFO [tx:-] Started UpvoteApiApplication in 80.154 seconds
 ```
 
-- **Padrão logback**: `%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [tx:%X{transactionId:--}] %m%n%ex{short}`
+- **Padrão logback**: `%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [tx:%X{transactionId:--}] %m%n%ex`
 - **Arquivo**: `apps/api/src/main/resources/logback-spring.xml`
-- **Profiles**: `!prod` → console com cores (dev), `prod` → one-liner (produção)
+- **Profiles**: `!prod` → console com cores (dev), `prod` → one-liner com stack traces completos (produção)
 - `transactionId` é injetado via MDC pelo `TransactionFilter` em cada request HTTP
+- **Exception logging**: `GlobalExceptionHandler` loga todas as exceções com prefixo `[EXCEPTION]`, contexto da request (`METHOD /uri → STATUS`) e stack trace. Filtrável no Loki: `|= "[EXCEPTION]"`
 
 ### Alloy — como funciona
 - Roda como **DaemonSet** (1 pod por node) para coletar logs de todos os containers

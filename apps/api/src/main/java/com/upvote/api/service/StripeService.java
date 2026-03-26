@@ -99,7 +99,7 @@ public class StripeService {
             return new CheckoutSessionResponse(session.getUrl());
         } catch (StripeException e) {
             log.error("[STRIPE] userId={} Failed to create checkout session: plan={}", userId, planoDesejado, e);
-            throw new BusinessException("Erro ao iniciar checkout. Tente novamente.");
+            throw new BusinessException("Erro ao iniciar checkout. Tente novamente.", e);
         }
     }
 
@@ -127,7 +127,7 @@ public class StripeService {
             return new PortalSessionResponse(portalSession.getUrl());
         } catch (StripeException e) {
             log.error("[STRIPE] userId={} Failed to create portal session", userId, e);
-            throw new BusinessException("Erro ao abrir portal de assinatura. Tente novamente.");
+            throw new BusinessException("Erro ao abrir portal de assinatura. Tente novamente.", e);
         }
     }
 
@@ -141,7 +141,7 @@ public class StripeService {
             event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
         } catch (SignatureVerificationException e) {
             log.warn("[STRIPE] Invalid webhook signature: sigHeader={}", sigHeader, e);
-            throw new BusinessException("Assinatura de webhook inválida");
+            throw new BusinessException("Assinatura de webhook inválida", e);
         }
 
         String eventId = event.getId();
