@@ -180,6 +180,7 @@ npm install && npm run dev
 - Multi-tenancy: cada Organization tem seus Canais isolados
 - Nunca commitar secrets ou .env — usar .env.example como referência
 - Branches: main (produção), develop (desenvolvimento), feature/* (features)
+- **Documentação obrigatória**: toda alteração que mude a estrutura do projeto (novas seções de infra, novos módulos, mudança de stack, novo serviço, nova integração, mudança de formato de dados/logs) **deve** ser documentada no `CLAUDE.md` correspondente (raiz ou por app) no mesmo commit ou PR. Código sem documentação de mudança estrutural não deve ser mergeado
 
 ## Modelo de negócio
 - Plano Free: 1 canal, 50 sugestões, sem widget
@@ -530,11 +531,25 @@ management:
 - `infra/k8s/alloy-values.yaml` — Helm values do Grafana Alloy (métricas + logs)
 - `infra/k8s/pod-monitor.yaml` — PodMonitoring CRD para GKE Managed Prometheus
 
+### Formato de logs em produção
+
+O backend usa `PatternLayoutEncoder` (não JSON) em produção. Formato:
+```
+2026-03-26 11:30:22.681  INFO [tx:2326eb83d6a24b3c] [RESPONSE] GET /api/canais → 200 (700ms)
+2026-03-26 11:30:15.040  INFO [tx:-] Started UpvoteApiApplication in 80.154 seconds
+```
+
+- **Padrão logback**: `%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [tx:%X{transactionId:--}] %m%n%ex{short}`
+- **Arquivo**: `apps/api/src/main/resources/logback-spring.xml`
+- **Profiles**: `!prod` → console com cores (dev), `prod` → one-liner (produção)
+- `transactionId` é injetado via MDC pelo `TransactionFilter` em cada request HTTP
+
 ### Alloy — como funciona
 - Roda como **DaemonSet** (1 pod por node) para coletar logs de todos os containers
 - **Métricas**: descobre pods com annotation `prometheus.io/scrape=true`, scrapa a cada 30s, remote-write para Grafana Cloud
 - **Logs**: coleta logs de todos os containers no namespace `upvote` via Kubernetes API, envia para Loki
-- Labels adicionados automaticamente: `namespace`, `pod`, `app`, `container`, `node`, `cluster`
+- **Extração de labels**: regex extrai `level` e `transactionId` da linha de log formatada
+- Labels adicionados automaticamente: `namespace`, `pod`, `app`, `container`, `node`, `cluster`, `level`, `transactionId`
 
 ### Secrets no cluster
 Secret `grafana-cloud-credentials` com keys:
@@ -567,16 +582,22 @@ histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{namespace="upv
 ```
 
 ```logql
-# Logs — todos os logs da API (formato limpo)
-{namespace="upvote", app="api"} | json | line_format "{{.severity}} [{{.thread_name}}] {{.message}}"
+# Logs — todos os logs da API
+{namespace="upvote", app="api"}
 
 # Logs — apenas erros
-{namespace="upvote", app="api"} | json | severity="ERROR"
+{namespace="upvote", app="api", level="ERROR"}
+
+# Logs — filtrar por transactionId (rastrear uma request completa)
+{namespace="upvote", transactionId="2326eb83d6a24b3c"}
 
 # Logs — filtrar por endpoint
-{namespace="upvote", app="api"} | json | message=~".*feedback.*"
+{namespace="upvote", app="api"} |= "feedback"
 
-# Logs — todos os serviços
+# Logs — apenas warnings e erros
+{namespace="upvote", app="api"} | level=~"WARN|ERROR"
+
+# Logs — todos os serviços (api, redis, rabbitmq)
 {namespace="upvote"}
 ```
 
