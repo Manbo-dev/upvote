@@ -632,6 +632,45 @@ helm install alloy grafana/alloy -n upvote -f infra/k8s/alloy-values.yaml
 helm upgrade alloy grafana/alloy -n upvote -f infra/k8s/alloy-values.yaml
 ```
 
+## Export de Relatórios (CSV e PDF)
+
+### Visão geral
+Parceiros podem exportar relatórios dos feedback groups de um canal diretamente pelo dashboard.
+Dois formatos disponíveis: CSV (tabular, para análise em planilhas) e PDF (relatório executivo profissional).
+
+### Endpoint CSV
+`GET /api/canais/{slug}/report.csv`
+- Query params: `status`, `category`, `from` (yyyy-MM-dd), `to` (yyyy-MM-dd), `includeDetails` (boolean)
+- `includeDetails=true` adiciona uma segunda seção com feedbacks individuais
+
+### Endpoint PDF
+`GET /api/canais/{slug}/report.pdf`
+- Query params: `status`, `category`, `from` (yyyy-MM-dd), `to` (yyyy-MM-dd)
+- Retorna `application/pdf` com `Content-Disposition: attachment`
+- Não tem `includeDetails` — estrutura do PDF é fixa por design
+
+### Estrutura do PDF
+1. **Header** — logo Upvote, nome do canal, período coberto, data/hora de geração
+2. **Situação Atual** — cards de contagem por status (OPEN, PLANNED, IN_PROGRESS, DONE, CLOSED, ARCHIVED) + top 5 grupos mais votados em andamento
+3. **Concluídos** — grupos com status DONE ou ARCHIVED, com badge de categoria, contagem de votos e resumo
+4. **Mapa de Palavras** — tags extraídas pela IA com tamanho de fonte proporcional à frequência (1rem–3rem, limitado a 50 tags)
+5. **Footer** — referência à plataforma
+
+### Arquitetura backend
+- **`ReportService`** — geração de CSV
+- **`PdfReportService`** — geração de PDF; usa Thymeleaf para renderizar HTML e OpenHTMLToPDF para converter em bytes
+- **`ReportController`** — dois endpoints, ambos requerem JWT
+- **Template**: `apps/api/src/main/resources/templates/report.html` — HTML + CSS com paleta dark (#0f172a) idêntica ao app
+
+### Biblioteca PDF
+- **OpenHTMLToPDF** (`com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10`) — Apache 2.0 + LGPL 2.1 (seguro para SaaS comercial)
+- Thymeleaf renderiza o template em HTML; OpenHTMLToPDF converte o HTML para PDF bytes
+- CSS: usar `display:table` e `display:flex` — `display:grid` **não é suportado** pelo openhtmltopdf
+
+### Frontend
+- **`apps/web/src/services/feedbackGroups.ts`** — `exportFeedbackGroups()` (CSV) e `exportFeedbackGroupsPdf()` (PDF)
+- **`apps/web/src/pages/CanalDetailPage.tsx`** — modal de export com seletor CSV/PDF; branch em `handleExport()` por formato
+
 ## Internacionalização (i18n) — Frontend
 
 ### Stack

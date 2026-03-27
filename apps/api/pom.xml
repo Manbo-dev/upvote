@@ -124,6 +124,18 @@
             <version>31.4.1</version>
         </dependency>
 
+        <!-- PDF generation via HTML template rendering -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-pdfbox</artifactId>
+            <version>1.0.10</version>
+        </dependency>
+
         <!-- Prometheus metrics via Micrometer -->
         <dependency>
             <groupId>io.micrometer</groupId>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+
+        /* ── Header ── */
+        .header {
+            background-color: #1e293b;
+            padding: 28px 40px;
+            border-bottom: 2px solid #6366f1;
+        }
+
+        .header-inner {
+            display: table;
+            width: 100%;
+        }
+
+        .header-left {
+            display: table-cell;
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .header-right {
+            display: table-cell;
+            vertical-align: top;
+            text-align: right;
+            width: 50%;
+        }
+
+        .brand {
+            font-size: 22pt;
+            font-weight: bold;
+            color: #6366f1;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            color: #64748b;
+            font-size: 9pt;
+            margin-top: 3px;
+        }
+
+        .canal-name {
+            font-size: 15pt;
+            font-weight: bold;
+            color: #f1f5f9;
+        }
+
+        .meta {
+            color: #94a3b8;
+            font-size: 8.5pt;
+            margin-top: 4px;
+        }
+
+        /* ── Section ── */
+        .section {
+            padding: 26px 40px;
+        }
+
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #6366f1;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+
+        /* ── Status Cards ── */
+        .status-table {
+            display: table;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 10px 0;
+        }
+
+        .status-cell {
+            display: table-cell;
+            width: 16.6%;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px 10px;
+            text-align: center;
+        }
+
+        .status-count {
+            font-size: 26pt;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .status-label {
+            font-size: 7.5pt;
+            color: #94a3b8;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-open       { color: #60a5fa; }
+        .color-planned    { color: #a78bfa; }
+        .color-inprogress { color: #fb923c; }
+        .color-done       { color: #34d399; }
+        .color-closed     { color: #f87171; }
+        .color-archived   { color: #94a3b8; }
+
+        /* ── Top Active List ── */
+        .top-label {
+            font-size: 9pt;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            margin-top: 22px;
+        }
+
+        .ranked-item {
+            display: table;
+            width: 100%;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+        }
+
+        .ranked-inner {
+            display: table-row;
+        }
+
+        .ranked-num {
+            display: table-cell;
+            font-size: 16pt;
+            font-weight: bold;
+            color: #334155;
+            width: 30px;
+            vertical-align: middle;
+            padding-right: 14px;
+        }
+
+        .ranked-title {
+            display: table-cell;
+            font-size: 10.5pt;
+            font-weight: bold;
+            color: #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .ranked-votes {
+            display: table-cell;
+            text-align: right;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 8.5pt;
+            color: #94a3b8;
+            width: 80px;
+        }
+
+        .votes-count {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #6366f1;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px;
+            background-color: #1e293b;
+            margin: 0 40px;
+        }
+
+        /* ── Completed Cards ── */
+        .completed-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .completed-header {
+            display: table;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .completed-title-cell {
+            display: table-cell;
+            font-size: 11pt;
+            font-weight: bold;
+            color: #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .completed-meta-cell {
+            display: table-cell;
+            text-align: right;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: 160px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            font-size: 7.5pt;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-right: 6px;
+        }
+
+        .cat-BUG             { background-color: #450a0a; color: #f87171; }
+        .cat-SUGGESTION      { background-color: #1e3a5f; color: #60a5fa; }
+        .cat-COMPLAINT       { background-color: #431407; color: #fb923c; }
+        .cat-PRAISE          { background-color: #052e16; color: #34d399; }
+        .cat-FEATURE_REQUEST { background-color: #1e3a5f; color: #60a5fa; }
+        .cat-UX              { background-color: #2d1b69; color: #a78bfa; }
+
+        .votes-badge {
+            display: inline-block;
+            font-size: 8pt;
+            background-color: #1e3a5f;
+            color: #60a5fa;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .completed-summary {
+            font-size: 9pt;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #475569;
+            font-size: 9pt;
+            border: 1px dashed #334155;
+            border-radius: 8px;
+        }
+
+        /* ── Word Cloud ── */
+        .word-cloud {
+            padding: 10px 0;
+            line-height: 2.2;
+        }
+
+        .word-tag {
+            display: inline-block;
+            color: #a5b4fc;
+            font-weight: 500;
+            margin-right: 14px;
+            margin-bottom: 6px;
+        }
+
+        .word-tag-top {
+            display: inline-block;
+            color: #818cf8;
+            font-weight: 700;
+            margin-right: 14px;
+            margin-bottom: 6px;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            padding: 16px 40px;
+            border-top: 1px solid #1e293b;
+            text-align: center;
+            color: #334155;
+            font-size: 8pt;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     Header
+     ══════════════════════════════ -->
+<div class="header">
+    <div class="header-inner">
+        <div class="header-left">
+            <div class="brand">Upvote</div>
+            <div class="tagline">Feedback sem ruído.</div>
+        </div>
+        <div class="header-right">
+            <div class="canal-name" th:text="${canal.name}">Canal Name</div>
+            <div class="meta">Período: <span th:text="${period}">-</span></div>
+            <div class="meta">Gerado em: <span th:text="${generatedAt}">-</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════
+     Seção 1 — Situação Atual
+     ══════════════════════════════ -->
+<div class="section">
+    <div class="section-title">Situação Atual</div>
+
+    <!-- Status cards -->
+    <div class="status-table">
+        <div th:each="entry : ${statusCounts}"
+             th:with="colorClass=${entry.key == 'OPEN' ? 'color-open' :
+                                   entry.key == 'PLANNED' ? 'color-planned' :
+                                   entry.key == 'IN_PROGRESS' ? 'color-inprogress' :
+                                   entry.key == 'DONE' ? 'color-done' :
+                                   entry.key == 'CLOSED' ? 'color-closed' : 'color-archived'},
+                      labelText=${entry.key == 'OPEN' ? 'Aberto' :
+                                  entry.key == 'PLANNED' ? 'Planejado' :
+                                  entry.key == 'IN_PROGRESS' ? 'Em Progresso' :
+                                  entry.key == 'DONE' ? 'Concluído' :
+                                  entry.key == 'CLOSED' ? 'Fechado' : 'Arquivado'}"
+             class="status-cell">
+            <div class="status-count" th:classappend="${colorClass}" th:text="${entry.value}">0</div>
+            <div class="status-label" th:text="${labelText}">-</div>
+        </div>
+    </div>
+
+    <!-- Top 5 most voted active groups -->
+    <div th:if="${!topActive.isEmpty()}">
+        <div class="top-label">Top feedbacks em andamento</div>
+        <div th:each="group, idx : ${topActive}" class="ranked-item">
+            <div class="ranked-inner">
+                <div class="ranked-num" th:text="${idx.count}">1</div>
+                <div class="ranked-title" th:text="${group.title}">Title</div>
+                <div class="ranked-votes">
+                    <span class="votes-count" th:text="${group.voteCount}">0</span> votos
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${topActive.isEmpty()}" class="empty-state" style="margin-top: 20px;">
+        Nenhum feedback ativo no período selecionado.
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════
+     Seção 2 — Concluídos
+     ══════════════════════════════ -->
+<div class="section">
+    <div class="section-title">Concluídos</div>
+
+    <div th:if="${!completed.isEmpty()}">
+        <div th:each="group : ${completed}" class="completed-card">
+            <div class="completed-header">
+                <div class="completed-title-cell" th:text="${group.title}">Title</div>
+                <div class="completed-meta-cell">
+                    <span th:classappend="'category-badge cat-' + ${group.category.name()}"
+                          th:text="${group.category.name() == 'BUG' ? 'Bug' :
+                                    group.category.name() == 'SUGGESTION' ? 'Sugestão' :
+                                    group.category.name() == 'COMPLAINT' ? 'Reclamação' :
+                                    group.category.name() == 'PRAISE' ? 'Elogio' :
+                                    group.category.name()}">Cat</span>
+                    <span class="votes-badge" th:text="${group.voteCount} + ' votos'">0 votos</span>
+                </div>
+            </div>
+            <div class="completed-summary"
+                 th:text="${group.summary != null and !#strings.isEmpty(group.summary) ? group.summary : 'Sem resumo disponível.'}">
+                Summary
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${completed.isEmpty()}" class="empty-state">
+        Nenhum item concluído no período selecionado.
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════
+     Seção 3 — Mapa de Palavras
+     ══════════════════════════════ -->
+<div class="section">
+    <div class="section-title">Mapa de Palavras</div>
+
+    <div th:if="${!wordMap.isEmpty()}" class="word-cloud">
+        <span th:each="tag, idx : ${wordMap}"
+              th:class="${idx.index < 3 ? 'word-tag-top' : 'word-tag'}"
+              th:style="'font-size:' + ${tag.fontSizeHundredths / 100.0} + 'rem'"
+              th:text="${tag.tag}">palavra</span>
+    </div>
+
+    <div th:if="${wordMap.isEmpty()}" class="empty-state">
+        Nenhuma tag disponível para gerar o mapa de palavras.
+    </div>
+</div>
+
+<!-- ══════════════════════════════
+     Footer
+     ══════════════════════════════ -->
+<div class="footer">
+    Gerado automaticamente pela plataforma Upvote &middot; upvote.pro
+</div>
+
+</body>
+</html>

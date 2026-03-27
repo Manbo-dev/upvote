@@ -19,6 +19,7 @@ import {
   archiveAllDone,
   archiveFeedbackGroup,
   exportFeedbackGroups,
+  exportFeedbackGroupsPdf,
   type FeedbackCategory,
   type FeedbackGroupResponse,
   type FeedbackGroupStatus,
@@ -418,13 +419,22 @@ export default function CanalDetailPage() {
   async function handleExport() {
     setExporting(true);
     try {
-      await exportFeedbackGroups(slug!, {
-        status: exportStatus !== 'ALL' ? exportStatus : undefined,
-        category: activeCategory !== 'ALL' ? activeCategory : undefined,
-        from: toDateParam(dateRange.from),
-        to: toDateParam(dateRange.to),
-        includeDetails: exportIncludeDetails,
-      });
+      if (exportFormat === 'csv') {
+        await exportFeedbackGroups(slug!, {
+          status: exportStatus !== 'ALL' ? exportStatus : undefined,
+          category: activeCategory !== 'ALL' ? activeCategory : undefined,
+          from: toDateParam(dateRange.from),
+          to: toDateParam(dateRange.to),
+          includeDetails: exportIncludeDetails,
+        });
+      } else {
+        await exportFeedbackGroupsPdf(slug!, {
+          status: exportStatus !== 'ALL' ? exportStatus : undefined,
+          category: activeCategory !== 'ALL' ? activeCategory : undefined,
+          from: toDateParam(dateRange.from),
+          to: toDateParam(dateRange.to),
+        });
+      }
       setExportOpen(false);
     } finally {
       setExporting(false);
@@ -472,12 +482,14 @@ export default function CanalDetailPage() {
                       CSV
                     </button>
                     <button
-                      disabled
-                      className="flex-1 cursor-not-allowed rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-400 dark:border-gray-700 dark:text-gray-600"
-                      title="Coming soon"
+                      onClick={() => setExportFormat('pdf')}
+                      className={`flex-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                        exportFormat === 'pdf'
+                          ? 'border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                          : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'
+                      }`}
                     >
                       PDF
-                      <span className="ml-1 text-[10px] opacity-60">soon</span>
                     </button>
                   </div>
                 </div>

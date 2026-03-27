@@ -166,3 +166,43 @@ export async function exportFeedbackGroups(
   document.body.removeChild(a);
   URL.revokeObjectURL(blobUrl);
 }
+
+// Downloads a PDF report of feedback groups with optional filters
+export async function exportFeedbackGroupsPdf(
+  slug: string,
+  options: {
+    status?: string;
+    category?: string;
+    from?: string;
+    to?: string;
+  },
+): Promise<void> {
+  const params = new URLSearchParams();
+  if (options.status && options.status !== 'ALL') params.set('status', options.status);
+  if (options.category && options.category !== 'ALL') params.set('category', options.category);
+  if (options.from) params.set('from', options.from);
+  if (options.to) params.set('to', options.to);
+
+  const token = localStorage.getItem('token');
+  const baseUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
+  const query = params.toString();
+  const url = `${baseUrl}/api/canais/${slug}/report.pdf${query ? '?' + query : ''}`;
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token ?? ''}` },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to export PDF report');
+  }
+
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = `feedback-${slug}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(blobUrl);
+}
