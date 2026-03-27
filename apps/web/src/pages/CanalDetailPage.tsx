@@ -433,7 +433,7 @@ export default function CanalDetailPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('canal.title')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -542,7 +542,7 @@ export default function CanalDetailPage() {
       </div>
 
       {/* Search bar + date filter */}
-      <div className="mb-4 flex gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <svg className="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -671,7 +671,7 @@ export default function CanalDetailPage() {
         onDragEnd={handleDragEnd}
       >
         {/* Category filter pills — expand to drop zones while dragging */}
-        <div className={`mb-6 flex gap-3 ${draggingGroup ? '' : 'flex-wrap'}`}>
+        <div className={`mb-6 flex gap-3 ${draggingGroup ? '' : 'overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden'}`}>
           {CATEGORY_FILTERS.filter((f) => !draggingGroup || f.value !== 'ALL').map((filter) => (
             <DroppableCategoryPill
               key={filter.value}

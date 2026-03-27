@@ -21,7 +21,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const { theme, toggle } = useThemeStore();
   const { language, setLanguage } = useLanguageStore();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
 
   const NAV_ITEMS = [
     {
@@ -79,9 +79,17 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? 'w-64' : 'w-14'} flex flex-shrink-0 flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-800 dark:bg-gray-900`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 md:relative md:z-auto ${sidebarOpen ? 'md:w-64' : 'md:w-14'} ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} flex flex-shrink-0 flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-800 dark:bg-gray-900`}
       >
         {/* Sidebar header */}
         <div className="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 px-3 dark:border-gray-800">
@@ -121,15 +129,27 @@ export default function Layout() {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-800 dark:bg-gray-900">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Dashboard</h2>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600 dark:text-gray-400">{user?.name}</span>
+        <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-800 dark:bg-gray-900 md:px-6">
+          <div className="flex items-center gap-3">
+            {/* Hamburger — mobile only */}
+            <button
+              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 md:hidden"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Dashboard</h2>
+          </div>
+          <div className="flex items-center gap-2 md:gap-4">
+            <span className="hidden text-sm text-gray-600 dark:text-gray-400 sm:inline">{user?.name}</span>
 
-            {/* Language toggle */}
+            {/* Language toggle — hidden on mobile */}
             <button
               onClick={() => setLanguage(language === 'pt-BR' ? 'en' : 'pt-BR')}
-              className="rounded-lg px-2 py-1 text-xs font-semibold text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              className="hidden rounded-lg px-2 py-1 text-xs font-semibold text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 sm:flex"
               title={language === 'pt-BR' ? 'Switch to English' : 'Mudar para Português'}
             >
               {language === 'pt-BR' ? 'EN' : 'PT'}
@@ -152,17 +172,22 @@ export default function Layout() {
               )}
             </button>
 
+            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              className="rounded-lg p-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
             >
-              {t('nav.logout')}
+              <span className="hidden sm:inline">{t('nav.logout')}</span>
+              {/* Icon-only on mobile */}
+              <svg className="h-5 w-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
             </button>
           </div>
         </header>
 
         {/* Content area */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 md:p-6">
           <Outlet />
         </main>
       </div>
