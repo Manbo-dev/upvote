@@ -282,11 +282,13 @@ export default function BillingPage() {
                 ))}
               </ul>
               <button
-                onClick={() => handleCheckout('PRO')}
-                disabled={loading === 'PRO'}
+                onClick={isPago ? handlePortal : () => handleCheckout('PRO')}
+                disabled={isPago ? loading === 'portal' : loading === 'PRO'}
                 className="mt-6 w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
               >
-                {loading === 'PRO' ? t('billing.redirecting') : `${t('billing.subscribeTo')} Pro`}
+                {isPago
+                  ? (loading === 'portal' ? t('billing.opening') : t('billing.upgradeViaPortal'))
+                  : (loading === 'PRO' ? t('billing.redirecting') : `${t('billing.subscribeTo')} Pro`)}
               </button>
             </div>
           </div>
