@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException ex, HttpServletRequest request) {
-        log.warn("[EXCEPTION] {} → 422: {}", requestInfo(request), ex.getMessage(), ex);
+        log.error("[EXCEPTION] {} → 422: {}", requestInfo(request), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(ApiResponse.error(ex.getMessage()));
     }

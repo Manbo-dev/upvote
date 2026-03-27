@@ -69,7 +69,7 @@ Log levels by exception type:
 
 | Exception | HTTP | Log Level |
 |-----------|------|-----------|
-| `BusinessException` | 422 | `warn` + stack trace |
+| `BusinessException` | 422 | `error` + stack trace |
 | `ResourceNotFoundException` | 404 | `warn` + stack trace |
 | `MethodArgumentNotValidException` | 400 | `warn` (field errors only, no stack trace) |
 | `IllegalArgumentException` | 400 | `warn` + stack trace |
