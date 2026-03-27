@@ -86,6 +86,7 @@ public class PdfReportService {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
             builder.useFont(() -> getClass().getResourceAsStream("/fonts/Inter-Regular.otf"), "Inter", 400, PdfRendererBuilder.FontStyle.NORMAL, true);
+            builder.useFont(() -> getClass().getResourceAsStream("/fonts/Inter-Regular.otf"), "Inter", 500, PdfRendererBuilder.FontStyle.NORMAL, true);
             builder.useFont(() -> getClass().getResourceAsStream("/fonts/Inter-SemiBold.otf"), "Inter", 600, PdfRendererBuilder.FontStyle.NORMAL, true);
             builder.useFont(() -> getClass().getResourceAsStream("/fonts/Inter-Bold.otf"), "Inter", 700, PdfRendererBuilder.FontStyle.NORMAL, true);
             builder.withHtmlContent(html, null);
