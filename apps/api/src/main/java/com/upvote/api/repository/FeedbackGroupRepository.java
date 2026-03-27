@@ -26,6 +26,10 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
 
     List<FeedbackGroup> findByCanalIdAndStatusAndCategoryOrderByVoteCountDesc(UUID canalId, FeedbackGroupStatus status, FeedbackGroupCategory category);
 
+    List<FeedbackGroup> findByCanalIdAndStatusOrderByUpdatedAtDesc(UUID canalId, FeedbackGroupStatus status);
+
+    List<FeedbackGroup> findByCanalIdAndStatusAndCategoryOrderByUpdatedAtDesc(UUID canalId, FeedbackGroupStatus status, FeedbackGroupCategory category);
+
     /**
      * Finds feedback groups similar to the given text using a hybrid strategy:
      * <ul>

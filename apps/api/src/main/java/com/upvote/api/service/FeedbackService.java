@@ -224,11 +224,20 @@ public class FeedbackService {
         if (hasStatus && hasCategory) {
             FeedbackGroupStatus groupStatus = FeedbackGroupStatus.valueOf(status.toUpperCase());
             FeedbackGroupCategory groupCategory = FeedbackGroupCategory.valueOf(category.toUpperCase());
-            groups = feedbackGroupRepository.findByCanalIdAndStatusAndCategoryOrderByVoteCountDesc(
-                    canal.getId(), groupStatus, groupCategory);
+            if (groupStatus == FeedbackGroupStatus.ARCHIVED) {
+                groups = feedbackGroupRepository.findByCanalIdAndStatusAndCategoryOrderByUpdatedAtDesc(
+                        canal.getId(), groupStatus, groupCategory);
+            } else {
+                groups = feedbackGroupRepository.findByCanalIdAndStatusAndCategoryOrderByVoteCountDesc(
+                        canal.getId(), groupStatus, groupCategory);
+            }
         } else if (hasStatus) {
             FeedbackGroupStatus groupStatus = FeedbackGroupStatus.valueOf(status.toUpperCase());
-            groups = feedbackGroupRepository.findByCanalIdAndStatusOrderByVoteCountDesc(canal.getId(), groupStatus);
+            if (groupStatus == FeedbackGroupStatus.ARCHIVED) {
+                groups = feedbackGroupRepository.findByCanalIdAndStatusOrderByUpdatedAtDesc(canal.getId(), groupStatus);
+            } else {
+                groups = feedbackGroupRepository.findByCanalIdAndStatusOrderByVoteCountDesc(canal.getId(), groupStatus);
+            }
         } else if (hasCategory) {
             FeedbackGroupCategory groupCategory = FeedbackGroupCategory.valueOf(category.toUpperCase());
             groups = feedbackGroupRepository.findByCanalIdAndCategoryOrderByVoteCountDesc(canal.getId(), groupCategory);
