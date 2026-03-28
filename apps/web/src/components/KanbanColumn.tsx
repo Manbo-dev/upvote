@@ -34,7 +34,7 @@ export default function KanbanColumn({
       className={`flex min-w-[280px] flex-col rounded-xl transition-colors ${
         isOver
           ? 'bg-primary-50 ring-2 ring-primary-300 dark:bg-primary-900/20 dark:ring-primary-600'
-          : 'bg-gray-50 dark:bg-gray-800/50'
+          : 'border border-gray-200 bg-gray-50 dark:border-transparent dark:bg-gray-800/50'
       }`}
     >
       {/* Column header */}

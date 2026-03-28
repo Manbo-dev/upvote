@@ -53,7 +53,7 @@ export default function FeedbackGroupCard({
     return (
       <div
         ref={setNodeRef}
-        className={`group cursor-grab rounded-lg border border-gray-200 bg-white p-3 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary-700 ${dragStyle}`}
+        className={`group cursor-grab rounded-lg border border-gray-300 bg-white p-3 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary-700 ${dragStyle}`}
         {...listeners}
         {...attributes}
       >
@@ -140,7 +140,7 @@ export default function FeedbackGroupCard({
   return (
     <div
       ref={setNodeRef}
-      className={`flex cursor-grab gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700 ${dragStyle}`}
+      className={`flex cursor-grab gap-4 rounded-lg border border-gray-300 bg-white p-4 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700 ${dragStyle}`}
       {...listeners}
       {...attributes}
     >
