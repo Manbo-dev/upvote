@@ -130,6 +130,12 @@ spec:
                 secretKeyRef:
                   name: upvote-secrets
                   key: GEMINI_API_KEY
+            # Google OAuth
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: GOOGLE_CLIENT_ID
             # Jira Integration
             - name: JIRA_CLIENT_ID
               valueFrom:
