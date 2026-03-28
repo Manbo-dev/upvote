@@ -49,6 +49,7 @@ variable "secret_names" {
     "STRIPE_STARTER_PRICE_ID",
     "STRIPE_PRO_PRICE_ID",
     "GEMINI_API_KEY",
+    "GOOGLE_CLIENT_ID",
     "JIRA_CLIENT_ID",
     "JIRA_CLIENT_SECRET",
     "CLICKUP_CLIENT_ID",
