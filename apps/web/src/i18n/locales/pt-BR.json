@@ -188,7 +188,27 @@
     "name": "Nome",
     "email": "Email",
     "widgetSection": "Widget de Feedback",
-    "widgetDescription": "Copie o código abaixo e adicione ao seu site para ativar o widget de feedback."
+    "widgetDescription": "Adicione o widget ao seu site em 3 passos simples.",
+    "widget": {
+      "step1Title": "1. Copie o código",
+      "step1Description": "Copie o script abaixo com a sua chave de API.",
+      "step2Title": "2. Cole antes de </body>",
+      "step2Description": "Adicione o script no HTML do seu site, antes do fechamento da tag body.",
+      "step3Title": "3. Pronto!",
+      "step3Description": "O widget aparece automaticamente. Sem dependências, sem configuração extra.",
+      "copySnippet": "Copiar código",
+      "copied": "Copiado!",
+      "advancedTitle": "Opções avançadas",
+      "advancedTriggerButton": "data-trigger=\"button\" — exibe botão flutuante (padrão)",
+      "advancedTriggerAlways": "data-trigger=\"always\" — widget sempre visível",
+      "advancedProgrammatic": "Controle programático: window.UpvoteWidget.open() / .close()",
+      "contextTitle": "Capturado automaticamente",
+      "contextUrl": "URL e título da página",
+      "contextInteraction": "Último elemento interagido",
+      "contextDevice": "Tipo de dispositivo (mobile/desktop)",
+      "viewApiKeys": "Gerenciar chaves de API",
+      "noCanal": "Crie um canal primeiro para obter sua chave de API."
+    }
   },
   "integrations": {
     "title": "Integrações",
