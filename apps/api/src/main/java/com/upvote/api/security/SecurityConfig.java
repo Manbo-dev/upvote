@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/widget.js").permitAll()
                         .requestMatchers("/api/widget/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/canais/*").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
@@ -77,6 +78,7 @@ public class SecurityConfig {
         apiConfig.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/widget.js", widgetConfig);
         source.registerCorsConfiguration("/api/widget/**", widgetConfig);
         source.registerCorsConfiguration("/**", apiConfig);
         return source;
