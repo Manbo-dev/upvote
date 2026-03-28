@@ -31,8 +31,11 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    @Column(name = "google_id", unique = true)
+    private String googleId;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

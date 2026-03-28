@@ -259,6 +259,58 @@ STRIPE_PRO_PRICE_ID=price_...
 ### Migration
 - `V6__create_subscriptions.sql` — cria tabela `subscriptions` e popula todas Organizations existentes com plano FREE
 
+## Autenticação Social (Google)
+
+### Visão geral
+Usuários podem se registrar e fazer login com o Google via Google Identity Services (GIS).
+O frontend obtém um ID token do Google e o envia ao backend, que valida e retorna um JWT padrão — sem mudança no fluxo após o login.
+
+### Fluxo
+1. Usuário clica em "Sign in with Google" na tela de login ou registro
+2. GIS abre o popup de seleção de conta Google
+3. Frontend recebe o ID token (`credential`) no callback
+4. Frontend POST `/api/auth/google` com `{ idToken }`
+5. Backend valida o token via `https://oauth2.googleapis.com/tokeninfo`
+6. Backend retorna `AuthResponse` com JWT igual ao login normal
+7. Frontend armazena o JWT e redireciona para `/dashboard`
+
+### Três casos tratados pelo backend
+| Caso | Ação |
+|---|---|
+| Usuário novo | Cria conta sem senha + Subscription FREE |
+| Usuário existente pelo `google_id` | Login direto (fast path) |
+| Merge: mesmo email, cadastro via senha | Login + backfill do `google_id` |
+
+### Arquitetura backend
+- **`GoogleAuthService`** — valida o ID token via `RestClient` (sem SDK externo); verifica `aud` e `email_verified`
+- **`AuthService.googleLogin()`** — orquestra os 3 casos, retorna `AuthResponse`
+- **Endpoint**: `POST /api/auth/google` — público (já coberto por `/api/auth/**`)
+- **`User.passwordHash`** — agora nullable (usuários Google não têm senha)
+- **`User.googleId`** — novo campo para lookup direto em logins subsequentes
+
+### Frontend
+- **`GoogleSignInButton.tsx`** — carrega o script GIS (`accounts.google.com/gsi/client`) e renderiza o botão oficial via `renderButton()`
+- **`src/types/google.d.ts`** — ambient types para `window.google` (sem dependência npm)
+- **`LoginPage.tsx`** e **`RegisterPage.tsx`** — divider + botão abaixo do formulário
+
+### Variável de ambiente necessária
+```
+# Backend (valida o aud claim do token)
+GOOGLE_CLIENT_ID=<client-id>.apps.googleusercontent.com
+
+# Frontend (inicializa o GIS)
+VITE_GOOGLE_CLIENT_ID=<client-id>.apps.googleusercontent.com
+```
+Mesmo Client ID para os dois. Sem `GOOGLE_CLIENT_ID`, a validação do `aud` falha explicitamente.
+
+### Configurar no Google Cloud Console
+1. APIs & Services → Credentials → Create OAuth 2.0 Client ID (tipo: Web application)
+2. Authorized JavaScript origins: `http://localhost:5173` e `https://app.upvote.com`
+3. Sem redirect URI (GIS usa popup, não server-side redirect)
+
+### Migration
+- `V20260329000000__add_google_auth_to_users.sql` — `password_hash` nullable, coluna `google_id`, index
+
 ## Integrações Externas (Jira / ClickUp)
 
 ### Visão geral

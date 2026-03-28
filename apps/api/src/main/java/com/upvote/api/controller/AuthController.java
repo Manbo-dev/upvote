@@ -2,6 +2,7 @@ package com.upvote.api.controller;
 
 import com.upvote.api.dto.ApiResponse;
 import com.upvote.api.dto.AuthResponse;
+import com.upvote.api.dto.GoogleLoginRequest;
 import com.upvote.api.dto.LoginRequest;
 import com.upvote.api.dto.RegisterRequest;
 import com.upvote.api.service.AuthService;
@@ -35,6 +36,13 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         log.info("Login recebido — email: {}", request.email());
         AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        log.info("Google login attempt received");
+        AuthResponse response = authService.googleLogin(request.idToken());
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 }

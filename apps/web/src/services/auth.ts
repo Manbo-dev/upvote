@@ -36,3 +36,10 @@ export async function register(
   });
   return data.data;
 }
+
+export async function googleLogin(idToken: string): Promise<AuthResponse> {
+  const { data } = await api.post<ApiResult<AuthResponse>>('/auth/google', {
+    idToken,
+  });
+  return data.data;
+}

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { register } from '../services/auth';
+import { googleLogin, register } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -13,6 +14,25 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const { login: storeLogin } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleCredential = async (idToken: string) => {
+    setError('');
+    setLoading(true);
+    try {
+      const response = await googleLogin(idToken);
+      storeLogin(response.token, {
+        name: response.name,
+        email: response.email,
+        plano: response.plano,
+      });
+      navigate('/dashboard');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || t('auth.google.errorDefault'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +138,22 @@ export default function RegisterPage() {
               {loading ? t('auth.register.submitting') : t('auth.register.submit')}
             </button>
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-2 text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                  {t('auth.google.or')}
+                </span>
+              </div>
+            </div>
+            <div className="mt-4">
+              <GoogleSignInButton onCredential={handleGoogleCredential} text="signup_with" />
+            </div>
+          </div>
 
           <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
             {t('auth.register.hasAccount')}{' '}

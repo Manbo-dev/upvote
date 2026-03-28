@@ -51,6 +51,10 @@
       "hasAccount": "Already have an account?",
       "signIn": "Sign in",
       "errorDefault": "Error creating account"
+    },
+    "google": {
+      "or": "or continue with",
+      "errorDefault": "Error signing in with Google"
     }
   },
   "dashboard": {
