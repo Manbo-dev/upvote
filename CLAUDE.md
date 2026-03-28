@@ -252,7 +252,7 @@ STRIPE_PRO_PRICE_ID=price_...
 ### Configuração no Stripe Dashboard (produção)
 1. Criar produtos Starter e Pro com preços recorrentes mensais em BRL
 2. Copiar os Price IDs para as variáveis de ambiente
-3. Configurar webhook apontando para `https://api.upvote.com/api/stripe/webhook`
+3. Configurar webhook apontando para `https://api.upvote.pro/api/stripe/webhook`
 4. Eventos do webhook: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`
 5. Copiar o webhook signing secret para `STRIPE_WEBHOOK_SECRET`
 
@@ -305,7 +305,7 @@ Mesmo Client ID para os dois. Sem `GOOGLE_CLIENT_ID`, a validação do `aud` fal
 
 ### Configurar no Google Cloud Console
 1. APIs & Services → Credentials → Create OAuth 2.0 Client ID (tipo: Web application)
-2. Authorized JavaScript origins: `http://localhost:5173` e `https://app.upvote.com`
+2. Authorized JavaScript origins: `http://localhost:5173` e `https://app.upvote.pro`
 3. Sem redirect URI (GIS usa popup, não server-side redirect)
 
 ### Migration
@@ -539,8 +539,8 @@ Lista completa em `infra/terraform/variables.tf` (variável `secret_names`). Val
 - `GCP_SERVICE_ACCOUNT` = `github-actions@project-38c32df4-c37c-41d9-b5d.iam.gserviceaccount.com`
 
 ### Domínios
-- app.upvote.com (frontend)
-- api.upvote.com (backend)
+- app.upvote.pro (frontend)
+- api.upvote.pro (backend)
 
 ## Observabilidade (Grafana Cloud)
 
