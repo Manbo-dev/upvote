@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, Zap, LayoutDashboard, Puzzle } from 'lucide-react';
 
@@ -160,7 +161,7 @@ export default function AuthPanel() {
 
       {/* Logo */}
       <div className="relative z-10 px-10 pt-10">
-        <span className="text-2xl font-bold text-white tracking-tight">Upvote</span>
+        <Link to="/" className="text-2xl font-bold text-white tracking-tight hover:opacity-80 transition-opacity">Upvote</Link>
       </div>
 
       {/* Slides */}
