@@ -40,7 +40,8 @@
       "hidePassword": "Hide password",
       "noAccount": "Don't have an account?",
       "createAccount": "Create account",
-      "errorDefault": "Error signing in"
+      "errorDefault": "Error signing in",
+      "forgotPassword": "Forgot your password?"
     },
     "register": {
       "title": "Create Account",
@@ -59,6 +60,23 @@
     "google": {
       "or": "or continue with",
       "errorDefault": "Error signing in with Google"
+    },
+    "panel": {
+      "slide0": {
+        "tagline": "Noise-free feedback.",
+        "subtitle": "AI that turns raw comments into actionable insights for your product."
+      },
+      "slide1": {
+        "title": "Everything your product needs",
+        "feature0": "Embeddable widget in 2 minutes",
+        "feature1": "AI synthesizes and groups feedback",
+        "feature2": "Dashboard for PMs and founders",
+        "feature3": "Jira and ClickUp integrations"
+      },
+      "slide2": {
+        "quote": "We stopped losing hours reading repeated feedback. Upvote delivers what really matters.",
+        "author": "— Product Manager, B2B SaaS"
+      }
     }
   },
   "dashboard": {

@@ -40,7 +40,8 @@
       "hidePassword": "Ocultar senha",
       "noAccount": "Não tem conta?",
       "createAccount": "Criar conta",
-      "errorDefault": "Erro ao fazer login"
+      "errorDefault": "Erro ao fazer login",
+      "forgotPassword": "Esqueceu sua senha?"
     },
     "register": {
       "title": "Criar Conta",
@@ -59,6 +60,23 @@
     "google": {
       "or": "ou continue com",
       "errorDefault": "Erro ao fazer login com Google"
+    },
+    "panel": {
+      "slide0": {
+        "tagline": "Feedback sem ruído.",
+        "subtitle": "IA que transforma comentários brutos em insights acionáveis para o seu produto."
+      },
+      "slide1": {
+        "title": "Tudo que seu produto precisa",
+        "feature0": "Widget embarcável em 2 minutos",
+        "feature1": "IA sintetiza e agrupa feedbacks",
+        "feature2": "Dashboard para PMs e fundadores",
+        "feature3": "Integrações com Jira e ClickUp"
+      },
+      "slide2": {
+        "quote": "Paramos de perder horas lendo feedbacks repetidos. O Upvote entrega o que realmente importa.",
+        "author": "— Product Manager, B2B SaaS"
+      }
     }
   },
   "dashboard": {
