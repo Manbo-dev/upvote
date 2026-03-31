@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { login, register } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
 import AuthPanel from '../components/AuthPanel';
@@ -251,7 +251,16 @@ export default function AuthPage() {
   }, [isRegister]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-10">
+      <div className="mb-4 w-full max-w-5xl">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar ao início
+        </Link>
+      </div>
       <div
         className="w-full max-w-5xl rounded-2xl shadow-lg border border-border bg-card overflow-hidden"
         style={{ minHeight: 600 }}
