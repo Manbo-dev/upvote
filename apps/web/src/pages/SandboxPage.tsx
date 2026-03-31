@@ -26,9 +26,9 @@ export default function SandboxPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-background">
       {/* Navbar simples */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="text-xl font-bold text-indigo-600">
@@ -38,7 +38,7 @@ export default function SandboxPage() {
               <button
                 onClick={toggle}
                 aria-label="Alternar tema"
-                className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-accent transition-colors"
               >
                 {theme === 'dark' ? (
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,7 +52,7 @@ export default function SandboxPage() {
               </button>
               <Link
                 to="/"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Voltar ao site
               </Link>
@@ -67,10 +67,10 @@ export default function SandboxPage() {
           <div className="inline-flex items-center gap-2 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-sm font-medium px-4 py-1.5 mb-4">
             Sandbox
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground">
             Experimente o widget do Upvote
           </h1>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             Veja como seus usuários vão interagir com o widget. Escreva um feedback
             na caixa abaixo e simule o envio.
           </p>
@@ -79,16 +79,16 @@ export default function SandboxPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Coluna esquerda: App simulado */}
           <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">
+            <p className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
               Sua aplicação
             </p>
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 shadow-lg bg-white dark:bg-gray-900 overflow-hidden">
+            <div className="rounded-2xl border border-border shadow-lg bg-card overflow-hidden">
               {/* Barra do navegador */}
-              <div className="flex items-center gap-1.5 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-1.5 px-4 py-3 bg-warm-100 dark:bg-warm-800 border-b border-border">
                 <span className="w-3 h-3 rounded-full bg-red-400"></span>
                 <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
                 <span className="w-3 h-3 rounded-full bg-green-400"></span>
-                <span className="ml-3 text-xs text-gray-500 dark:text-gray-400 font-mono">meuapp.com.br/checkout</span>
+                <span className="ml-3 text-xs text-muted-foreground font-mono">meuapp.com.br/checkout</span>
               </div>
 
               {/* Conteúdo do app simulado — página de checkout */}
@@ -104,7 +104,7 @@ export default function SandboxPage() {
                 </div>
 
                 {/* Título da seção */}
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Resumo do pedido</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Resumo do pedido</p>
 
                 {/* Itens do carrinho */}
                 <div className="space-y-2 mb-4">
@@ -126,8 +126,8 @@ export default function SandboxPage() {
 
                 {/* Cupom */}
                 <div className="flex gap-2 mb-4">
-                  <div className="flex-1 h-8 rounded-md border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 flex items-center px-3">
-                    <span className="text-[11px] text-gray-400 dark:text-gray-500">Código de cupom</span>
+                  <div className="flex-1 h-8 rounded-md border border-dashed border-warm-300 dark:border-warm-600 bg-warm-50 dark:bg-warm-800/50 flex items-center px-3">
+                    <span className="text-[11px] text-muted-foreground">Código de cupom</span>
                   </div>
                   <button className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 px-3 rounded-md border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 h-8">
                     Aplicar
@@ -135,7 +135,7 @@ export default function SandboxPage() {
                 </div>
 
                 {/* Totais */}
-                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-3 mb-4">
+                <div className="space-y-1 text-xs text-muted-foreground border-t border-warm-100 dark:border-warm-800 pt-3 mb-4">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span>R$ 499,60</span>
@@ -144,7 +144,7 @@ export default function SandboxPage() {
                     <span>Frete (PAC)</span>
                     <span className="text-green-600 dark:text-green-400">Grátis</span>
                   </div>
-                  <div className="flex justify-between font-semibold text-gray-900 dark:text-white text-sm pt-1 border-t border-gray-100 dark:border-gray-800 mt-1">
+                  <div className="flex justify-between font-semibold text-foreground text-sm pt-1 border-t border-warm-100 dark:border-warm-800 mt-1">
                     <span>Total</span>
                     <span>R$ 499,60</span>
                   </div>
@@ -158,7 +158,7 @@ export default function SandboxPage() {
                   <span className="text-xs font-semibold text-white">Finalizar compra</span>
                 </button>
 
-                <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">
+                <p className="text-[10px] text-muted-foreground text-center mt-2">
                   🔒 Pagamento 100% seguro via Stripe
                 </p>
 
@@ -178,12 +178,12 @@ export default function SandboxPage() {
 
           {/* Coluna direita: Contexto capturado */}
           <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">
+            <p className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
               Contexto capturado automaticamente
             </p>
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 shadow-lg bg-white dark:bg-gray-900 overflow-hidden">
+            <div className="rounded-2xl border border-border shadow-lg bg-card overflow-hidden">
               <div className="p-6 space-y-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Esses dados são capturados junto com cada feedback, sem nenhuma ação do usuário.
                 </p>
 
@@ -255,9 +255,9 @@ export default function SandboxPage() {
             </div>
 
             {/* Como o feedback é processado */}
-            <div className="mt-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-lg bg-white dark:bg-gray-900 overflow-hidden">
+            <div className="mt-6 rounded-2xl border border-border shadow-lg bg-card overflow-hidden">
               <div className="p-6">
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-base font-semibold text-foreground mb-4">
                   O que acontece após o envio?
                 </h3>
                 <ol className="space-y-3">
@@ -272,7 +272,7 @@ export default function SandboxPage() {
                       <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center justify-center">
                         {i + 1}
                       </span>
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{passo}</span>
+                      <span className="text-sm text-foreground">{passo}</span>
                     </li>
                   ))}
                 </ol>
@@ -306,13 +306,13 @@ function WidgetDemo({
     <>
       {/* Popup do widget */}
       {aberto && (
-        <div className="absolute bottom-14 right-0 w-72 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-2xl overflow-hidden">
+        <div className="absolute bottom-14 right-0 w-72 rounded-xl border border-border bg-card shadow-2xl overflow-hidden">
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">Enviar feedback</span>
+              <span className="text-sm font-semibold text-foreground">Enviar feedback</span>
               <button
                 onClick={() => setAberto(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Fechar widget"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -328,8 +328,8 @@ function WidgetDemo({
                     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                   </svg>
                 </div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Obrigado!</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Seu feedback foi recebido.</p>
+                <p className="text-sm font-medium text-foreground">Obrigado!</p>
+                <p className="text-xs text-muted-foreground mt-1">Seu feedback foi recebido.</p>
               </div>
             ) : (
               <>
@@ -338,7 +338,7 @@ function WidgetDemo({
                   onChange={(e) => onTextoChange(e.target.value)}
                   placeholder="Descreva seu feedback, sugestão ou problema..."
                   rows={4}
-                  className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-border bg-warm-50 dark:bg-warm-800 text-sm text-foreground placeholder-muted-foreground p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
 
                 <button
@@ -359,7 +359,7 @@ function WidgetDemo({
                   )}
                 </button>
 
-                <p className="mt-2 text-[10px] text-gray-400 dark:text-gray-500 text-center">
+                <p className="mt-2 text-[10px] text-muted-foreground text-center">
                   Ao enviar, você concorda com nossa política de feedback
                 </p>
               </>
@@ -367,8 +367,8 @@ function WidgetDemo({
           </div>
 
           {/* Powered by */}
-          <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-2 bg-gray-50 dark:bg-gray-800/50">
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center">
+          <div className="border-t border-warm-100 dark:border-warm-800 px-4 py-2 bg-warm-50 dark:bg-warm-800/50">
+            <p className="text-[10px] text-muted-foreground text-center">
               Powered by <span className="font-semibold text-indigo-500">Upvote</span>
             </p>
           </div>
@@ -411,17 +411,17 @@ function ItemCarrinho({
   emoji: string;
 }) {
   return (
-    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-      <div className="w-10 h-10 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-lg flex-shrink-0">
+    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-warm-50 dark:bg-warm-800/50 border border-warm-100 dark:border-warm-800">
+      <div className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center text-lg flex-shrink-0">
         {emoji}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{nome}</p>
-        <p className="text-[10px] text-gray-500 dark:text-gray-400">{variante}</p>
+        <p className="text-xs font-semibold text-foreground truncate">{nome}</p>
+        <p className="text-[10px] text-muted-foreground">{variante}</p>
       </div>
       <div className="text-right flex-shrink-0">
-        <p className="text-xs font-semibold text-gray-900 dark:text-white">{preco}</p>
-        <p className="text-[10px] text-gray-500 dark:text-gray-400">Qtd: {qtd}</p>
+        <p className="text-xs font-semibold text-foreground">{preco}</p>
+        <p className="text-[10px] text-muted-foreground">Qtd: {qtd}</p>
       </div>
     </div>
   );
@@ -439,13 +439,13 @@ function ContextoItem({
   icone: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+    <div className="flex items-start gap-3 p-3 rounded-lg bg-warm-50 dark:bg-warm-800/50 border border-warm-100 dark:border-warm-800">
       <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
         {icone}
       </div>
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-        <p className="text-sm font-medium text-gray-900 dark:text-white">{valor}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium text-foreground">{valor}</p>
       </div>
     </div>
   );

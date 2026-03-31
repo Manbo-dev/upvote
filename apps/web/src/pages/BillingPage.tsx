@@ -111,7 +111,7 @@ export default function BillingPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('billing.title')}</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t('billing.title')}</h1>
 
       {/* Checkout feedback banner */}
       {banner && (
@@ -141,11 +141,11 @@ export default function BillingPage() {
       )}
 
       {/* Current plan */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+      <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{t('billing.currentPlan')}</p>
-            <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+            <p className="text-sm text-muted-foreground">{t('billing.currentPlan')}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">
               {planoLabels[planoAtual] || planoAtual}
             </p>
             {subscription.stripeStatus && (
@@ -168,7 +168,7 @@ export default function BillingPage() {
             <button
               onClick={handlePortal}
               disabled={loading === 'portal'}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+              className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-50"
             >
               {loading === 'portal' ? t('billing.opening') : t('billing.manageSubscription')}
             </button>
@@ -176,25 +176,25 @@ export default function BillingPage() {
         </div>
 
         {subscription.currentPeriodEnd && (
-          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-3 text-sm text-muted-foreground">
             {t('billing.renewsOn')} {new Date(subscription.currentPeriodEnd).toLocaleDateString(locale)}
           </p>
         )}
       </div>
 
       {/* Current usage */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t('billing.currentUsage')}</h2>
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">{t('billing.currentUsage')}</h2>
         <div className="space-y-4">
           {/* Channels */}
           <div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">{t('billing.channels')}</span>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="text-muted-foreground">{t('billing.channels')}</span>
+              <span className="font-medium text-foreground">
                 {subscription.canaisAtivos} de {subscription.limiteCanais}
               </span>
             </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-warm-100 dark:bg-warm-800">
               <div
                 className="h-full rounded-full bg-primary-600 transition-all"
                 style={{ width: `${Math.min((subscription.canaisAtivos / subscription.limiteCanais) * 100, 100)}%` }}
@@ -206,12 +206,12 @@ export default function BillingPage() {
           {subscription.limiteSugestoesMes < 2147483647 && (
             <div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">{t('billing.suggestionsThisMonth')}</span>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="text-muted-foreground">{t('billing.suggestionsThisMonth')}</span>
+                <span className="font-medium text-foreground">
                   {subscription.sugestoesUsadasMes} de {subscription.limiteSugestoesMes}
                 </span>
               </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-warm-100 dark:bg-warm-800">
                 <div
                   className={`h-full rounded-full transition-all ${
                     subscription.sugestoesUsadasMes >= subscription.limiteSugestoesMes
@@ -229,18 +229,18 @@ export default function BillingPage() {
       {/* Upgrade cards (if not on PRO) */}
       {planoAtual !== 'PRO' && (
         <div>
-          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">
             {planoAtual === 'FREE' ? t('billing.doUpgrade') : t('billing.upgradeAvailable')}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Starter */}
             {planoAtual === 'FREE' && (
-              <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Starter</h3>
-                <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
-                  R$49<span className="text-base font-normal text-gray-500 dark:text-gray-400">{t('billing.perMonth')}</span>
+              <div className="rounded-xl border border-border bg-card p-6">
+                <h3 className="text-lg font-bold text-foreground">Starter</h3>
+                <p className="mt-1 text-3xl font-bold text-foreground">
+                  R$49<span className="text-base font-normal text-muted-foreground">{t('billing.perMonth')}</span>
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   {(t('billing.plans.starter.features', { returnObjects: true }) as string[]).map((feature) => (
                     <li key={feature} className="flex items-center gap-2">
                       <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,17 +261,17 @@ export default function BillingPage() {
             )}
 
             {/* Pro */}
-            <div className="rounded-xl border-2 border-primary-600 bg-white p-6 dark:bg-gray-900">
+            <div className="rounded-xl border-2 border-primary-600 bg-card p-6">
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Pro</h3>
+                <h3 className="text-lg font-bold text-foreground">Pro</h3>
                 <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
                   {t('billing.plans.pro.popular')}
                 </span>
               </div>
-              <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
-                R$129<span className="text-base font-normal text-gray-500 dark:text-gray-400">{t('billing.perMonth')}</span>
+              <p className="mt-1 text-3xl font-bold text-foreground">
+                R$129<span className="text-base font-normal text-muted-foreground">{t('billing.perMonth')}</span>
               </p>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 {(t('billing.plans.pro.features', { returnObjects: true }) as string[]).map((feature) => (
                   <li key={feature} className="flex items-center gap-2">
                     <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -296,17 +296,17 @@ export default function BillingPage() {
       )}
 
       {/* Business plan */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+      <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Business</h3>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <h3 className="text-lg font-bold text-foreground">Business</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               {t('billing.plans.business.description')}
             </p>
           </div>
           <a
             href="mailto:contato@upvote.com"
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             {t('billing.plans.business.contact')}
           </a>

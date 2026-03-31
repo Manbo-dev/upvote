@@ -8,7 +8,7 @@ import {
   type FeedbackDetail,
 } from '../services/feedbackGroups';
 import type { FeedbackGroupStatus } from '../services/feedbackGroups';
-import Modal from './Modal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import PushToExternalModal from './PushToExternalModal';
 
 interface FeedbackGroupDetailModalProps {
@@ -25,7 +25,7 @@ const STATUS_STYLES: Record<FeedbackGroupStatus, { dotClass: string; activeClass
   PLANNED: { dotClass: 'bg-yellow-500', activeClasses: 'bg-yellow-100 text-yellow-700 ring-yellow-400 dark:bg-yellow-900/40 dark:text-yellow-300 dark:ring-yellow-600' },
   IN_PROGRESS: { dotClass: 'bg-orange-500', activeClasses: 'bg-orange-100 text-orange-700 ring-orange-400 dark:bg-orange-900/40 dark:text-orange-300 dark:ring-orange-600' },
   DONE: { dotClass: 'bg-green-500', activeClasses: 'bg-green-100 text-green-700 ring-green-400 dark:bg-green-900/40 dark:text-green-300 dark:ring-green-600' },
-  CLOSED: { dotClass: 'bg-gray-400', activeClasses: 'bg-gray-100 text-gray-700 ring-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600' },
+  CLOSED: { dotClass: 'bg-warm-400', activeClasses: 'bg-warm-100 text-warm-700 ring-warm-400 dark:bg-warm-800 dark:text-warm-300 dark:ring-warm-600' },
   ARCHIVED: { dotClass: 'bg-purple-500', activeClasses: 'bg-purple-100 text-purple-700 ring-purple-400 dark:bg-purple-900/40 dark:text-purple-300 dark:ring-purple-600' },
 };
 
@@ -85,11 +85,15 @@ export default function FeedbackGroupDetailModal({
   if (!group) return null;
 
   return (
-    <Modal isOpen={!!group} onClose={onClose} title={group.title}>
+    <Dialog open={!!group} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{group.title}</DialogTitle>
+        </DialogHeader>
       <div className="space-y-5">
         {/* Category */}
         <div>
-          <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">{t('modal.feedbackDetail.category')}</p>
+          <p className="mb-2 text-xs font-medium text-muted-foreground">{t('modal.feedbackDetail.category')}</p>
           <div className="flex flex-wrap gap-2">
             {CATEGORY_OPTIONS.map((value) => {
               const style = CATEGORY_STYLES[value];
@@ -101,7 +105,7 @@ export default function FeedbackGroupDetailModal({
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all ${
                     isActive
                       ? `ring-2 ${style.activeClasses}`
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                      : 'bg-warm-100 text-muted-foreground hover:bg-warm-200 dark:bg-warm-800 dark:hover:bg-warm-700'
                   }`}
                 >
                   {style.icon}
@@ -114,12 +118,12 @@ export default function FeedbackGroupDetailModal({
 
         {/* Summary */}
         <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{group.summary}</p>
+          <p className="text-sm text-muted-foreground">{group.summary}</p>
         </div>
 
         {/* Status */}
         <div>
-          <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">{t('modal.feedbackDetail.status')}</p>
+          <p className="mb-2 text-xs font-medium text-muted-foreground">{t('modal.feedbackDetail.status')}</p>
           <div className="flex flex-wrap gap-2">
             {STATUS_OPTIONS.map((value) => {
               const style = STATUS_STYLES[value];
@@ -131,10 +135,10 @@ export default function FeedbackGroupDetailModal({
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all ${
                     isActive
                       ? `ring-2 ${style.activeClasses}`
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                      : 'bg-warm-100 text-muted-foreground hover:bg-warm-200 dark:bg-warm-800 dark:hover:bg-warm-700'
                   }`}
                 >
-                  <span className={`h-2 w-2 rounded-full ${isActive ? style.dotClass : 'bg-gray-400 dark:bg-gray-500'}`} />
+                  <span className={`h-2 w-2 rounded-full ${isActive ? style.dotClass : 'bg-warm-400 dark:bg-warm-500'}`} />
                   {t(`status.${value}`)}
                 </button>
               );
@@ -144,11 +148,11 @@ export default function FeedbackGroupDetailModal({
 
         {/* Main context */}
         {group.topContext && (
-          <div className="rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <div className="rounded-lg bg-warm-50 px-3 py-2 dark:bg-warm-800">
+            <span className="text-xs font-medium text-muted-foreground">
               {t('modal.feedbackDetail.mainContext')}
             </span>
-            <p className="text-sm text-gray-700 dark:text-gray-300">{group.topContext}</p>
+            <p className="text-sm text-foreground">{group.topContext}</p>
           </div>
         )}
 
@@ -190,7 +194,7 @@ export default function FeedbackGroupDetailModal({
           {/* Push button */}
           <button
             onClick={() => setShowPushModal(true)}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-sm font-medium text-foreground transition-all hover:bg-accent"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -201,7 +205,7 @@ export default function FeedbackGroupDetailModal({
 
         {/* Individual feedbacks list */}
         <div>
-          <h4 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <h4 className="mb-3 text-sm font-semibold text-foreground">
             {t('modal.feedbackDetail.groupedFeedbacks')}
           </h4>
 
@@ -210,7 +214,7 @@ export default function FeedbackGroupDetailModal({
               <div className="h-6 w-6 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
             </div>
           ) : feedbacks?.length === 0 ? (
-            <p className="text-sm text-gray-400 dark:text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {t('modal.feedbackDetail.noFeedbacks')}
             </p>
           ) : (
@@ -230,7 +234,8 @@ export default function FeedbackGroupDetailModal({
           onClose={() => setShowPushModal(false)}
         />
       )}
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -242,31 +247,31 @@ function FeedbackItem({ feedback, lang }: { feedback: FeedbackDetail; lang: stri
   });
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
+    <div className="rounded-lg border border-border bg-warm-50 p-3 dark:bg-warm-800">
       {/* Original message */}
       <div className="mb-2">
-        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+        <span className="text-xs font-medium text-muted-foreground">
           {t('modal.feedbackDetail.originalMessage')}
         </span>
-        <p className="text-sm text-gray-800 dark:text-gray-200">{feedback.rawMessage}</p>
+        <p className="text-sm text-foreground">{feedback.rawMessage}</p>
       </div>
 
       {/* AI synthesized message */}
       {feedback.synthesizedMessage && (
         <div className="mb-2">
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <span className="text-xs font-medium text-muted-foreground">
             {t('modal.feedbackDetail.aiSynthesis')}
           </span>
-          <p className="text-sm text-gray-600 italic dark:text-gray-400">
+          <p className="text-sm text-muted-foreground italic">
             {feedback.synthesizedMessage}
           </p>
         </div>
       )}
 
       {/* Context metadata */}
-      <div className="flex flex-wrap gap-2 text-xs text-gray-400 dark:text-gray-500">
+      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
         {feedback.pageTitle && (
-          <span className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5 dark:bg-gray-700 dark:text-gray-300">
+          <span className="inline-flex items-center gap-1 rounded bg-card px-2 py-0.5">
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -274,7 +279,7 @@ function FeedbackItem({ feedback, lang }: { feedback: FeedbackDetail; lang: stri
           </span>
         )}
         {feedback.lastInteraction && (
-          <span className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5 dark:bg-gray-700 dark:text-gray-300">
+          <span className="inline-flex items-center gap-1 rounded bg-card px-2 py-0.5">
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
             </svg>
@@ -282,12 +287,12 @@ function FeedbackItem({ feedback, lang }: { feedback: FeedbackDetail; lang: stri
           </span>
         )}
         {feedback.triggerType && (
-          <span className="rounded bg-white px-2 py-0.5 dark:bg-gray-700 dark:text-gray-300">
+          <span className="rounded bg-card px-2 py-0.5">
             {triggerLabel}
           </span>
         )}
         {feedback.deviceType && (
-          <span className="rounded bg-white px-2 py-0.5 dark:bg-gray-700 dark:text-gray-300">
+          <span className="rounded bg-card px-2 py-0.5">
             {feedback.deviceType === 'mobile' ? 'Mobile' : 'Desktop'}
           </span>
         )}

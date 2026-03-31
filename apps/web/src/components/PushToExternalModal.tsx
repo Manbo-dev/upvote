@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import Modal from './Modal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import {
   getIntegrations,
   listProjects,
@@ -104,12 +104,16 @@ export default function PushToExternalModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t('integrations.push.title')}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{t('integrations.push.title')}</DialogTitle>
+        </DialogHeader>
       <div className="space-y-5">
         {/* Feedback group info */}
-        <div className="rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('integrations.push.pushingItem')}</p>
-          <p className="font-medium text-gray-900 dark:text-white">{feedbackGroupTitle}</p>
+        <div className="rounded-lg bg-warm-50 px-3 py-2 dark:bg-warm-800">
+          <p className="text-xs text-muted-foreground">{t('integrations.push.pushingItem')}</p>
+          <p className="font-medium text-foreground">{feedbackGroupTitle}</p>
         </div>
 
         {/* Integration selector */}
@@ -123,7 +127,7 @@ export default function PushToExternalModal({
           </div>
         ) : (
           <div>
-            <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">
               {t('integrations.push.selectIntegration')}
             </p>
             <div className="flex gap-2">
@@ -134,7 +138,7 @@ export default function PushToExternalModal({
                   className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
                     selectedIntegration?.id === integration.id
                       ? 'border-primary-300 bg-primary-50 text-primary-700 ring-2 ring-primary-300 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-600'
-                      : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                      : 'border-border bg-card text-foreground hover:bg-accent'
                   }`}
                 >
                   {integration.provider === 'JIRA' ? (
@@ -156,7 +160,7 @@ export default function PushToExternalModal({
         {/* Project / List selector */}
         {selectedIntegration && (
           <div>
-            <label className="mb-2 block text-xs font-medium text-gray-500 dark:text-gray-400">
+            <label className="mb-2 block text-xs font-medium text-muted-foreground">
               {selectedIntegration.provider === 'JIRA'
                 ? t('integrations.push.project')
                 : t('integrations.push.list')}
@@ -169,7 +173,7 @@ export default function PushToExternalModal({
               <select
                 value={selectedProject}
                 onChange={(e) => handleProjectSelect(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground"
               >
                 <option value="">
                   {selectedIntegration.provider === 'JIRA'
@@ -189,7 +193,7 @@ export default function PushToExternalModal({
         {/* Issue type (Jira only) */}
         {selectedIntegration?.provider === 'JIRA' && selectedProject && (
           <div>
-            <label className="mb-2 block text-xs font-medium text-gray-500 dark:text-gray-400">
+            <label className="mb-2 block text-xs font-medium text-muted-foreground">
               {t('integrations.push.issueType')}
             </label>
             {loadingIssueTypes ? (
@@ -200,7 +204,7 @@ export default function PushToExternalModal({
               <select
                 value={issueType}
                 onChange={(e) => setIssueType(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground"
               >
                 <option value="">{t('integrations.push.selectIssueType')}</option>
                 {issueTypes.map((it) => (
@@ -217,10 +221,10 @@ export default function PushToExternalModal({
         )}
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-gray-700">
+        <div className="flex justify-end gap-3 border-t border-border pt-4">
           <button
             onClick={onClose}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-foreground transition-all hover:bg-accent"
           >
             {t('common.cancel')}
           </button>
@@ -233,6 +237,7 @@ export default function PushToExternalModal({
           </button>
         </div>
       </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -2,10 +2,20 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Pencil, Trash2, Package } from 'lucide-react';
 import { getCanais, createCanal, renameCanal, deleteCanal } from '../services/canais';
 import type { CanalResponse } from '../services/canais';
 import { getSubscription } from '../services/subscriptions';
-import Modal from '../components/Modal';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog';
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
@@ -98,27 +108,20 @@ export default function DashboardPage() {
     setDeleteConfirmText('');
   };
 
-  // The delete confirmation word stays in English to avoid locale issues
   const DELETE_CONFIRM_WORD = 'delete';
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('dashboard.title')}</h1>
         {limiteAtingido ? (
-          <Link
-            to="/dashboard/billing"
-            className="rounded-lg border border-primary-600 px-4 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20"
-          >
-            {t('dashboard.limitReached')}
-          </Link>
+          <Button variant="outline" asChild>
+            <Link to="/dashboard/billing">{t('dashboard.limitReached')}</Link>
+          </Button>
         ) : (
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
-          >
+          <Button onClick={() => setIsCreateModalOpen(true)}>
             {t('dashboard.newChannel')}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -127,14 +130,12 @@ export default function DashboardPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
         </div>
       ) : canais?.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
-          <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+        <div className="rounded-xl border-2 border-dashed border-warm-300 p-12 text-center dark:border-warm-700">
+          <Package className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-medium text-foreground">
             {t('dashboard.empty.title')}
           </h3>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t('dashboard.empty.description')}
           </p>
         </div>
@@ -144,17 +145,17 @@ export default function DashboardPage() {
             <div key={canal.id} className="group relative">
               <Link
                 to={`/dashboard/${canal.slug}`}
-                className="block rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-primary-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700"
+                className="block rounded-xl border border-border bg-card p-6 transition-all hover:border-primary-300 hover:shadow-md dark:hover:border-primary-700"
               >
                 <div
                   className="mb-3 h-2 w-12 rounded-full"
                   style={{ backgroundColor: canal.widgetColor }}
                 />
-                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 dark:text-white">
+                <h3 className="text-lg font-semibold text-foreground group-hover:text-primary-600">
                   {canal.name}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">/{canal.slug}</p>
-                <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">/{canal.slug}</p>
+                <p className="mt-3 text-xs text-muted-foreground">
                   {t('dashboard.channelCreatedAt')}{' '}
                   {new Date(canal.createdAt).toLocaleDateString(i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US')}
                 </p>
@@ -163,20 +164,16 @@ export default function DashboardPage() {
                 <button
                   onClick={(e) => openRenameModal(canal, e)}
                   title={t('dashboard.renameChannel')}
-                  className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
+                  <Pencil className="h-4 w-4" />
                 </button>
                 <button
                   onClick={(e) => openDeleteModal(canal, e)}
                   title={t('dashboard.deleteChannel')}
-                  className="rounded-md p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -184,178 +181,152 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Modal: create new channel */}
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title={t('dashboard.modals.createTitle')}
-      >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            createMutation.mutate();
-          }}
-          className="space-y-4"
-        >
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('dashboard.modals.channelName')}
-            </label>
-            <input
-              type="text"
-              value={canalName}
-              onChange={(e) => handleNameChange(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-              placeholder="Ex: Checkout"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('dashboard.modals.channelSlug')}
-            </label>
-            <input
-              type="text"
-              value={canalSlug}
-              onChange={(e) => setCanalSlug(e.target.value)}
-              required
-              pattern="^[a-z0-9-]+$"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-              placeholder="my-app"
-            />
-            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-              {t('dashboard.modals.slugHint')}
-            </p>
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(false)}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
-            >
-              {createMutation.isPending ? t('dashboard.modals.creating') : t('dashboard.modals.createSubmit')}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Modal: rename channel */}
-      <Modal
-        isOpen={renameTarget !== null}
-        onClose={() => { setRenameTarget(null); setRenameName(''); setRenameSlug(''); }}
-        title={t('dashboard.modals.renameTitle')}
-      >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            renameMutation.mutate();
-          }}
-          className="space-y-4"
-        >
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('dashboard.modals.newName')}
-            </label>
-            <input
-              type="text"
-              value={renameName}
-              onChange={(e) => handleRenameNameChange(e.target.value)}
-              required
-              autoFocus
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('dashboard.modals.slugPath')}
-            </label>
-            <div className="flex items-center rounded-lg border border-gray-300 focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500 dark:border-gray-700 dark:bg-gray-800">
-              <span className="pl-3 text-sm text-gray-400 dark:text-gray-500">/</span>
-              <input
+      {/* Dialog: create new channel */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('dashboard.modals.createTitle')}</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              createMutation.mutate();
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label className="mb-1 block">{t('dashboard.modals.channelName')}</Label>
+              <Input
                 type="text"
-                value={renameSlug}
-                readOnly
-                className="w-full rounded-lg bg-transparent px-2 py-2 text-sm text-gray-500 dark:text-gray-400"
+                value={canalName}
+                onChange={(e) => handleNameChange(e.target.value)}
+                required
+                placeholder="Ex: Checkout"
               />
             </div>
-            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-              {t('dashboard.modals.slugHint')}
-            </p>
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => { setRenameTarget(null); setRenameName(''); setRenameSlug(''); }}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={renameMutation.isPending || renameName.trim() === '' || renameSlug.trim() === ''}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
-            >
-              {renameMutation.isPending ? t('dashboard.modals.saving') : t('common.save')}
-            </button>
-          </div>
-        </form>
-      </Modal>
+            <div>
+              <Label className="mb-1 block">{t('dashboard.modals.channelSlug')}</Label>
+              <Input
+                type="text"
+                value={canalSlug}
+                onChange={(e) => setCanalSlug(e.target.value)}
+                required
+                pattern="^[a-z0-9-]+$"
+                placeholder="my-app"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t('dashboard.modals.slugHint')}
+              </p>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setIsCreateModalOpen(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending ? t('dashboard.modals.creating') : t('dashboard.modals.createSubmit')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      {/* Modal: delete channel */}
-      <Modal
-        isOpen={deleteTarget !== null}
-        onClose={() => { setDeleteTarget(null); setDeleteConfirmText(''); }}
-        title={t('dashboard.modals.deleteTitle')}
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {t('dashboard.modals.deleteWarning')}{' '}
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {deleteTarget?.name}
-            </span>{' '}
-            {t('dashboard.modals.deleteWarningEnd')}
-          </p>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('dashboard.modals.deleteConfirmLabel')}{' '}
-              <span className="font-mono font-semibold">{DELETE_CONFIRM_WORD}</span>{' '}
-              {t('dashboard.modals.deleteConfirmSuffix')}
-            </label>
-            <input
-              type="text"
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              autoFocus
-              placeholder={DELETE_CONFIRM_WORD}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-            />
+      {/* Dialog: rename channel */}
+      <Dialog open={renameTarget !== null} onOpenChange={(open) => { if (!open) { setRenameTarget(null); setRenameName(''); setRenameSlug(''); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('dashboard.modals.renameTitle')}</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              renameMutation.mutate();
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label className="mb-1 block">{t('dashboard.modals.newName')}</Label>
+              <Input
+                type="text"
+                value={renameName}
+                onChange={(e) => handleRenameNameChange(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
+            <div>
+              <Label className="mb-1 block">{t('dashboard.modals.slugPath')}</Label>
+              <div className="flex items-center rounded-md border border-input">
+                <span className="pl-3 text-sm text-muted-foreground">/</span>
+                <input
+                  type="text"
+                  value={renameSlug}
+                  readOnly
+                  className="w-full bg-transparent px-2 py-2 text-sm text-muted-foreground"
+                />
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t('dashboard.modals.slugHint')}
+              </p>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => { setRenameTarget(null); setRenameName(''); setRenameSlug(''); }}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                type="submit"
+                disabled={renameMutation.isPending || renameName.trim() === '' || renameSlug.trim() === ''}
+              >
+                {renameMutation.isPending ? t('dashboard.modals.saving') : t('common.save')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: delete channel */}
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteConfirmText(''); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('dashboard.modals.deleteTitle')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {t('dashboard.modals.deleteWarning')}{' '}
+              <span className="font-semibold text-foreground">
+                {deleteTarget?.name}
+              </span>{' '}
+              {t('dashboard.modals.deleteWarningEnd')}
+            </p>
+            <div>
+              <Label className="mb-1 block">
+                {t('dashboard.modals.deleteConfirmLabel')}{' '}
+                <span className="font-mono font-semibold">{DELETE_CONFIRM_WORD}</span>{' '}
+                {t('dashboard.modals.deleteConfirmSuffix')}
+              </Label>
+              <Input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                autoFocus
+                placeholder={DELETE_CONFIRM_WORD}
+                className="focus-visible:ring-destructive"
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => { setDeleteTarget(null); setDeleteConfirmText(''); }}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={deleteConfirmText !== DELETE_CONFIRM_WORD || deleteMutation.isPending}
+                onClick={() => deleteMutation.mutate()}
+              >
+                {deleteMutation.isPending ? t('dashboard.modals.deleting') : t('dashboard.modals.deleteSubmit')}
+              </Button>
+            </DialogFooter>
           </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => { setDeleteTarget(null); setDeleteConfirmText(''); }}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              type="button"
-              disabled={deleteConfirmText !== DELETE_CONFIRM_WORD || deleteMutation.isPending}
-              onClick={() => deleteMutation.mutate()}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
-            >
-              {deleteMutation.isPending ? t('dashboard.modals.deleting') : t('dashboard.modals.deleteSubmit')}
-            </button>
-          </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

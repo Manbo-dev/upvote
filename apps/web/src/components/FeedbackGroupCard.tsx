@@ -1,14 +1,16 @@
 import { useDraggable } from '@dnd-kit/core';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
+import { Archive, RotateCcw, ExternalLink, ChevronUp, Link as LinkIcon } from 'lucide-react';
 import type { FeedbackGroupResponse } from '../services/feedbackGroups';
 import { useThemeStore } from '../store/themeStore';
+import { categoryAccents } from '../design-system/tokens';
 import CategoryBadge from './CategoryBadge';
 import StatusBadge from './StatusBadge';
 
 function getVoteHeatColor(voteCount: number, maxVotes: number, isDark: boolean) {
   const ratio = maxVotes > 1 ? Math.min(voteCount / maxVotes, 1) : 0;
-  const hue = Math.round(220 - ratio * 180); // 220 (blue) → 40 (yellow) → 0 (red)
+  const hue = Math.round(220 - ratio * 180);
   const saturation = isDark ? 70 : 80;
   const lightness = isDark ? 35 : 88;
   const textLightness = isDark ? 85 : 25;
@@ -42,6 +44,7 @@ export default function FeedbackGroupCard({
   const isDark = theme === 'dark';
   const heatColor = getVoteHeatColor(group.voteCount, maxVotes, isDark);
   const timeAgo = getRelativeTime(group.updatedAt, t, i18n.language);
+  const accentColor = categoryAccents[group.category as keyof typeof categoryAccents];
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: group.id,
@@ -53,7 +56,8 @@ export default function FeedbackGroupCard({
     return (
       <div
         ref={setNodeRef}
-        className={`group cursor-grab rounded-lg border border-gray-300 bg-white p-3 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary-700 ${dragStyle}`}
+        className={`group cursor-grab rounded-lg border border-warm-200 border-l-4 bg-card p-3 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-warm-700 dark:hover:border-primary-600 ${dragStyle}`}
+        style={{ borderLeftColor: accentColor?.border }}
         {...listeners}
         {...attributes}
       >
@@ -65,7 +69,7 @@ export default function FeedbackGroupCard({
             {group.voteCount}
           </span>
           <h3
-            className="flex-1 truncate text-sm font-semibold text-gray-900 dark:text-white"
+            className="flex-1 truncate text-sm font-semibold text-foreground"
             onClick={(e) => {
               e.stopPropagation();
               onClick();
@@ -76,29 +80,25 @@ export default function FeedbackGroupCard({
           {onArchive && (
             <button
               onClick={(e) => { e.stopPropagation(); onArchive(); }}
-              className="flex-shrink-0 rounded p-1 text-gray-400 opacity-0 transition-all hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+              className="flex-shrink-0 rounded p-1 text-muted-foreground opacity-0 transition-all hover:bg-accent hover:text-foreground group-hover:opacity-100"
               title={t('card.archive')}
             >
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-              </svg>
+              <Archive className="h-3.5 w-3.5" />
             </button>
           )}
           {onRestore && (
             <button
               onClick={(e) => { e.stopPropagation(); onRestore(); }}
-              className="flex-shrink-0 rounded p-1 text-gray-400 opacity-0 transition-all hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+              className="flex-shrink-0 rounded p-1 text-muted-foreground opacity-0 transition-all hover:bg-accent hover:text-foreground group-hover:opacity-100"
               title={t('card.restore')}
             >
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <RotateCcw className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
 
         {group.summary && (
-          <p className="mb-2 text-xs text-gray-600 line-clamp-2 dark:text-gray-400">
+          <p className="mb-2 text-xs text-muted-foreground line-clamp-2">
             {group.summary}
           </p>
         )}
@@ -119,18 +119,16 @@ export default function FeedbackGroupCard({
               }`}
               title={`${issue.provider}: ${issue.externalStatus || ''}`}
             >
-              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
+              <ExternalLink className="h-3 w-3" />
               {issue.externalId}
             </a>
           ))}
           {group.topContext && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1 rounded-full bg-warm-100 px-2 py-0.5 text-xs text-muted-foreground dark:bg-warm-800">
               {group.topContext}
             </span>
           )}
-          <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">{timeAgo}</span>
+          <span className="ml-auto text-xs text-muted-foreground">{timeAgo}</span>
         </div>
 
       </div>
@@ -140,7 +138,8 @@ export default function FeedbackGroupCard({
   return (
     <div
       ref={setNodeRef}
-      className={`flex cursor-grab gap-4 rounded-lg border border-gray-300 bg-white p-4 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-primary-700 ${dragStyle}`}
+      className={`flex cursor-grab gap-4 rounded-lg border border-warm-200 border-l-4 bg-card p-4 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-warm-700 dark:hover:border-primary-600 ${dragStyle}`}
+      style={{ borderLeftColor: accentColor?.border }}
       {...listeners}
       {...attributes}
     >
@@ -153,9 +152,7 @@ export default function FeedbackGroupCard({
           borderColor: heatColor.border,
         }}
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
+        <ChevronUp className="h-4 w-4" />
         {group.voteCount}
       </div>
 
@@ -163,7 +160,7 @@ export default function FeedbackGroupCard({
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
           <h3
-            className="truncate font-semibold text-gray-900 dark:text-white"
+            className="truncate font-semibold text-foreground"
             onClick={(e) => {
               e.stopPropagation();
               onClick();
@@ -187,26 +184,22 @@ export default function FeedbackGroupCard({
               }`}
               title={`${issue.provider}: ${issue.externalStatus || ''}`}
             >
-              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
+              <ExternalLink className="h-3 w-3" />
               {issue.externalId}
             </a>
           ))}
         </div>
 
         {group.summary && (
-          <p className="mb-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">
             {group.summary}
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           {group.topContext && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
+            <span className="inline-flex items-center gap-1 rounded-full bg-warm-100 px-2.5 py-0.5 text-xs font-medium text-warm-600 dark:bg-warm-800 dark:text-warm-400">
+              <LinkIcon className="h-3 w-3" />
               {group.topContext}
             </span>
           )}

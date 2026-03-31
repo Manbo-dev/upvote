@@ -21,7 +21,11 @@
     "settings": "Settings",
     "logout": "Sign out",
     "toggleSidebar": "Toggle sidebar",
-    "toggleTheme": "Toggle theme"
+    "toggleTheme": "Toggle theme",
+    "groupMain": "Main",
+    "groupAccount": "Account",
+    "profile": "Profile",
+    "uploadPhoto": "Upload photo"
   },
   "auth": {
     "login": {

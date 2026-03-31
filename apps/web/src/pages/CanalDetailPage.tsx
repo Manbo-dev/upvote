@@ -37,7 +37,7 @@ const CATEGORY_FILTERS: {
   {
     value: 'ALL',
     icon: null,
-    activeClasses: 'bg-gray-900 text-white dark:bg-white dark:text-gray-900',
+    activeClasses: 'bg-warm-900 text-white dark:bg-warm-100 dark:text-warm-900',
     dropClasses: '',
   },
   {
@@ -156,13 +156,13 @@ function DroppableCategoryPill({
         ref={setNodeRef}
         className={`
           flex flex-1 cursor-default flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed py-5 transition-all duration-150
-          ${isOvering ? 'scale-105 border-solid shadow-md ' + filter.dropClasses : 'border-gray-200 dark:border-gray-700'}
+          ${isOvering ? 'scale-105 border-solid shadow-md ' + filter.dropClasses : 'border-warm-200 dark:border-warm-700'}
         `}
       >
         <span className={`${isOvering ? 'opacity-100' : 'opacity-40'} transition-opacity`}>
           {filter.icon}
         </span>
-        <span className={`text-xs font-semibold ${isOvering ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
+        <span className={`text-xs font-semibold ${isOvering ? 'text-foreground' : 'text-muted-foreground'}`}>
           {label}
         </span>
       </div>
@@ -176,13 +176,13 @@ function DroppableCategoryPill({
       onClick={onClick}
       className={`
         inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150
-        ${isActive ? filter.activeClasses : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'}
+        ${isActive ? filter.activeClasses : 'bg-warm-100 text-warm-600 hover:bg-warm-200 dark:bg-warm-800 dark:text-warm-400 dark:hover:bg-warm-700'}
       `}
     >
       {filter.icon}
       {label}
       {isDroppable && (
-        <span className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${isActive ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'}`}>
+        <span className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${isActive ? 'bg-white/20' : 'bg-warm-200 dark:bg-warm-700'}`}>
           {count}
         </span>
       )}
@@ -445,8 +445,8 @@ export default function CanalDetailPage() {
     <div>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('canal.title')}</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-foreground">{t('canal.title')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {t('canal.subtitle')}
           </p>
         </div>
@@ -455,7 +455,7 @@ export default function CanalDetailPage() {
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setExportOpen((o) => !o)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-warm-200 px-3 py-2 text-sm font-medium text-warm-600 transition-colors hover:bg-warm-50 dark:border-warm-700 dark:text-warm-400 dark:hover:bg-warm-800"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -464,19 +464,19 @@ export default function CanalDetailPage() {
             </button>
 
             {exportOpen && (
-              <div className="absolute right-0 z-50 mt-1 w-64 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">{t('canal.exportReport')}</p>
+              <div className="absolute right-0 z-50 mt-1 w-64 rounded-lg border border-warm-200 bg-card p-4 shadow-lg dark:border-warm-700">
+                <p className="mb-3 text-sm font-semibold text-foreground">{t('canal.exportReport')}</p>
 
                 {/* Format selector */}
                 <div className="mb-3">
-                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{t('canal.exportFormat')}</label>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('canal.exportFormat')}</label>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setExportFormat('csv')}
                       className={`flex-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
                         exportFormat === 'csv'
                           ? 'border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
-                          : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'
+                          : 'border-warm-200 text-warm-600 hover:bg-warm-50 dark:border-warm-700 dark:text-warm-400 dark:hover:bg-warm-800'
                       }`}
                     >
                       CSV
@@ -486,7 +486,7 @@ export default function CanalDetailPage() {
                       className={`flex-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
                         exportFormat === 'pdf'
                           ? 'border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
-                          : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'
+                          : 'border-warm-200 text-warm-600 hover:bg-warm-50 dark:border-warm-700 dark:text-warm-400 dark:hover:bg-warm-800'
                       }`}
                     >
                       PDF
@@ -495,11 +495,11 @@ export default function CanalDetailPage() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{t('canal.exportStatus')}</label>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('canal.exportStatus')}</label>
                   <select
                     value={exportStatus}
                     onChange={(e) => setExportStatus(e.target.value as FeedbackGroupStatus | 'ALL')}
-                    className="w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                    className="w-full rounded-md border border-warm-200 bg-card px-2 py-1.5 text-sm text-foreground dark:border-warm-700"
                   >
                     <option value="ALL">{t('canal.allStatuses')}</option>
                     <option value="OPEN">{t('status.OPEN')}</option>
@@ -516,13 +516,13 @@ export default function CanalDetailPage() {
                     type="checkbox"
                     checked={exportIncludeDetails}
                     onChange={(e) => setExportIncludeDetails(e.target.checked)}
-                    className="rounded border-gray-300 text-primary-600 dark:border-gray-600"
+                    className="rounded border-warm-300 text-primary-600 dark:border-warm-600"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('canal.exportIncludeDetails')}</span>
+                  <span className="text-sm text-foreground">{t('canal.exportIncludeDetails')}</span>
                 </label>
 
                 {(activeCategory !== 'ALL' || datePreset !== 'ALL') && (
-                  <p className="mb-3 rounded-md bg-gray-50 px-2 py-1.5 text-xs text-gray-500 dark:bg-gray-700/50 dark:text-gray-400">
+                  <p className="mb-3 rounded-md bg-warm-50 px-2 py-1.5 text-xs text-muted-foreground dark:bg-warm-800/50">
                     {t('canal.exportActiveFilters')}{' '}
                     {activeCategory !== 'ALL' && <span className="font-medium">{activeCategory.toLowerCase()}</span>}
                     {activeCategory !== 'ALL' && datePreset !== 'ALL' && ' · '}
@@ -543,7 +543,7 @@ export default function CanalDetailPage() {
 
           <Link
             to={`/dashboard/${slug}/arquivo`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-warm-200 px-3 py-2 text-sm font-medium text-warm-600 transition-colors hover:bg-warm-50 dark:border-warm-700 dark:text-warm-400 dark:hover:bg-warm-800"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -557,7 +557,7 @@ export default function CanalDetailPage() {
       <div className="mb-4 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <svg className="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -572,12 +572,12 @@ export default function CanalDetailPage() {
               }
             }}
             placeholder={t('canal.searchPlaceholder')}
-            className="block w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-primary-500"
+            className="block w-full rounded-lg border border-warm-200 bg-card py-2.5 pl-10 pr-10 text-sm text-foreground placeholder-warm-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-warm-700 dark:placeholder-warm-500 dark:focus:border-primary-500"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -628,7 +628,7 @@ export default function CanalDetailPage() {
                   )}
                 </button>
               ))}
-              <div className="my-1 border-t border-gray-200 dark:border-gray-700" />
+              <div className="my-1 border-t border-warm-200 dark:border-warm-700" />
               <button
                 onClick={() => setDatePreset('CUSTOM')}
                 className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors ${
@@ -652,7 +652,7 @@ export default function CanalDetailPage() {
                       type="date"
                       value={customFrom}
                       onChange={(e) => setCustomFrom(e.target.value)}
-                      className="w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                      className="w-full rounded-md border border-warm-200 bg-card px-2 py-1.5 text-sm text-foreground dark:border-warm-700"
                     />
                   </div>
                   <div>
@@ -661,7 +661,7 @@ export default function CanalDetailPage() {
                       type="date"
                       value={customTo}
                       onChange={(e) => setCustomTo(e.target.value)}
-                      className="w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                      className="w-full rounded-md border border-warm-200 bg-card px-2 py-1.5 text-sm text-foreground dark:border-warm-700"
                     />
                   </div>
                   <button
@@ -716,7 +716,7 @@ export default function CanalDetailPage() {
                 d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
               />
             </svg>
-            <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+            <h3 className="mt-4 text-lg font-medium text-foreground">
               {t('canal.empty.title', 'No feedback received yet')}
             </h3>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -741,7 +741,7 @@ export default function CanalDetailPage() {
                       <button
                         onClick={() => archiveAllMutation.mutate()}
                         disabled={archiveAllMutation.isPending}
-                        className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
+                        className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-warm-200 dark:bg-warm-700 dark:text-gray-400 dark:hover:bg-gray-600"
                         title={t('canal.archiveAll')}
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

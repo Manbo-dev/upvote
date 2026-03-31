@@ -75,11 +75,11 @@ export default function IntegrationsSettings() {
   };
 
   return (
-    <div className="max-w-2xl rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-      <h2 className="mb-1 text-lg font-semibold text-gray-900 dark:text-white">
+    <div className="max-w-2xl rounded-xl border border-border bg-card p-6">
+      <h2 className="mb-1 text-lg font-semibold text-foreground">
         {t('integrations.title')}
       </h2>
-      <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
+      <p className="mb-5 text-sm text-muted-foreground">
         {t('integrations.description')}
       </p>
 
@@ -102,7 +102,7 @@ export default function IntegrationsSettings() {
                 className={`flex items-center gap-4 rounded-lg border p-4 transition-all ${
                   connected
                     ? `${provider.borderColor} ${provider.bgColor}`
-                    : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
+                    : 'border-warm-200 bg-warm-50 dark:border-warm-700 dark:bg-warm-800'
                 }`}
               >
                 <div className={`flex-shrink-0 ${provider.color}`}>
@@ -110,15 +110,15 @@ export default function IntegrationsSettings() {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-medium text-gray-900 dark:text-white">
+                  <h3 className="font-medium text-foreground">
                     {provider.name}
                   </h3>
                   {connected ? (
-                    <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+                    <p className="truncate text-sm text-muted-foreground">
                       {t('integrations.connectedTo')} {connected.siteUrl}
                     </p>
                   ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       {t('integrations.notConnected')}
                     </p>
                   )}
@@ -128,7 +128,7 @@ export default function IntegrationsSettings() {
                   <button
                     onClick={() => handleDisconnect(connected.id)}
                     disabled={isDisconnecting}
-                    className="flex-shrink-0 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:bg-gray-900 dark:text-red-400 dark:hover:bg-red-900/20"
+                    className="flex-shrink-0 rounded-lg border border-red-200 bg-card px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
                   >
                     {isDisconnecting ? t('common.loading') : t('integrations.disconnect')}
                   </button>

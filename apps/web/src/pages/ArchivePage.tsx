@@ -62,15 +62,15 @@ export default function ArchivePage() {
       <div className="mb-6">
         <Link
           to={`/dashboard/${slug}`}
-          className="mb-3 inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+          className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           {t('archive.backToBoard')}
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('archive.title')}</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold text-foreground">{t('archive.title')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           {t('archive.subtitle')}
         </p>
       </div>
@@ -83,14 +83,14 @@ export default function ArchivePage() {
             onClick={() => setActiveCategory(value)}
             className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 ${
               activeCategory === value
-                ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                ? 'bg-foreground text-background'
+                : 'bg-warm-100 text-muted-foreground hover:bg-warm-200 dark:bg-warm-800 dark:hover:bg-warm-700'
             }`}
           >
             {t(`canal.categories.${value}`)}
             {value !== 'ALL' && (
               <span className={`ml-0.5 rounded-full px-1.5 py-0.5 text-xs ${
-                activeCategory === value ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
+                activeCategory === value ? 'bg-white/20' : 'bg-warm-200 dark:bg-warm-700'
               }`}>
                 {archivedGroups?.filter((g) => g.category === value).length ?? 0}
               </span>
@@ -105,9 +105,9 @@ export default function ArchivePage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
         </div>
       ) : !filtered || filtered.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
+        <div className="rounded-xl border-2 border-dashed border-warm-300 p-12 text-center dark:border-warm-700">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
+            className="mx-auto h-12 w-12 text-muted-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -119,10 +119,10 @@ export default function ArchivePage() {
               d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
             />
           </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+          <h3 className="mt-4 text-lg font-medium text-foreground">
             {t('archive.empty.title')}
           </h3>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t('archive.empty.description')}
           </p>
         </div>

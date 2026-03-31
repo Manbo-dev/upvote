@@ -69,26 +69,26 @@ function NavbarSection() {
   const { language, setLanguage } = useLanguageStore();
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <span className="text-xl font-bold text-indigo-600">Upvote</span>
+            <span className="text-xl font-bold text-primary-600">Upvote</span>
           </div>
 
           {/* Center links — desktop only */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#funcionalidades" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <a href="#funcionalidades" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               {t('landing.nav.features')}
             </a>
-            <a href="#precos" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <a href="#precos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               {t('landing.nav.pricing')}
             </a>
-            <a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               {t('landing.nav.blog')}
             </a>
-            <Link to="/sandbox" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <Link to="/sandbox" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               {t('landing.nav.tryWidget')}
             </Link>
           </div>
@@ -98,7 +98,7 @@ function NavbarSection() {
             {/* Language toggle */}
             <button
               onClick={() => setLanguage(language === 'pt-BR' ? 'en' : 'pt-BR')}
-              className="rounded-lg px-2 py-1 text-xs font-semibold text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+              className="rounded-lg px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-accent transition-colors"
             >
               {language === 'pt-BR' ? 'EN' : 'PT'}
             </button>
@@ -107,7 +107,7 @@ function NavbarSection() {
             <button
               onClick={toggle}
               aria-label={theme === 'dark' ? t('landing.nav.lightMode') : t('landing.nav.darkMode')}
-              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-accent transition-colors"
             >
               {theme === 'dark' ? (
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,13 +122,13 @@ function NavbarSection() {
 
             <Link
               to="/login"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="text-sm font-medium text-foreground hover:text-foreground transition-colors"
             >
               {t('landing.nav.signIn')}
             </Link>
             <Link
               to="/register"
-              className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="text-sm font-semibold bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
               {t('landing.nav.startFree')}
             </Link>
@@ -137,7 +137,7 @@ function NavbarSection() {
           {/* Hamburger button — mobile */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="md:hidden p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors"
             aria-label={t('landing.nav.openMenu')}
           >
             {menuOpen ? (
@@ -154,24 +154,24 @@ function NavbarSection() {
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
-            <a href="#funcionalidades" onClick={() => setMenuOpen(false)} className="block text-sm text-gray-600 dark:text-gray-400 py-2">
+          <div className="md:hidden py-4 border-t border-border space-y-3">
+            <a href="#funcionalidades" onClick={() => setMenuOpen(false)} className="block text-sm text-muted-foreground py-2">
               {t('landing.nav.features')}
             </a>
-            <a href="#precos" onClick={() => setMenuOpen(false)} className="block text-sm text-gray-600 dark:text-gray-400 py-2">
+            <a href="#precos" onClick={() => setMenuOpen(false)} className="block text-sm text-muted-foreground py-2">
               {t('landing.nav.pricing')}
             </a>
-            <a href="#" className="block text-sm text-gray-600 dark:text-gray-400 py-2">
+            <a href="#" className="block text-sm text-muted-foreground py-2">
               {t('landing.nav.blog')}
             </a>
-            <Link to="/sandbox" onClick={() => setMenuOpen(false)} className="block text-sm text-gray-600 dark:text-gray-400 py-2">
+            <Link to="/sandbox" onClick={() => setMenuOpen(false)} className="block text-sm text-muted-foreground py-2">
               {t('landing.nav.tryWidget')}
             </Link>
 
             {/* Language toggle — mobile */}
             <button
               onClick={() => setLanguage(language === 'pt-BR' ? 'en' : 'pt-BR')}
-              className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 py-2"
+              className="flex items-center gap-2 text-sm text-muted-foreground py-2"
             >
               {language === 'pt-BR' ? 'EN' : 'PT'}
             </button>
@@ -179,7 +179,7 @@ function NavbarSection() {
             {/* Theme toggle — mobile */}
             <button
               onClick={toggle}
-              className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 py-2"
+              className="flex items-center gap-2 text-sm text-muted-foreground py-2"
             >
               {theme === 'dark' ? (
                 <>
@@ -199,10 +199,10 @@ function NavbarSection() {
             </button>
 
             <div className="flex flex-col gap-2 pt-2">
-              <Link to="/login" className="text-sm font-medium text-center text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 py-2 rounded-lg">
+              <Link to="/login" className="text-sm font-medium text-center text-foreground border border-input py-2 rounded-lg">
                 {t('landing.nav.signIn')}
               </Link>
-              <Link to="/register" className="text-sm font-semibold text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg">
+              <Link to="/register" className="text-sm font-semibold text-center bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg">
                 {t('landing.nav.startFree')}
               </Link>
             </div>
@@ -220,7 +220,7 @@ function HeroSection() {
   const mockupItems = t('landing.hero.mockup.items', { returnObjects: true }) as Array<{ title: string; status: string }>;
 
   return (
-    <section className="bg-gradient-to-br from-white to-indigo-50 dark:from-gray-950 dark:to-gray-900">
+    <section className="bg-gradient-to-br from-warm-50 to-primary-50 dark:from-warm-950 dark:to-warm-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* Text column */}
@@ -234,19 +234,19 @@ function HeroSection() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-              <span className="text-gray-900 dark:text-white">{t('landing.hero.title1')}</span>
+              <span className="text-foreground">{t('landing.hero.title1')}</span>
               <br />
-              <span className="text-indigo-600">{t('landing.hero.title2')}</span>
+              <span className="text-primary-600">{t('landing.hero.title2')}</span>
             </h1>
 
-            <p className="mt-6 text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto lg:mx-0">
+            <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
               {t('landing.hero.subtitle')}
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg text-base transition-colors"
+                className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-lg text-base transition-colors"
               >
                 {t('landing.hero.startFree')}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
@@ -255,7 +255,7 @@ function HeroSection() {
               </Link>
               <Link
                 to="/sandbox"
-                className="inline-flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium px-6 py-3 rounded-lg text-base transition-colors"
+                className="inline-flex items-center justify-center gap-2 border border-input text-foreground hover:bg-accent font-medium px-6 py-3 rounded-lg text-base transition-colors"
               >
                 {t('landing.hero.tryWidget')}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
@@ -264,37 +264,37 @@ function HeroSection() {
               </Link>
             </div>
 
-            <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-6 text-sm text-muted-foreground">
               {t('landing.hero.noCreditCard')}
             </p>
           </div>
 
           {/* Dashboard mockup */}
           <div className="flex-1 w-full max-w-lg lg:max-w-none">
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xl bg-white dark:bg-gray-900 overflow-hidden">
-              <div className="flex items-center gap-1.5 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div className="rounded-2xl border border-border shadow-2xl bg-card overflow-hidden">
+              <div className="flex items-center gap-1.5 px-4 py-3 bg-warm-100 dark:bg-warm-800 border-b border-border">
                 <span className="w-3 h-3 rounded-full bg-red-400"></span>
                 <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
                 <span className="w-3 h-3 rounded-full bg-green-400"></span>
-                <span className="ml-3 text-xs text-gray-500 dark:text-gray-400 font-mono">app.upvote.com/dashboard</span>
+                <span className="ml-3 text-xs text-muted-foreground font-mono">app.upvote.com/dashboard</span>
               </div>
 
               <div className="p-5 space-y-3">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('landing.hero.mockup.patterns')}</p>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{t('landing.hero.mockup.lastDays')}</span>
+                  <p className="text-sm font-semibold text-foreground">{t('landing.hero.mockup.patterns')}</p>
+                  <span className="text-xs text-muted-foreground">{t('landing.hero.mockup.lastDays')}</span>
                 </div>
 
                 {mockupItems.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-warm-100 dark:border-warm-800 bg-warm-50 dark:bg-warm-800/50">
                     <div className="flex flex-col items-center gap-0.5 min-w-[36px]">
                       <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                         <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
                       </svg>
-                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{MOCKUP_VOTES[i]}</span>
+                      <span className="text-xs font-bold text-primary-600 dark:text-indigo-400">{MOCKUP_VOTES[i]}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{item.title}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
                       <div className="mt-1">
                         <span className={`inline-flex text-xs px-2 py-0.5 rounded-full font-medium
                           ${MOCKUP_COLORS[i] === 'orange' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : ''}
@@ -323,13 +323,13 @@ function StatsSection() {
   const stats = t('landing.stats', { returnObjects: true }) as Array<{ value: string; label: string }>;
 
   return (
-    <section className="bg-indigo-600 dark:bg-indigo-700">
+    <section className="bg-primary-600 dark:bg-primary-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           {stats.map((stat) => (
             <div key={stat.label}>
               <p className="text-3xl sm:text-4xl font-extrabold text-white">{stat.value}</p>
-              <p className="mt-1 text-sm text-indigo-100">{stat.label}</p>
+              <p className="mt-1 text-sm text-primary-100">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -345,13 +345,13 @@ function HowItWorksSection() {
   const steps = t('landing.howItWorks.steps', { returnObjects: true }) as Array<{ number: string; title: string; description: string }>;
 
   return (
-    <section id="como-funciona" className="bg-white dark:bg-gray-900">
+    <section id="como-funciona" className="bg-card/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground">
             {t('landing.howItWorks.title')}
           </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             {t('landing.howItWorks.subtitle')}
           </p>
         </div>
@@ -367,15 +367,15 @@ function HowItWorksSection() {
                 <span className="text-7xl font-extrabold text-indigo-50 dark:text-indigo-950 select-none absolute -top-4 left-1/2 -translate-x-1/2">
                   {step.number}
                 </span>
-                <div className="relative z-10 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                <div className="relative z-10 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-primary-600 dark:text-indigo-400">
                   {STEP_ICONS[i]}
                 </div>
               </div>
 
-              <h3 className="mt-6 text-xl font-semibold text-gray-900 dark:text-white">
+              <h3 className="mt-6 text-xl font-semibold text-foreground">
                 {step.title}
               </h3>
-              <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 {step.description}
               </p>
             </div>
@@ -393,13 +393,13 @@ function FeaturesSection() {
   const features = t('landing.features.items', { returnObjects: true }) as Array<{ title: string; description: string }>;
 
   return (
-    <section id="funcionalidades" className="bg-gray-50 dark:bg-gray-950">
+    <section id="funcionalidades" className="bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground">
             {t('landing.features.title')}
           </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             {t('landing.features.subtitle')}
           </p>
         </div>
@@ -408,13 +408,13 @@ function FeaturesSection() {
           {features.map((item, i) => (
             <div
               key={item.title}
-              className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
+              className="p-6 rounded-xl border border-border bg-card hover:border-primary-300 dark:hover:border-primary-600 transition-colors"
             >
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 mb-4">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-primary-600 dark:text-indigo-400 mb-4">
                 {FEATURE_ICONS[i]}
               </div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{item.description}</p>
+              <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
+              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{item.description}</p>
             </div>
           ))}
         </div>
@@ -432,13 +432,13 @@ function TestimonialsSection() {
   }>;
 
   return (
-    <section className="bg-white dark:bg-gray-900">
+    <section className="bg-card/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground">
             {t('landing.testimonials.title')}
           </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-lg text-muted-foreground">
             {t('landing.testimonials.subtitle')}
           </p>
         </div>
@@ -447,11 +447,11 @@ function TestimonialsSection() {
           {testimonials.map((dep) => (
             <div
               key={dep.name}
-              className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex flex-col"
+              className="p-6 rounded-xl border border-border bg-warm-50 dark:bg-warm-800/50 flex flex-col"
             >
               <span className="text-4xl font-serif text-indigo-200 dark:text-indigo-800 leading-none select-none">"</span>
 
-              <p className="mt-2 text-gray-700 dark:text-gray-300 text-sm leading-relaxed flex-1">
+              <p className="mt-2 text-foreground text-sm leading-relaxed flex-1">
                 {dep.text}
               </p>
 
@@ -460,8 +460,8 @@ function TestimonialsSection() {
                   {dep.initials}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{dep.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-sm font-semibold text-foreground">{dep.name}</p>
+                  <p className="text-xs text-muted-foreground">
                     {dep.role} · {dep.company}
                   </p>
                 </div>
@@ -483,13 +483,13 @@ function PricingSection() {
   }>;
 
   return (
-    <section id="precos" className="bg-gray-50 dark:bg-gray-950">
+    <section id="precos" className="bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground">
             {t('landing.pricing.title')}
           </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-lg text-muted-foreground">
             {t('landing.pricing.subtitle')}
           </p>
         </div>
@@ -500,35 +500,35 @@ function PricingSection() {
             return (
               <div
                 key={plan.name}
-                className={`relative p-6 rounded-xl border bg-white dark:bg-gray-900 flex flex-col ${
+                className={`relative p-6 rounded-xl border bg-card flex flex-col ${
                   isHighlighted
-                    ? 'ring-2 ring-indigo-600 dark:ring-indigo-500 border-indigo-600 dark:border-indigo-500'
-                    : 'border-gray-200 dark:border-gray-800'
+                    ? 'ring-2 ring-primary-600 dark:ring-primary-500 border-primary-600 dark:border-primary-500'
+                    : 'border-border'
                 }`}
               >
                 {isHighlighted && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    <span className="bg-primary-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
                       {t('landing.pricing.mostPopular')}
                     </span>
                   </div>
                 )}
 
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   {plan.name}
                 </p>
 
                 <div className="mt-2 flex items-end gap-1">
-                  <span className="text-4xl font-extrabold text-gray-900 dark:text-white">{plan.price}</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">{plan.period}</span>
+                  <span className="text-4xl font-extrabold text-foreground">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground mb-1">{plan.period}</span>
                 </div>
 
-                <div className="my-4 border-t border-gray-100 dark:border-gray-800" />
+                <div className="my-4 border-t border-warm-100 dark:border-warm-800" />
 
                 <ul className="space-y-2 flex-1">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                      <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
+                    <li key={feature} className="flex items-center gap-2 text-sm text-foreground">
+                      <svg className="w-4 h-4 text-primary-600 dark:text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                       </svg>
                       {feature}
@@ -539,7 +539,7 @@ function PricingSection() {
                 {plan.name === 'Business' ? (
                   <a
                     href="mailto:contato@upvote.com"
-                    className="mt-6 block text-center text-sm font-semibold py-2.5 rounded-lg transition-colors border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="mt-6 block text-center text-sm font-semibold py-2.5 rounded-lg transition-colors border border-input text-foreground hover:bg-accent"
                   >
                     {plan.cta}
                   </a>
@@ -548,8 +548,8 @@ function PricingSection() {
                     to="/register"
                     className={`mt-6 block text-center text-sm font-semibold py-2.5 rounded-lg transition-colors ${
                       isHighlighted || plan.name === 'Free'
-                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                        : 'border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                        ? 'bg-primary-600 hover:bg-primary-700 text-white'
+                        : 'border border-input text-foreground hover:bg-accent'
                     }`}
                   >
                     {plan.cta}
@@ -570,18 +570,18 @@ function CtaFinalSection() {
   const { t } = useTranslation();
 
   return (
-    <section className="bg-gradient-to-br from-indigo-600 to-indigo-700 dark:from-indigo-700 dark:to-indigo-900">
+    <section className="bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-900">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
           {t('landing.cta.title')}
         </h2>
-        <p className="mt-4 text-lg text-indigo-100">
+        <p className="mt-4 text-lg text-primary-100">
           {t('landing.cta.subtitle')}
         </p>
         <div className="mt-8">
           <Link
             to="/register"
-            className="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-8 py-3 rounded-lg hover:bg-indigo-50 transition-colors text-base"
+            className="inline-flex items-center gap-2 bg-white text-primary-700 font-semibold px-8 py-3 rounded-lg hover:bg-primary-50 transition-colors text-base"
           >
             {t('landing.cta.startFree')}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
@@ -615,13 +615,13 @@ function FooterSection() {
   ];
 
   return (
-    <footer className="bg-gray-900 dark:bg-gray-950">
+    <footer className="bg-warm-900 dark:bg-warm-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Logo and tagline */}
           <div className="col-span-2">
-            <span className="text-xl font-bold text-indigo-400">Upvote</span>
-            <p className="mt-3 text-sm text-gray-400 max-w-xs">
+            <span className="text-xl font-bold text-primary-400">Upvote</span>
+            <p className="mt-3 text-sm text-warm-400 max-w-xs">
               {t('landing.footer.tagline')}
             </p>
           </div>
@@ -629,11 +629,11 @@ function FooterSection() {
           {/* Link columns */}
           {footerGroups.map((group) => (
             <div key={group.title}>
-              <p className="text-sm font-semibold text-gray-300">{group.title}</p>
+              <p className="text-sm font-semibold text-warm-300">{group.title}</p>
               <ul className="mt-3 space-y-2">
                 {group.links.map((link) => (
                   <li key={link}>
-                    <a href="#" className="text-sm text-gray-400 hover:text-gray-300 transition-colors">
+                    <a href="#" className="text-sm text-warm-400 hover:text-warm-300 transition-colors">
                       {link}
                     </a>
                   </li>
@@ -644,11 +644,11 @@ function FooterSection() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">
+        <div className="mt-12 pt-6 border-t border-warm-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-warm-500">
             © {new Date().getFullYear()} Upvote. {t('landing.footer.rights')}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-warm-500">
             Feito com carinho no Brasil 🇧🇷 Pelo Engenheiro Guilherme Dias Cardoso
           </p>
         </div>

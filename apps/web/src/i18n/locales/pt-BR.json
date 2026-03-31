@@ -21,7 +21,11 @@
     "settings": "Configurações",
     "logout": "Sair",
     "toggleSidebar": "Alternar sidebar",
-    "toggleTheme": "Alternar tema"
+    "toggleTheme": "Alternar tema",
+    "groupMain": "Principal",
+    "groupAccount": "Conta",
+    "profile": "Perfil",
+    "uploadPhoto": "Enviar foto"
   },
   "auth": {
     "login": {

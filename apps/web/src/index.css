@@ -9,49 +9,98 @@
 @tailwind utilities;
 
 /* ─── CSS Custom Properties ──────────────────────────────────────────────────
-   These mirror the tokens in src/design-system/tokens.ts as CSS variables.
-   Use these when you need raw CSS access instead of Tailwind classes:
-   inline styles, third-party component overrides, dynamic computations.
-
-   When updating colors in tokens.ts, keep the values below in sync.
+   Warm neutral palette — cream/beige light mode, chocolate/charcoal dark mode.
+   These mirror the tokens in src/design-system/tokens.ts.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
-  /* Brand — primary indigo scale */
-  --color-primary-50:  #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
-  --color-primary-950: #1e1b4b;
 
-  /* Semantic surfaces — light mode */
-  --surface-background: #f9fafb;  /* gray-50  — page background */
-  --surface-panel:      #ffffff;  /* white    — cards, sidebar, modals */
-  --surface-panel-alt:  #f3f4f6;  /* gray-100 — hover rows, subtle insets */
-  --surface-border:     #e5e7eb;  /* gray-200 — default dividers */
-  --surface-border-strong: #d1d5db; /* gray-300 — focused inputs */
+@layer base {
+  :root {
+    /* Brand — warmed indigo scale */
+    --color-primary-50:  #F0EDFF;
+    --color-primary-100: #E4DFFE;
+    --color-primary-200: #CCC4FD;
+    --color-primary-300: #AEA0FB;
+    --color-primary-400: #8B78F6;
+    --color-primary-500: #6D5AEF;
+    --color-primary-600: #5B46E5;
+    --color-primary-700: #4C38CA;
+    --color-primary-800: #3F30A3;
+    --color-primary-900: #352C81;
+    --color-primary-950: #211B4B;
 
-  /* Typography */
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
+    /* Semantic surfaces — warm light mode */
+    --surface-background:     #FAF8F5;
+    --surface-panel:          #FFFFFF;
+    --surface-panel-alt:      #F5F0EB;
+    --surface-border:         #E8E0D8;
+    --surface-border-strong:  #D4C9BD;
 
-:root.dark {
-  /* Semantic surfaces — dark mode */
-  --surface-background: #030712;  /* gray-950 */
-  --surface-panel:      #111827;  /* gray-900 */
-  --surface-panel-alt:  #1f2937;  /* gray-800 */
-  --surface-border:     #1f2937;  /* gray-800 */
-  --surface-border-strong: #374151; /* gray-700 */
+    /* shadcn/ui HSL variables */
+    --background: 36 33% 97%;
+    --foreground: 12 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 12 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 12 10% 10%;
+    --primary: 250 75% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 22% 94%;
+    --secondary-foreground: 12 10% 10%;
+    --muted: 30 22% 94%;
+    --muted-foreground: 15 5% 45%;
+    --accent: 30 22% 94%;
+    --accent-foreground: 12 10% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 28 16% 88%;
+    --input: 28 16% 88%;
+    --ring: 250 75% 58%;
+    --radius: 0.75rem;
+
+    /* Typography */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  .dark {
+    /* Semantic surfaces — warm dark mode */
+    --surface-background:     #1A1614;
+    --surface-panel:          #231F1C;
+    --surface-panel-alt:      #2E2924;
+    --surface-border:         #3D3530;
+    --surface-border-strong:  #52483F;
+
+    /* shadcn/ui HSL variables — warm dark */
+    --background: 16 12% 9%;
+    --foreground: 36 33% 97%;
+    --card: 16 10% 12%;
+    --card-foreground: 36 33% 97%;
+    --popover: 16 10% 12%;
+    --popover-foreground: 36 33% 97%;
+    --primary: 250 75% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 16 10% 16%;
+    --secondary-foreground: 36 33% 97%;
+    --muted: 16 10% 16%;
+    --muted-foreground: 18 8% 50%;
+    --accent: 16 10% 16%;
+    --accent-foreground: 36 33% 97%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 14 10% 22%;
+    --input: 14 10% 22%;
+    --ring: 250 75% 58%;
+  }
 }
 
 /* ─── Base styles ─────────────────────────────────────────────────────────── */
-body {
-  font-family: var(--font-sans);
-  @apply bg-gray-50 text-gray-900 antialiased dark:bg-gray-950 dark:text-white;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    @apply bg-background text-foreground antialiased;
+  }
 }

@@ -86,7 +86,18 @@ Sem essa variável, o `StubAiService` é usado (comportamento seguro para dev/te
 - Cards com contexto: "5 relatos após 'botão Pagar' na tela de checkout esta semana"
 - Visão para PO/PM que permite decisão sem investigação técnica
 - Kanban board com colunas: Open, Planned, In Progress, Done
-- Drag-and-drop para mover cards entre status e categorias
+- Drag-and-drop para mover cards entre status e categorias (@dnd-kit)
+
+### Design System (Frontend)
+- **Warm neutral palette**: cream/beige light mode, dark chocolate dark mode, warmed indigo primary (`#5B46E5`)
+- **Component library**: shadcn/ui pattern (Radix UI + CVA + tailwind-merge) in `src/components/ui/`
+- **CSS variable theming**: HSL-based variables in `src/index.css`, semantic Tailwind colors (background, foreground, card, primary, muted, accent, border, input)
+- **Design tokens**: `src/design-system/tokens.ts` — warm palette, category accents (soft pastel left borders), status colors
+- **Icons**: lucide-react — no inline SVGs for standard icons
+- **Layout**: Collapsible sidebar with grouped navigation + profile section at bottom
+- **Modals**: All modals use shadcn `<Dialog>` (Radix-based, accessible)
+- **Dark mode**: Warm dark tones (NOT cool gray) — see `apps/web/CLAUDE.md` for full mapping rules
+- **Do NOT use `gray-*` Tailwind classes** — use `warm-*` utilities or semantic tokens instead
 
 ### Arquivo (Archive)
 
@@ -136,7 +147,7 @@ OPEN → PLANNED → IN_PROGRESS → DONE → ARCHIVED
 - Arquitetura desenhada para permitir controle granular de captura no futuro (sem implementar agora)
 
 ## Stack completa
-- Frontend: React 18 + TypeScript + Vite + TailwindCSS
+- Frontend: React 18 + TypeScript + Vite + TailwindCSS + shadcn/ui (Radix UI + CVA) + lucide-react
 - Backend: Spring Boot 3.4.3 + Java 21 + PostgreSQL (Neon.tech)
 - Widget: TypeScript puro embarcável via script tag
 - Cache: Redis

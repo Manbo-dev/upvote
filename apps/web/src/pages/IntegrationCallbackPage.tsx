@@ -36,7 +36,7 @@ export default function IntegrationCallbackPage() {
   }, [searchParams, provider, navigate, t]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+    <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="text-center">
         {error ? (
           <div>
@@ -51,7 +51,7 @@ export default function IntegrationCallbackPage() {
         ) : (
           <div>
             <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
-            <p className="text-gray-600 dark:text-gray-400">{t('integrations.connecting')}</p>
+            <p className="text-muted-foreground">{t('integrations.connecting')}</p>
           </div>
         )}
       </div>

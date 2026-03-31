@@ -14,42 +14,42 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h1>
+      <h1 className="mb-6 text-2xl font-bold text-foreground">{t('settings.title')}</h1>
 
       <div className="max-w-2xl space-y-6">
         {/* Profile */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{t('settings.profile')}</h2>
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">{t('settings.profile')}</h2>
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 {t('settings.name')}
               </label>
               <input
                 type="text"
                 value={user?.name || ''}
                 readOnly
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                className="w-full rounded-lg border border-input bg-muted px-3 py-2 text-sm text-muted-foreground"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 {t('settings.email')}
               </label>
               <input
                 type="email"
                 value={user?.email || ''}
                 readOnly
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                className="w-full rounded-lg border border-input bg-muted px-3 py-2 text-sm text-muted-foreground"
               />
             </div>
           </div>
         </div>
 
         {/* Widget installation guide */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('settings.widgetSection')}</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t('settings.widgetSection')}</h2>
             <Link
               to="/dashboard/api-keys"
               className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
@@ -57,7 +57,7 @@ export default function SettingsPage() {
               {t('settings.widget.viewApiKeys')} →
             </Link>
           </div>
-          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">{t('settings.widgetDescription')}</p>
+          <p className="mb-6 text-sm text-muted-foreground">{t('settings.widgetDescription')}</p>
 
           {/* Steps */}
           <div className="mb-6 space-y-4">
@@ -68,7 +68,7 @@ export default function SettingsPage() {
             {firstCanal ? (
               <SnippetBlock canal={firstCanal} />
             ) : (
-              <p className="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              <p className="rounded-lg border border-dashed border-warm-300 p-4 text-sm text-muted-foreground dark:border-warm-700">
                 {t('settings.widget.noCanal')}{' '}
                 <Link to="/dashboard" className="text-indigo-600 hover:underline dark:text-indigo-400">
                   {t('nav.channels')}
@@ -111,11 +111,11 @@ export default function SettingsPage() {
 
 function Step({ title, description, highlight }: { title: string; description: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-lg p-3 ${highlight ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
-      <p className={`text-sm font-semibold ${highlight ? 'text-green-700 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+    <div className={`rounded-lg p-3 ${highlight ? 'bg-green-50 dark:bg-green-900/20' : 'bg-warm-50 dark:bg-warm-800/50'}`}>
+      <p className={`text-sm font-semibold ${highlight ? 'text-green-700 dark:text-green-400' : 'text-foreground'}`}>
         {title}
       </p>
-      <p className={`text-sm ${highlight ? 'text-green-600 dark:text-green-500' : 'text-gray-500 dark:text-gray-400'}`}>
+      <p className={`text-sm ${highlight ? 'text-green-600 dark:text-green-500' : 'text-muted-foreground'}`}>
         {description}
       </p>
     </div>
@@ -158,10 +158,10 @@ function AdvancedOptions() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
+    <div className="border-t border-warm-100 pt-4 dark:border-warm-800">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <svg
           className={`h-4 w-4 transition-transform ${open ? 'rotate-90' : ''}`}
@@ -176,7 +176,7 @@ function AdvancedOptions() {
       {open && (
         <ul className="mt-3 space-y-2">
           {(['advancedTriggerButton', 'advancedTriggerAlways', 'advancedProgrammatic'] as const).map((key) => (
-            <li key={key} className="rounded-lg bg-gray-50 px-3 py-2 font-mono text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <li key={key} className="rounded-lg bg-warm-50 px-3 py-2 font-mono text-xs text-foreground dark:bg-warm-800">
               {t(`settings.widget.${key}`)}
             </li>
           ))}

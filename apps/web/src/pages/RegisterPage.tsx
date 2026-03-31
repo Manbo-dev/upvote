@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { googleLogin, register } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -56,96 +59,83 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4 dark:from-gray-950 dark:to-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-warm-50 to-warm-100 px-4 dark:from-warm-950 dark:to-warm-900">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-primary-600">Upvote</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">{t('auth.register.subtitle')}</p>
+          <p className="mt-2 text-muted-foreground">{t('auth.register.subtitle')}</p>
         </div>
 
-        <div className="rounded-xl bg-white p-8 shadow-lg dark:bg-gray-900 dark:shadow-black/40">
-          <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+        <div className="rounded-xl bg-card p-8 shadow-lg border border-border">
+          <h2 className="mb-6 text-xl font-semibold text-foreground">
             {t('auth.register.title')}
           </h2>
 
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label
-                htmlFor="name"
-                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
+              <Label htmlFor="name" className="mb-1 block">
                 {t('auth.register.name')}
-              </label>
-              <input
+              </Label>
+              <Input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                className="h-10"
                 placeholder={t('auth.register.namePlaceholder')}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
+              <Label htmlFor="email" className="mb-1 block">
                 {t('auth.register.email')}
-              </label>
-              <input
+              </Label>
+              <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                className="h-10"
                 placeholder="seu@email.com"
               />
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
+              <Label htmlFor="password" className="mb-1 block">
                 {t('auth.register.password')}
-              </label>
-              <input
+              </Label>
+              <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                className="h-10"
                 placeholder={t('auth.register.passwordPlaceholder')}
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
-            >
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? t('auth.register.submitting') : t('auth.register.submit')}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                <span className="bg-card px-2 text-muted-foreground">
                   {t('auth.google.or')}
                 </span>
               </div>
@@ -155,7 +145,7 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             {t('auth.register.hasAccount')}{' '}
             <Link
               to="/login"

@@ -11,11 +11,11 @@
  * 2. src/index.css declares matching CSS custom properties derived from these values.
  * 3. Components read `statusTokens` / `categoryTokens` directly — no hardcoded strings.
  *
- * FOR THE DESIGNER
- * ─────────────────
- * This file uses plain TypeScript objects. You do not need to know React or Tailwind.
- * Change a hex value → save → the change appears everywhere automatically.
- * See DESIGN_SYSTEM.md for a step-by-step guide.
+ * PALETTE: Warm Neutral
+ * ─────────────────────
+ * Light: cream/beige backgrounds, warm borders
+ * Dark: dark chocolate/warm charcoal (not cool gray)
+ * Primary: warmed indigo accent
  */
 
 import type { FeedbackGroupStatus } from '../services/feedbackGroups';
@@ -23,120 +23,123 @@ import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 // ─── Primitive color palettes ─────────────────────────────────────────────────
 
 /**
- * Brand primary — Indigo scale.
- * primary-600 (#4f46e5) is the main CTA color: buttons, links, active states.
+ * Brand primary — Warmed Indigo scale.
+ * primary-600 (#5B46E5) is the main CTA color: buttons, links, active states.
  */
 export const colors = {
   primary: {
-    50:  '#eef2ff',
-    100: '#e0e7ff',
-    200: '#c7d2fe',
-    300: '#a5b4fc',
-    400: '#818cf8',
-    500: '#6366f1',
-    600: '#4f46e5',
-    700: '#4338ca',
-    800: '#3730a3',
-    900: '#312e81',
-    950: '#1e1b4b',
+    50:  '#F0EDFF',
+    100: '#E4DFFE',
+    200: '#CCC4FD',
+    300: '#AEA0FB',
+    400: '#8B78F6',
+    500: '#6D5AEF',
+    600: '#5B46E5',
+    700: '#4C38CA',
+    800: '#3F30A3',
+    900: '#352C81',
+    950: '#211B4B',
   },
 } as const;
 
 // ─── Semantic surface tokens ──────────────────────────────────────────────────
 /**
- * Documents the intended meaning of each gray shade.
- * Tailwind utilities remain `gray-*` to avoid a mass rename — this object
- * is the designer's reference for what each shade represents.
- *
- * Light-mode value → dark-mode value (mirrored in CSS variables in index.css).
+ * Warm neutral surface palette.
+ * Light mode: cream/beige tones
+ * Dark mode: warm chocolate/charcoal tones (not cool blue-gray)
  */
 export const surface = {
-  /** Page background: gray-50 light / gray-950 dark */
-  background:      '#f9fafb',
-  backgroundDark:  '#030712',
+  /** Page background: warm cream light / dark chocolate dark */
+  background:      '#FAF8F5',
+  backgroundDark:  '#1A1614',
 
-  /** Cards, sidebar, header, modals: white light / gray-900 dark */
-  panel:           '#ffffff',
-  panelDark:       '#111827',
+  /** Cards, sidebar, header, modals: white light / warm dark panel */
+  panel:           '#FFFFFF',
+  panelDark:       '#231F1C',
 
-  /** Hover rows, subtle insets inside a panel: gray-100 light / gray-800 dark */
-  panelAlt:        '#f3f4f6',
-  panelAltDark:    '#1f2937',
+  /** Hover rows, subtle insets inside a panel: warm beige light / warm dark hover */
+  panelAlt:        '#F5F0EB',
+  panelAltDark:    '#2E2924',
 
-  /** Default dividers and borders: gray-200 light / gray-800 dark */
-  border:          '#e5e7eb',
-  borderDark:      '#1f2937',
+  /** Default dividers and borders: warm border light / warm dark border */
+  border:          '#E8E0D8',
+  borderDark:      '#3D3530',
 
-  /** Focused inputs, stronger borders: gray-300 light / gray-700 dark */
-  borderStrong:    '#d1d5db',
-  borderStrongDark:'#374151',
+  /** Focused inputs, stronger borders */
+  borderStrong:    '#D4C9BD',
+  borderStrongDark:'#52483F',
+} as const;
+
+// ─── Warm neutral scale (for Tailwind utilities) ─────────────────────────────
+/**
+ * Custom warm neutral scale replacing cool grays.
+ * Use `warm-50` through `warm-950` in Tailwind classes.
+ */
+export const warmNeutral = {
+  50:  '#FAF8F5',
+  100: '#F5F0EB',
+  200: '#E8E0D8',
+  300: '#D4C9BD',
+  400: '#A8A29E',
+  500: '#8A7F76',
+  600: '#57534E',
+  700: '#3D3530',
+  800: '#2E2924',
+  900: '#231F1C',
+  950: '#1A1614',
 } as const;
 
 // ─── Typography ───────────────────────────────────────────────────────────────
-/**
- * Inter is used for both the web app and PDF reports — brand consistency.
- * Loaded via Google Fonts @import in src/index.css.
- */
 export const typography = {
   fontFamily: {
-    /** Body and UI text */
     sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-    /** Code snippets, API keys, monospace fields */
     mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
   },
 } as const;
 
 // ─── Border radius ────────────────────────────────────────────────────────────
-/**
- * Used in tailwind.config.js to register these as Tailwind `rounded-*` utilities.
- * Primary card/panel radius: `rounded-lg` (0.75rem).
- */
 export const borderRadius = {
   none:    '0px',
-  sm:      '0.25rem',   // rounded-sm  — tight chips, compact elements
-  DEFAULT: '0.375rem',  // rounded     — inputs, small tags
-  md:      '0.5rem',    // rounded-md  — buttons, secondary elements
-  lg:      '0.75rem',   // rounded-lg  — cards, panels (primary border radius)
-  xl:      '1rem',      // rounded-xl  — modals, auth cards
-  full:    '9999px',    // rounded-full — badges, avatars, pills
+  sm:      '0.25rem',
+  DEFAULT: '0.375rem',
+  md:      '0.5rem',
+  lg:      '0.75rem',
+  xl:      '1rem',
+  '2xl':   '1.5rem',
+  full:    '9999px',
 } as const;
 
 // ─── Shadows ──────────────────────────────────────────────────────────────────
 export const shadows = {
   sm:      '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-  DEFAULT: '0 1px 3px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10)',
-  md:      '0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10)',
-  lg:      '0 10px 15px -3px rgb(0 0 0 / 0.10), 0 4px 6px -4px rgb(0 0 0 / 0.10)',
+  DEFAULT: '0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08)',
+  md:      '0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08)',
+  lg:      '0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08)',
+} as const;
+
+// ─── Category card accent colors ─────────────────────────────────────────────
+/**
+ * Soft pastel accents for kanban card left borders.
+ * These are intentionally subtle — light tints, not bold colors.
+ */
+export const categoryAccents = {
+  BUG:        { border: '#F5C6CB', bg: '#FEF2F2' },
+  SUGGESTION: { border: '#BFD7ED', bg: '#EFF6FF' },
+  COMPLAINT:  { border: '#FDD9B5', bg: '#FFF7ED' },
+  PRAISE:     { border: '#B7E4C7', bg: '#F0FDF4' },
 } as const;
 
 // ─── Semantic status tokens ───────────────────────────────────────────────────
-/**
- * Color classes for each feedback group status.
- * Used by StatusBadge.tsx.
- *
- * NOTE: These must be full, literal Tailwind class strings.
- * Tailwind's JIT scanner needs to see the exact class names in source files
- * to include them in the final CSS. Do NOT construct them dynamically.
- *
- * To change a status color: replace the color name (e.g. blue → teal).
- * Available Tailwind colors: https://tailwindcss.com/docs/colors
- */
 export const statusTokens: Record<FeedbackGroupStatus, string> = {
   OPEN:        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   PLANNED:     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   IN_PROGRESS: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
   DONE:        'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  CLOSED:      'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400',
+  CLOSED:      'bg-warm-200 text-warm-600 dark:bg-warm-800 dark:text-warm-400',
   ARCHIVED:    'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
 };
 
 // ─── Semantic category tokens ─────────────────────────────────────────────────
-/**
- * Color classes for each feedback category.
- * Used by CategoryBadge.tsx.
- *
- * Same JIT rule applies — keep these as full literal strings.
- */
 export type FeedbackCategory = 'BUG' | 'SUGGESTION' | 'COMPLAINT' | 'PRAISE';
 
 export const categoryTokens: Record<FeedbackCategory, { bg: string; text: string }> = {
@@ -147,10 +150,6 @@ export const categoryTokens: Record<FeedbackCategory, { bg: string; text: string
 };
 
 // ─── Integration provider tokens ──────────────────────────────────────────────
-/**
- * Color classes for external issue badges (Jira, ClickUp).
- * Used in FeedbackGroupCard and FeedbackGroupDetailModal.
- */
 export type IntegrationProvider = 'JIRA' | 'CLICKUP';
 
 export const integrationTokens: Record<IntegrationProvider, { bg: string; text: string }> = {
