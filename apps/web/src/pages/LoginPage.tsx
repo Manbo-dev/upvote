@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff } from 'lucide-react';
-import { googleLogin, login } from '../services/auth';
+import { login } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
 import AuthPanel from '../components/AuthPanel';
 import { Button } from '../components/ui/button';
@@ -49,26 +49,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login: storeLogin } = useAuth();
   const navigate = useNavigate();
-
-  // TODO: re-wire Google OAuth to the new custom button in a follow-up
-  const _handleGoogleCredential = async (idToken: string) => {
-    setError('');
-    setLoading(true);
-    try {
-      const response = await googleLogin(idToken);
-      storeLogin(response.token, {
-        name: response.name,
-        email: response.email,
-        plano: response.plano,
-      });
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || t('auth.google.errorDefault'));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

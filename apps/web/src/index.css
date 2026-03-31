@@ -15,18 +15,18 @@
 
 @layer base {
   :root {
-    /* Brand — warmed indigo scale */
-    --color-primary-50:  #F0EDFF;
-    --color-primary-100: #E4DFFE;
-    --color-primary-200: #CCC4FD;
-    --color-primary-300: #AEA0FB;
-    --color-primary-400: #8B78F6;
-    --color-primary-500: #6D5AEF;
-    --color-primary-600: #5B46E5;
-    --color-primary-700: #4C38CA;
-    --color-primary-800: #3F30A3;
-    --color-primary-900: #352C81;
-    --color-primary-950: #211B4B;
+    /* Brand — teal scale */
+    --color-primary-50:  #F0FDFA;
+    --color-primary-100: #CCFBF1;
+    --color-primary-200: #99F6E4;
+    --color-primary-300: #5EEAD4;
+    --color-primary-400: #2DD4BF;
+    --color-primary-500: #14B8A6;
+    --color-primary-600: #0D9488;
+    --color-primary-700: #0F766E;
+    --color-primary-800: #115E59;
+    --color-primary-900: #134E4A;
+    --color-primary-950: #042F2E;
 
     /* Semantic surfaces — warm light mode */
     --surface-background:     #FAF8F5;
@@ -42,7 +42,7 @@
     --card-foreground: 12 10% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 12 10% 10%;
-    --primary: 250 75% 58%;
+    --primary: 175 84% 32%;
     --primary-foreground: 0 0% 100%;
     --secondary: 30 22% 94%;
     --secondary-foreground: 12 10% 10%;
@@ -54,7 +54,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 28 16% 88%;
     --input: 28 16% 88%;
-    --ring: 250 75% 58%;
+    --ring: 175 84% 32%;
     --radius: 0.75rem;
 
     /* Typography */
@@ -77,7 +77,7 @@
     --card-foreground: 36 33% 97%;
     --popover: 16 10% 12%;
     --popover-foreground: 36 33% 97%;
-    --primary: 250 75% 58%;
+    --primary: 175 84% 32%;
     --primary-foreground: 0 0% 100%;
     --secondary: 16 10% 16%;
     --secondary-foreground: 36 33% 97%;
@@ -89,7 +89,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 14 10% 22%;
     --input: 14 10% 22%;
-    --ring: 250 75% 58%;
+    --ring: 175 84% 32%;
   }
 }
 

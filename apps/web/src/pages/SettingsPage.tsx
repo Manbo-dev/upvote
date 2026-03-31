@@ -52,7 +52,7 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold text-foreground">{t('settings.widgetSection')}</h2>
             <Link
               to="/dashboard/api-keys"
-              className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               {t('settings.widget.viewApiKeys')} →
             </Link>
@@ -70,7 +70,7 @@ export default function SettingsPage() {
             ) : (
               <p className="rounded-lg border border-dashed border-warm-300 p-4 text-sm text-muted-foreground dark:border-warm-700">
                 {t('settings.widget.noCanal')}{' '}
-                <Link to="/dashboard" className="text-indigo-600 hover:underline dark:text-indigo-400">
+                <Link to="/dashboard" className="text-primary-600 hover:underline dark:text-primary-400">
                   {t('nav.channels')}
                 </Link>
               </p>
@@ -87,14 +87,14 @@ export default function SettingsPage() {
           </div>
 
           {/* Auto-captured context */}
-          <div className="mb-6 rounded-lg bg-indigo-50 p-4 dark:bg-indigo-900/20">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
+          <div className="mb-6 rounded-lg bg-primary-50 p-4 dark:bg-primary-900/20">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:text-primary-300">
               {t('settings.widget.contextTitle')}
             </p>
             <ul className="space-y-1">
               {(['contextUrl', 'contextInteraction', 'contextDevice'] as const).map((key) => (
-                <li key={key} className="flex items-center gap-2 text-sm text-indigo-700 dark:text-indigo-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                <li key={key} className="flex items-center gap-2 text-sm text-primary-700 dark:text-primary-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary-400" />
                   {t(`settings.widget.${key}`)}
                 </li>
               ))}

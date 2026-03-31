@@ -225,10 +225,10 @@ function HeroSection() {
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* Text column */}
           <div className="flex-1 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-sm font-medium px-4 py-1.5 mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 text-sm font-medium px-4 py-1.5 mb-6">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
               </span>
               {t('landing.hero.badge')}
             </div>
@@ -288,10 +288,10 @@ function HeroSection() {
                 {mockupItems.map((item, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-warm-100 dark:border-warm-800 bg-warm-50 dark:bg-warm-800/50">
                     <div className="flex flex-col items-center gap-0.5 min-w-[36px]">
-                      <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <svg className="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                         <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
                       </svg>
-                      <span className="text-xs font-bold text-primary-600 dark:text-indigo-400">{MOCKUP_VOTES[i]}</span>
+                      <span className="text-xs font-bold text-primary-600 dark:text-primary-400">{MOCKUP_VOTES[i]}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
@@ -360,14 +360,14 @@ function HowItWorksSection() {
           {steps.map((step, i) => (
             <div key={step.number} className="relative text-center">
               {i < steps.length - 1 && (
-                <div className="hidden md:block absolute top-10 left-[calc(50%+3rem)] right-0 border-t-2 border-dashed border-indigo-200 dark:border-indigo-900" />
+                <div className="hidden md:block absolute top-10 left-[calc(50%+3rem)] right-0 border-t-2 border-dashed border-primary-200 dark:border-primary-900" />
               )}
 
               <div className="relative inline-flex flex-col items-center">
-                <span className="text-7xl font-extrabold text-indigo-50 dark:text-indigo-950 select-none absolute -top-4 left-1/2 -translate-x-1/2">
+                <span className="text-7xl font-extrabold text-primary-50 dark:text-primary-950 select-none absolute -top-4 left-1/2 -translate-x-1/2">
                   {step.number}
                 </span>
-                <div className="relative z-10 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-primary-600 dark:text-indigo-400">
+                <div className="relative z-10 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
                   {STEP_ICONS[i]}
                 </div>
               </div>
@@ -410,7 +410,7 @@ function FeaturesSection() {
               key={item.title}
               className="p-6 rounded-xl border border-border bg-card hover:border-primary-300 dark:hover:border-primary-600 transition-colors"
             >
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-primary-600 dark:text-indigo-400 mb-4">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 mb-4">
                 {FEATURE_ICONS[i]}
               </div>
               <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
@@ -449,14 +449,14 @@ function TestimonialsSection() {
               key={dep.name}
               className="p-6 rounded-xl border border-border bg-warm-50 dark:bg-warm-800/50 flex flex-col"
             >
-              <span className="text-4xl font-serif text-indigo-200 dark:text-indigo-800 leading-none select-none">"</span>
+              <span className="text-4xl font-serif text-primary-200 dark:text-primary-800 leading-none select-none">"</span>
 
               <p className="mt-2 text-foreground text-sm leading-relaxed flex-1">
                 {dep.text}
               </p>
 
               <div className="flex items-center gap-3 mt-6">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-semibold text-sm flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-300 font-semibold text-sm flex-shrink-0">
                   {dep.initials}
                 </div>
                 <div>
@@ -528,7 +528,7 @@ function PricingSection() {
                 <ul className="space-y-2 flex-1">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm text-foreground">
-                      <svg className="w-4 h-4 text-primary-600 dark:text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
+                      <svg className="w-4 h-4 text-primary-600 dark:text-primary-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                       </svg>
                       {feature}

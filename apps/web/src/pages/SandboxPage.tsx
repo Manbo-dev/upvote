@@ -31,7 +31,7 @@ export default function SandboxPage() {
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="text-xl font-bold text-indigo-600">
+            <Link to="/" className="text-xl font-bold text-primary-600">
               Upvote
             </Link>
             <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ export default function SandboxPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Cabeçalho */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-sm font-medium px-4 py-1.5 mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 text-sm font-medium px-4 py-1.5 mb-4">
             Sandbox
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground">
@@ -95,10 +95,10 @@ export default function SandboxPage() {
               <div className="p-5 min-h-[400px] relative">
                 {/* Cabeçalho do app */}
                 <div className="flex items-center justify-between mb-5">
-                  <span className="text-base font-bold text-indigo-600">ShopBR</span>
+                  <span className="text-base font-bold text-primary-600">ShopBR</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
-                      <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400">GS</span>
+                    <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+                      <span className="text-[9px] font-bold text-primary-600 dark:text-primary-400">GS</span>
                     </div>
                   </div>
                 </div>
@@ -245,8 +245,8 @@ export default function SandboxPage() {
                 </div>
 
                 {/* Dica */}
-                <div className="mt-6 p-4 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800">
-                  <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                <div className="mt-6 p-4 rounded-lg bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800">
+                  <p className="text-sm text-primary-700 dark:text-primary-300">
                     <strong>Dica:</strong> No produto real, esses dados são capturados automaticamente
                     pelo script do widget. O usuário só precisa escrever o feedback.
                   </p>
@@ -269,7 +269,7 @@ export default function SandboxPage() {
                     'O padrão aparece no dashboard do parceiro',
                   ].map((passo, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center justify-center">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-bold flex items-center justify-center">
                         {i + 1}
                       </span>
                       <span className="text-sm text-foreground">{passo}</span>
@@ -338,13 +338,13 @@ function WidgetDemo({
                   onChange={(e) => onTextoChange(e.target.value)}
                   placeholder="Descreva seu feedback, sugestão ou problema..."
                   rows={4}
-                  className="w-full rounded-lg border border-border bg-warm-50 dark:bg-warm-800 text-sm text-foreground placeholder-muted-foreground p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-border bg-warm-50 dark:bg-warm-800 text-sm text-foreground placeholder-muted-foreground p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
 
                 <button
                   onClick={onEnviar}
                   disabled={!texto.trim() || enviando}
-                  className="mt-3 w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="mt-3 w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   {enviando ? (
                     <>
@@ -369,7 +369,7 @@ function WidgetDemo({
           {/* Powered by */}
           <div className="border-t border-warm-100 dark:border-warm-800 px-4 py-2 bg-warm-50 dark:bg-warm-800/50">
             <p className="text-[10px] text-muted-foreground text-center">
-              Powered by <span className="font-semibold text-indigo-500">Upvote</span>
+              Powered by <span className="font-semibold text-primary-500">Upvote</span>
             </p>
           </div>
         </div>
@@ -378,7 +378,7 @@ function WidgetDemo({
       {/* Botão flutuante do widget */}
       <button
         onClick={() => setAberto(!aberto)}
-        className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+        className="w-12 h-12 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
         aria-label="Abrir widget de feedback"
       >
         {aberto ? (
@@ -440,7 +440,7 @@ function ContextoItem({
 }) {
   return (
     <div className="flex items-start gap-3 p-3 rounded-lg bg-warm-50 dark:bg-warm-800/50 border border-warm-100 dark:border-warm-800">
-      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center">
         {icone}
       </div>
       <div>

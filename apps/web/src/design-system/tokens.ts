@@ -15,7 +15,7 @@
  * ─────────────────────
  * Light: cream/beige backgrounds, warm borders
  * Dark: dark chocolate/warm charcoal (not cool gray)
- * Primary: warmed indigo accent
+ * Primary: teal accent
  */
 
 import type { FeedbackGroupStatus } from '../services/feedbackGroups';
@@ -23,22 +23,22 @@ import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 // ─── Primitive color palettes ─────────────────────────────────────────────────
 
 /**
- * Brand primary — Warmed Indigo scale.
- * primary-600 (#5B46E5) is the main CTA color: buttons, links, active states.
+ * Brand primary — Teal scale.
+ * primary-600 (#0D9488) is the main CTA color: buttons, links, active states.
  */
 export const colors = {
   primary: {
-    50:  '#F0EDFF',
-    100: '#E4DFFE',
-    200: '#CCC4FD',
-    300: '#AEA0FB',
-    400: '#8B78F6',
-    500: '#6D5AEF',
-    600: '#5B46E5',
-    700: '#4C38CA',
-    800: '#3F30A3',
-    900: '#352C81',
-    950: '#211B4B',
+    50:  '#F0FDFA',
+    100: '#CCFBF1',
+    200: '#99F6E4',
+    300: '#5EEAD4',
+    400: '#2DD4BF',
+    500: '#14B8A6',
+    600: '#0D9488',
+    700: '#0F766E',
+    800: '#115E59',
+    900: '#134E4A',
+    950: '#042F2E',
   },
 } as const;
 
