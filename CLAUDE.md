@@ -89,10 +89,11 @@ Sem essa variável, o `StubAiService` é usado (comportamento seguro para dev/te
 - Drag-and-drop para mover cards entre status e categorias (@dnd-kit)
 
 ### Design System (Frontend)
-- **Warm neutral palette**: cream/beige light mode, dark chocolate dark mode, warmed indigo primary (`#5B46E5`)
+- **Warm neutral palette**: cream/beige light mode, dark chocolate dark mode, forest green primary (`#1F5C45`)
 - **Component library**: shadcn/ui pattern (Radix UI + CVA + tailwind-merge) in `src/components/ui/`
 - **CSS variable theming**: HSL-based variables in `src/index.css`, semantic Tailwind colors (background, foreground, card, primary, muted, accent, border, input)
 - **Design tokens**: `src/design-system/tokens.ts` — warm palette, category accents (soft pastel left borders), status colors
+- **Typography**: `DM Sans` (body) + `Fraunces` (display/headings h1/h2/h3). Use `font-display` Tailwind class for display headings.
 - **Icons**: lucide-react — no inline SVGs for standard icons
 - **Layout**: Collapsible sidebar with grouped navigation + profile section at bottom
 - **Modals**: All modals use shadcn `<Dialog>` (Radix-based, accessible)

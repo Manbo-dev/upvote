@@ -23,22 +23,22 @@ import type { FeedbackGroupStatus } from '../services/feedbackGroups';
 // ─── Primitive color palettes ─────────────────────────────────────────────────
 
 /**
- * Brand primary — Teal scale.
- * primary-600 (#0D9488) is the main CTA color: buttons, links, active states.
+ * Brand primary — Forest green scale.
+ * primary-600 (#1F5C45) is the main CTA color: buttons, links, active states.
  */
 export const colors = {
   primary: {
-    50:  '#F0FDFA',
-    100: '#CCFBF1',
-    200: '#99F6E4',
-    300: '#5EEAD4',
-    400: '#2DD4BF',
-    500: '#14B8A6',
-    600: '#0D9488',
-    700: '#0F766E',
-    800: '#115E59',
-    900: '#134E4A',
-    950: '#042F2E',
+    50:  '#EDFAF5',
+    100: '#CCEEE0',
+    200: '#99DDBF',
+    300: '#5CC99A',
+    400: '#31AB7A',
+    500: '#228B61',
+    600: '#1F5C45',
+    700: '#1A4D3A',
+    800: '#133B2C',
+    900: '#0C2720',
+    950: '#061410',
   },
 } as const;
 
@@ -92,8 +92,9 @@ export const warmNeutral = {
 // ─── Typography ───────────────────────────────────────────────────────────────
 export const typography = {
   fontFamily: {
-    sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-    mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+    sans:    ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+    display: ['Fraunces', 'ui-serif', 'serif'],
+    mono:    ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
   },
 } as const;
 
@@ -131,12 +132,12 @@ export const categoryAccents = {
 
 // ─── Semantic status tokens ───────────────────────────────────────────────────
 export const statusTokens: Record<FeedbackGroupStatus, string> = {
-  OPEN:        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  PLANNED:     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  IN_PROGRESS: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
-  DONE:        'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  OPEN:        'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400',
+  PLANNED:     'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  IN_PROGRESS: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
+  DONE:        'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
   CLOSED:      'bg-warm-200 text-warm-600 dark:bg-warm-800 dark:text-warm-400',
-  ARCHIVED:    'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  ARCHIVED:    'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400',
 };
 
 // ─── Semantic category tokens ─────────────────────────────────────────────────

@@ -33,7 +33,11 @@ Rotas privadas redirecionam para /login se não autenticado.
 ## Design System — Warm Neutral + shadcn/ui
 
 ### Palette
-The UI uses a **warm neutral palette** (cream/beige light, dark chocolate dark) with a warmed indigo primary accent (`#5B46E5`). All colors are defined as CSS variables (HSL) in `src/index.css` and mapped through Tailwind in `tailwind.config.js`.
+The UI uses a **warm neutral palette** (cream/beige light, dark chocolate dark) with a forest green primary (`#1F5C45`). All colors are defined as CSS variables (HSL) in `src/index.css` and mapped through Tailwind in `tailwind.config.js`.
+
+### Typography
+- **Body**: `DM Sans` — registered as `font-sans` (default for all text)
+- **Display/Headings**: `Fraunces` (optical variable serif) — registered as `font-display`, applied globally to `h1`, `h2`, `h3` via `@layer base`. Use `font-display` class for any additional display-style text (hero titles, card headings, logo).
 
 ### Color tokens (single source of truth)
 - **Design tokens**: `src/design-system/tokens.ts` — exports `warmNeutral`, `categoryAccents`, `statusTokens`, `categoryTokens`
