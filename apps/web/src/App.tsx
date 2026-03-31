@@ -15,6 +15,8 @@ import IntegrationsPage from './pages/IntegrationsPage';
 import IntegrationCallbackPage from './pages/IntegrationCallbackPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import { useThemeStore } from './store/themeStore';
@@ -62,6 +64,8 @@ function App() {
       </Route>
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
       <Route path="/" element={<RootRoute />} />
     </Routes>
     </>

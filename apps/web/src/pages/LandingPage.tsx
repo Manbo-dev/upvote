@@ -619,8 +619,8 @@ function FooterSection() {
     {
       title: t('landing.footer.legal'),
       links: [
-        { label: t('landing.footer.privacy'), href: '#' },
-        { label: t('landing.footer.terms'), href: '#' },
+        { label: t('landing.footer.privacy'), href: '/privacy' },
+        { label: t('landing.footer.terms'), href: '/terms' },
       ],
     },
   ];
