@@ -74,7 +74,7 @@ function NavbarSection() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <span className="text-xl font-bold text-primary-600">Upvote</span>
+            <a href="/" className="text-xl font-bold text-primary-600 hover:opacity-80 transition-opacity">Upvote</a>
           </div>
 
           {/* Center links — desktop only */}
