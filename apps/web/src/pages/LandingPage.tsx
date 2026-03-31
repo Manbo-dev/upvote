@@ -612,8 +612,8 @@ function FooterSection() {
       title: t('landing.footer.company'),
       links: [
         { label: t('landing.footer.blog'), href: 'https://medium.com/@guilhermedicasil/upvote-blog-19e6f32e64cd', external: true },
-        { label: t('landing.footer.about'), href: '#' },
-        { label: t('landing.footer.contact'), href: 'mailto:guilhermedicasil@gmail.com' },
+        { label: t('landing.footer.about'), href: '/about' },
+        { label: t('landing.footer.contact'), href: '/contact' },
       ],
     },
     {
@@ -644,13 +644,19 @@ function FooterSection() {
               <ul className="mt-3 space-y-2">
                 {group.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      className="text-sm text-warm-400 hover:text-warm-300 transition-colors"
-                    >
-                      {link.label}
-                    </a>
+                    {link.external || link.href.startsWith('#') || link.href.startsWith('mailto:') ? (
+                      <a
+                        href={link.href}
+                        {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        className="text-sm text-warm-400 hover:text-warm-300 transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link to={link.href} className="text-sm text-warm-400 hover:text-warm-300 transition-colors">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

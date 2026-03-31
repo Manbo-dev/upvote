@@ -13,6 +13,8 @@ import BillingPage from './pages/BillingPage';
 import ArchivePage from './pages/ArchivePage';
 import IntegrationsPage from './pages/IntegrationsPage';
 import IntegrationCallbackPage from './pages/IntegrationCallbackPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import { useThemeStore } from './store/themeStore';
@@ -58,6 +60,8 @@ function App() {
         <Route path="integrations" element={<IntegrationsPage />} />
         <Route path="billing" element={<BillingPage />} />
       </Route>
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
       <Route path="/" element={<RootRoute />} />
     </Routes>
     </>
