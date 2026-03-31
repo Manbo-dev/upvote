@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import CanalDetailPage from './pages/CanalDetailPage';
 import SettingsPage from './pages/SettingsPage';
@@ -39,8 +38,8 @@ function App() {
     <Analytics />
     <SpeedInsights />
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<AuthPage />} />
+      <Route path="/register" element={<AuthPage />} />
       <Route path="/sandbox" element={<SandboxPage />} />
       <Route path="/integrations/:provider/callback" element={<IntegrationCallbackPage />} />
       <Route
