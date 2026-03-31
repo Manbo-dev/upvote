@@ -41,25 +41,13 @@ function FacebookIcon() {
 function SocialButtons() {
   return (
     <div className="mt-4 grid grid-cols-3 gap-3">
-      <button
-        type="button"
-        className="flex items-center justify-center rounded-lg border border-border bg-card py-2.5 hover:bg-accent transition-colors"
-        aria-label="Google"
-      >
+      <button type="button" className="flex items-center justify-center rounded-lg border border-border bg-card py-2.5 hover:bg-accent transition-colors" aria-label="Google">
         <GoogleIcon />
       </button>
-      <button
-        type="button"
-        className="flex items-center justify-center rounded-lg border border-border bg-card py-2.5 hover:bg-accent transition-colors"
-        aria-label="Apple"
-      >
+      <button type="button" className="flex items-center justify-center rounded-lg border border-border bg-card py-2.5 hover:bg-accent transition-colors" aria-label="Apple">
         <AppleIcon />
       </button>
-      <button
-        type="button"
-        className="flex items-center justify-center rounded-lg border border-border bg-card py-2.5 hover:bg-accent transition-colors"
-        aria-label="Facebook"
-      >
+      <button type="button" className="flex items-center justify-center rounded-lg border border-border bg-card py-2.5 hover:bg-accent transition-colors" aria-label="Facebook">
         <FacebookIcon />
       </button>
     </div>
@@ -68,7 +56,7 @@ function SocialButtons() {
 
 // ─── Login form ───────────────────────────────────────────────────────────────
 
-function LoginForm() {
+function LoginForm({ showLogo = false }: { showLogo?: boolean }) {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -84,11 +72,7 @@ function LoginForm() {
     setLoading(true);
     try {
       const response = await login(email, password);
-      storeLogin(response.token, {
-        name: response.name,
-        email: response.email,
-        plano: response.plano,
-      });
+      storeLogin(response.token, { name: response.name, email: response.email, plano: response.plano });
       navigate('/dashboard');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
@@ -100,30 +84,18 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="mb-8 lg:hidden">
-        <span className="text-2xl font-bold text-primary-600">Upvote</span>
-      </div>
+      {showLogo && <div className="mb-8"><span className="text-2xl font-bold text-primary-600">Upvote</span></div>}
 
       <h1 className="text-3xl font-bold text-foreground">{t('auth.login.title')}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t('auth.login.subtitle')}</p>
 
-      {error && (
-        <div className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-      )}
+      {error && <div className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div className="space-y-1.5">
           <Label htmlFor="login-email">{t('auth.login.email')}</Label>
-          <Input
-            id="login-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="seu@email.com"
-          />
+          <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="seu@email.com" />
         </div>
-
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="login-password">{t('auth.login.password')}</Label>
@@ -151,7 +123,6 @@ function LoginForm() {
             </button>
           </div>
         </div>
-
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? t('auth.login.submitting') : t('auth.login.submit')}
         </Button>
@@ -178,7 +149,7 @@ function LoginForm() {
 
 // ─── Register form ────────────────────────────────────────────────────────────
 
-function RegisterForm() {
+function RegisterForm({ showLogo = false }: { showLogo?: boolean }) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -194,11 +165,7 @@ function RegisterForm() {
     setLoading(true);
     try {
       const response = await register(name, email, password);
-      storeLogin(response.token, {
-        name: response.name,
-        email: response.email,
-        plano: response.plano,
-      });
+      storeLogin(response.token, { name: response.name, email: response.email, plano: response.plano });
       navigate('/dashboard');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
@@ -210,55 +177,26 @@ function RegisterForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="mb-8 lg:hidden">
-        <span className="text-2xl font-bold text-primary-600">Upvote</span>
-      </div>
+      {showLogo && <div className="mb-8"><span className="text-2xl font-bold text-primary-600">Upvote</span></div>}
 
       <h1 className="text-3xl font-bold text-foreground">{t('auth.register.title')}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t('auth.register.subtitle')}</p>
 
-      {error && (
-        <div className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-      )}
+      {error && <div className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div className="space-y-1.5">
           <Label htmlFor="register-name">{t('auth.register.name')}</Label>
-          <Input
-            id="register-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            placeholder={t('auth.register.namePlaceholder')}
-          />
+          <Input id="register-name" type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder={t('auth.register.namePlaceholder')} />
         </div>
-
         <div className="space-y-1.5">
           <Label htmlFor="register-email">{t('auth.register.email')}</Label>
-          <Input
-            id="register-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="seu@email.com"
-          />
+          <Input id="register-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="seu@email.com" />
         </div>
-
         <div className="space-y-1.5">
           <Label htmlFor="register-password">{t('auth.register.password')}</Label>
-          <Input
-            id="register-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            placeholder={t('auth.register.passwordPlaceholder')}
-          />
+          <Input id="register-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder={t('auth.register.passwordPlaceholder')} />
         </div>
-
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? t('auth.register.submitting') : t('auth.register.submit')}
         </Button>
@@ -289,47 +227,99 @@ export default function AuthPage() {
   const location = useLocation();
   const isRegister = location.pathname === '/register';
 
+  // Desktop: drives panel position (changes instantly → CSS transition does the animation)
   const [mode, setMode] = useState<'login' | 'register'>(isRegister ? 'register' : 'login');
-  const [visible, setVisible] = useState(true);
+
+  // Mobile: separate fade state
+  const [mobileMode, setMobileMode] = useState<'login' | 'register'>(isRegister ? 'register' : 'login');
+  const [mobileVisible, setMobileVisible] = useState(true);
 
   useEffect(() => {
-    const targetMode = isRegister ? 'register' : 'login';
-    if (targetMode === mode) return;
+    const target = isRegister ? 'register' : 'login';
 
-    setVisible(false);
+    // Desktop: instant mode switch — the panel CSS `left` transition handles the animation
+    setMode(target);
 
-    const timer = setTimeout(() => {
-      setMode(targetMode);
-      setVisible(true);
+    // Mobile: fade out → swap → fade in
+    if (target === mobileMode) return;
+    setMobileVisible(false);
+    const t = setTimeout(() => {
+      setMobileMode(target);
+      setMobileVisible(true);
     }, 180);
-
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [isRegister]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <div className="w-full max-w-5xl rounded-2xl shadow-lg border border-border overflow-hidden flex bg-card min-h-[600px]">
-        {/* Panel left (register mode) */}
-        {mode === 'register' && (
-          <div className="hidden lg:flex lg:w-[46%] xl:w-[48%] m-3 rounded-xl overflow-hidden">
+      <div
+        className="w-full max-w-5xl rounded-2xl shadow-lg border border-border bg-card overflow-hidden"
+        style={{ minHeight: 600 }}
+      >
+        {/* ── Desktop: sliding panel layout ─────────────────────────────────── */}
+        {/*
+          Both forms are always in the DOM in their fixed slots.
+          The green panel slides on top (z-10), covering whichever form is inactive.
+          pointer-events prevents interaction with the form behind the panel.
+
+          Login  → panel RIGHT: [LoginForm 54%][Panel 46%]
+          Register → panel LEFT: [Panel 46%][RegisterForm 54%]
+        */}
+        <div className="relative hidden lg:block" style={{ minHeight: 600 }}>
+
+          {/* Left slot: login form (always here) */}
+          <div
+            className="absolute inset-y-0 left-0 flex items-center justify-center px-10 xl:px-14 bg-card"
+            style={{
+              width: '54%',
+              zIndex: mode === 'login' ? 2 : 1,
+              pointerEvents: mode === 'login' ? 'auto' : 'none',
+            }}
+          >
+            <LoginForm />
+          </div>
+
+          {/* Right slot: register form (always here) */}
+          <div
+            className="absolute inset-y-0 right-0 flex items-center justify-center px-10 xl:px-14 bg-card"
+            style={{
+              width: '54%',
+              zIndex: mode === 'register' ? 2 : 1,
+              pointerEvents: mode === 'register' ? 'auto' : 'none',
+            }}
+          >
+            <RegisterForm />
+          </div>
+
+          {/* Sliding green panel — slides left↔right like a curtain */}
+          <div
+            className="absolute top-3 bottom-3 rounded-xl overflow-hidden z-10"
+            style={{
+              width: 'calc(46% - 1.5rem)',
+              // Login: panel on right (left edge starts at 54% + 12px margin)
+              // Register: panel on left (12px margin from left edge)
+              left: mode === 'login' ? 'calc(54% + 0.75rem)' : '0.75rem',
+              transition: 'left 0.6s cubic-bezier(0.65, 0, 0.35, 1)',
+            }}
+          >
             <AuthPanel />
           </div>
-        )}
-
-        {/* Form area — fades between modes */}
-        <div
-          className="flex flex-1 items-center justify-center px-8 py-12 lg:px-12 transition-opacity duration-200"
-          style={{ opacity: visible ? 1 : 0 }}
-        >
-          {mode === 'login' ? <LoginForm /> : <RegisterForm />}
         </div>
 
-        {/* Panel right (login mode) */}
-        {mode === 'login' && (
-          <div className="hidden lg:flex lg:w-[46%] xl:w-[48%] m-3 rounded-xl overflow-hidden">
-            <AuthPanel />
-          </div>
-        )}
+        {/* ── Mobile: single form with fade transition ───────────────────────── */}
+        <div
+          className="flex lg:hidden items-center justify-center px-8 py-12"
+          style={{
+            minHeight: 600,
+            opacity: mobileVisible ? 1 : 0,
+            transition: 'opacity 0.2s ease',
+          }}
+        >
+          {mobileMode === 'login'
+            ? <LoginForm showLogo />
+            : <RegisterForm showLogo />
+          }
+        </div>
       </div>
     </div>
   );
