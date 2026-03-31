@@ -85,7 +85,7 @@ function NavbarSection() {
             <a href="#precos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               {t('landing.nav.pricing')}
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a href="https://medium.com/@guilhermedicasil" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               {t('landing.nav.blog')}
             </a>
             <Link to="/sandbox" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -161,7 +161,7 @@ function NavbarSection() {
             <a href="#precos" onClick={() => setMenuOpen(false)} className="block text-sm text-muted-foreground py-2">
               {t('landing.nav.pricing')}
             </a>
-            <a href="#" className="block text-sm text-muted-foreground py-2">
+            <a href="https://medium.com/@guilhermedicasil" target="_blank" rel="noopener noreferrer" className="block text-sm text-muted-foreground py-2">
               {t('landing.nav.blog')}
             </a>
             <Link to="/sandbox" onClick={() => setMenuOpen(false)} className="block text-sm text-muted-foreground py-2">
