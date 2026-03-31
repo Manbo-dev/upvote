@@ -804,3 +804,50 @@ integrations.* — Integrations settings + push modal (connect, disconnect, push
 3. Adicionar o código em `supportedLngs`
 4. Atualizar `languageStore.ts` com o novo tipo `Language` e a lógica de detecção
 5. Adicionar o botão de toggle correspondente em `Layout.tsx`
+
+## Páginas Institucionais (Landing)
+
+Páginas públicas acessíveis sem autenticação, registradas em `apps/web/src/App.tsx`.
+
+### Rotas
+
+| Rota | Componente | Descrição |
+|------|-----------|-----------|
+| `/` | `LandingPage.tsx` | Landing page principal |
+| `/about` | `AboutPage.tsx` | Sobre o projeto |
+| `/contact` | `ContactPage.tsx` | Formulário de contato |
+| `/privacy` | `PrivacyPage.tsx` | Política de Privacidade |
+| `/terms` | `TermsPage.tsx` | Termos de Uso |
+
+### Blog
+
+O blog é hospedado no Medium. Link atual: `https://medium.com/@guilhermedicasil/upvote-blog-19e6f32e64cd`
+
+Para atualizar o link do Blog (navbar e footer da landing), editar `apps/web/src/pages/LandingPage.tsx`.
+
+### Configuração de contato
+
+O email de contato é uma constante no topo de cada arquivo:
+- `apps/web/src/pages/ContactPage.tsx` → `CONTACT_EMAIL`
+- `apps/web/src/pages/PrivacyPage.tsx` → `CONTACT_EMAIL`
+- `apps/web/src/pages/TermsPage.tsx` → `CONTACT_EMAIL`
+
+Email atual: `guilhermedicasil@gmail.com`
+
+### ⚠️ Manutenção obrigatória das páginas legais
+
+`PrivacyPage.tsx` e `TermsPage.tsx` fazem referência explícita à infraestrutura e configurações do produto.
+**Sempre que qualquer um dos itens abaixo mudar, atualizar as páginas legais no mesmo PR:**
+
+| O que mudou | Onde atualizar |
+|-------------|----------------|
+| Banco de dados (ex: Neon.tech → outro) | `PrivacyPage.tsx` — seção "5. Compartilhamento de dados" |
+| Provedor de IA (ex: Gemini → OpenAI) | `PrivacyPage.tsx` — seção "5. Compartilhamento de dados" |
+| Provedor de pagamentos (ex: Stripe → outro) | `PrivacyPage.tsx` — seção "5. Compartilhamento de dados" + `TermsPage.tsx` — seção "4. Planos e pagamentos" |
+| Infraestrutura de servidores (ex: GKE → AWS) | `PrivacyPage.tsx` — seção "5. Compartilhamento de dados" |
+| Autenticação social (ex: Google → outro) | `PrivacyPage.tsx` — seção "2. Dados que coletamos" |
+| Email de contato | `ContactPage.tsx`, `PrivacyPage.tsx`, `TermsPage.tsx` — constante `CONTACT_EMAIL` |
+| Foro/jurisdição | `TermsPage.tsx` — seção "10. Lei aplicável e foro" |
+| Prazo de retenção de dados | `PrivacyPage.tsx` — seção "6. Retenção de dados" |
+
+Ao atualizar qualquer página legal, também atualizar a constante `LAST_UPDATED` no topo do arquivo.
