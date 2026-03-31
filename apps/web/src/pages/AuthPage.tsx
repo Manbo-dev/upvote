@@ -271,7 +271,7 @@ export default function AuthPage() {
           <div
             className="absolute inset-y-0 left-0 flex items-center justify-center px-10 xl:px-14 bg-card"
             style={{
-              width: '54%',
+              width: '52%',
               zIndex: mode === 'login' ? 2 : 1,
               pointerEvents: mode === 'login' ? 'auto' : 'none',
             }}
@@ -283,7 +283,7 @@ export default function AuthPage() {
           <div
             className="absolute inset-y-0 right-0 flex items-center justify-center px-10 xl:px-14 bg-card"
             style={{
-              width: '54%',
+              width: '52%',
               zIndex: mode === 'register' ? 2 : 1,
               pointerEvents: mode === 'register' ? 'auto' : 'none',
             }}
@@ -295,10 +295,9 @@ export default function AuthPage() {
           <div
             className="absolute top-3 bottom-3 rounded-xl overflow-hidden z-10"
             style={{
-              width: 'calc(46% - 1.5rem)',
-              // Login: panel on right (left edge starts at 54% + 12px margin)
-              // Register: panel on left (12px margin from left edge)
-              left: mode === 'login' ? 'calc(54% + 0.75rem)' : '0.75rem',
+              width: 'calc(48% - 1.5rem)',
+              // Login: panel on right; Register: panel on left
+              left: mode === 'login' ? 'calc(52% + 0.75rem)' : '0.75rem',
               transition: 'left 0.6s cubic-bezier(0.65, 0, 0.35, 1)',
             }}
           >
