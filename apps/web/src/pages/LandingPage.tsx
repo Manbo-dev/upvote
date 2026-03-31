@@ -602,15 +602,26 @@ function FooterSection() {
   const footerGroups = [
     {
       title: t('landing.footer.product'),
-      links: [t('landing.footer.features'), t('landing.footer.pricing'), t('landing.footer.changelog')],
+      links: [
+        { label: t('landing.footer.features'), href: '#funcionalidades' },
+        { label: t('landing.footer.pricing'), href: '#precos' },
+        { label: t('landing.footer.changelog'), href: 'https://medium.com/@guilhermedicasil/upvote-blog-19e6f32e64cd', external: true },
+      ],
     },
     {
       title: t('landing.footer.company'),
-      links: [t('landing.footer.blog'), t('landing.footer.about'), t('landing.footer.contact')],
+      links: [
+        { label: t('landing.footer.blog'), href: 'https://medium.com/@guilhermedicasil/upvote-blog-19e6f32e64cd', external: true },
+        { label: t('landing.footer.about'), href: '#' },
+        { label: t('landing.footer.contact'), href: 'mailto:guilhermedicasil@gmail.com' },
+      ],
     },
     {
       title: t('landing.footer.legal'),
-      links: [t('landing.footer.privacy'), t('landing.footer.terms')],
+      links: [
+        { label: t('landing.footer.privacy'), href: '#' },
+        { label: t('landing.footer.terms'), href: '#' },
+      ],
     },
   ];
 
@@ -632,9 +643,13 @@ function FooterSection() {
               <p className="text-sm font-semibold text-warm-300">{group.title}</p>
               <ul className="mt-3 space-y-2">
                 {group.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm text-warm-400 hover:text-warm-300 transition-colors">
-                      {link}
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      className="text-sm text-warm-400 hover:text-warm-300 transition-colors"
+                    >
+                      {link.label}
                     </a>
                   </li>
                 ))}
