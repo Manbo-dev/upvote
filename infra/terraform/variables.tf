@@ -41,6 +41,7 @@ variable "secret_names" {
     "MAIL_PORT",
     "MAIL_USERNAME",
     "MAIL_PASSWORD",
+    "MAIL_FROM",
     "CORS_ORIGINS",
     "RABBITMQ_USER",
     "RABBITMQ_PASSWORD",

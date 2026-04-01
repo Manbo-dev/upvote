@@ -83,6 +83,11 @@ spec:
                 secretKeyRef:
                   name: upvote-secrets
                   key: MAIL_PASSWORD
+            - name: MAIL_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: upvote-secrets
+                  key: MAIL_FROM
             # CORS
             - name: CORS_ORIGINS
               valueFrom:

@@ -35,10 +35,11 @@ spring:
     password: ${SPRING_RABBITMQ_PASSWORD:guest}
 
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
+    host: ${MAIL_HOST:smtp.resend.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
+    username: ${MAIL_USERNAME:resend}
     password: ${MAIL_PASSWORD:}
+    from: ${MAIL_FROM:noreply@upvote.pro}
     properties:
       mail:
         smtp:
@@ -93,10 +94,7 @@ management:
         http.server.requests: true
   health:
     mail:
-      # Desabilitado enquanto MAIL_USERNAME e MAIL_PASSWORD não estiverem configurados.
-      # Quando as credenciais de e-mail estiverem definidas, remover este bloco
-      # para reativar o health check do mail no Actuator.
-      enabled: false
+      enabled: true
 
 logging:
   # Nível padrão da aplicação
