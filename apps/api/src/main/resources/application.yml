@@ -68,6 +68,9 @@ app:
   google:
     # Set GOOGLE_CLIENT_ID to validate the aud claim on Google ID tokens.
     client-id: ${GOOGLE_CLIENT_ID:}
+  apple:
+    # Set APPLE_CLIENT_ID (Services ID) to validate the aud claim on Apple ID tokens.
+    client-id: ${APPLE_CLIENT_ID:}
   integrations:
     jira:
       client-id: ${JIRA_CLIENT_ID:}

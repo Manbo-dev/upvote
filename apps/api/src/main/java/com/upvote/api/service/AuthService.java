@@ -4,10 +4,12 @@ import com.upvote.api.domain.Canal;
 import com.upvote.api.domain.Plano;
 import com.upvote.api.domain.Subscription;
 import com.upvote.api.domain.User;
+import com.upvote.api.dto.AppleTokenInfo;
 import com.upvote.api.dto.AuthResponse;
 import com.upvote.api.dto.GoogleTokenInfo;
 import com.upvote.api.dto.LoginRequest;
 import com.upvote.api.dto.RegisterRequest;
+import com.upvote.api.exception.BusinessException;
 import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.SubscriptionRepository;
 import com.upvote.api.repository.UserRepository;
@@ -34,6 +36,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final GoogleAuthService googleAuthService;
+    private final AppleAuthService appleAuthService;
 
     /**
      * Registers a new user, creates default subscription and canal
@@ -122,6 +125,68 @@ public class AuthService {
                 .name(name)
                 .email(email)
                 .googleId(googleId)
+                .build();
+        user = userRepository.save(user);
+
+        Subscription subscription = Subscription.builder()
+                .user(user)
+                .plano(Plano.FREE)
+                .build();
+        subscriptionRepository.save(subscription);
+
+        return new AuthResponse(jwtTokenProvider.generateToken(email), name, email, Plano.FREE.name());
+    }
+
+    /**
+     * Authenticates or registers a user via Apple ID token.
+     * Handles three cases: existing apple_id (fast path), existing email (merge), new user.
+     *
+     * Note: Apple only sends email on the first authorization. The requestName is also
+     * only provided by the frontend on first sign-in (from the JS callback's user object).
+     */
+    @Transactional
+    public AuthResponse appleLogin(String idToken, String requestName) {
+        AppleTokenInfo tokenInfo = appleAuthService.verifyIdToken(idToken);
+
+        String appleId = tokenInfo.sub();
+        String email = tokenInfo.email();
+
+        // Fast path: user already linked this Apple account (covers repeat sign-ins with no email in token)
+        Optional<User> byAppleId = userRepository.findByAppleId(appleId);
+        if (byAppleId.isPresent()) {
+            User user = byAppleId.get();
+            String plano = subscriptionRepository.findByUserId(user.getId())
+                    .map(sub -> sub.getPlano().name())
+                    .orElse(Plano.FREE.name());
+            return new AuthResponse(jwtTokenProvider.generateToken(user.getEmail()), user.getName(), user.getEmail(), plano);
+        }
+
+        // Merge case: user registered via email/password or Google, same email
+        if (email != null) {
+            Optional<User> byEmail = userRepository.findByEmail(email);
+            if (byEmail.isPresent()) {
+                User user = byEmail.get();
+                if (user.getAppleId() == null) {
+                    user.setAppleId(appleId);
+                    userRepository.save(user);
+                }
+                String plano = subscriptionRepository.findByUserId(user.getId())
+                        .map(sub -> sub.getPlano().name())
+                        .orElse(Plano.FREE.name());
+                return new AuthResponse(jwtTokenProvider.generateToken(email), user.getName(), email, plano);
+            }
+        }
+
+        // New user: requires email (only present on first sign-in)
+        if (email == null) {
+            throw new BusinessException("Apple sign-in requires email on first login");
+        }
+
+        String name = (requestName != null && !requestName.isBlank()) ? requestName : email;
+        User user = User.builder()
+                .name(name)
+                .email(email)
+                .appleId(appleId)
                 .build();
         user = userRepository.save(user);
 
