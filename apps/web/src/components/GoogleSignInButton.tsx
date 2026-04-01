@@ -7,6 +7,7 @@ interface Props {
 
 const GIS_SCRIPT_ID = 'google-gis-script';
 const GIS_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
+const GIS_INIT_FLAG = 'google-gis-initialized';
 
 /**
  * Renders Google's official sign-in button via Google Identity Services (GIS).
@@ -18,12 +19,18 @@ export default function GoogleSignInButton({ onCredential, text = 'continue_with
 
   useEffect(() => {
     const initGIS = () => {
-      if (!containerRef.current) return;
-      window.google?.accounts.id.initialize({
-        client_id: clientId,
-        callback: (response) => onCredential(response.credential),
-        use_fedcm_for_prompt: true,
-      });
+      if (!containerRef.current || !clientId) return;
+      // Only initialize once globally — multiple instances just render their buttons
+      if (!document.getElementById(GIS_INIT_FLAG)) {
+        const flag = document.createElement('meta');
+        flag.id = GIS_INIT_FLAG;
+        document.head.appendChild(flag);
+        window.google?.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response) => onCredential(response.credential),
+          use_fedcm_for_prompt: true,
+        });
+      }
       window.google?.accounts.id.renderButton(containerRef.current, {
         theme: 'outline',
         size: 'large',

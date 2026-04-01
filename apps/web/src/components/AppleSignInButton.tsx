@@ -18,6 +18,7 @@ export default function AppleSignInButton({ onCredential }: Props) {
   const clientId = import.meta.env.VITE_APPLE_CLIENT_ID as string;
 
   const initApple = () => {
+    if (!clientId) return;
     window.AppleID?.auth.init({
       clientId,
       scope: 'name email',
@@ -27,6 +28,7 @@ export default function AppleSignInButton({ onCredential }: Props) {
   };
 
   useEffect(() => {
+    if (!clientId) return;
     if (document.getElementById(APPLE_SCRIPT_ID)) {
       if (window.AppleID) initApple();
       return;
