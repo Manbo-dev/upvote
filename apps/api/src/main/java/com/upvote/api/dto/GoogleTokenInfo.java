@@ -11,5 +11,6 @@ public record GoogleTokenInfo(
         String email,
         String name,
         String aud,
-        @JsonProperty("email_verified") String emailVerified
+        @JsonProperty("email_verified") String emailVerified,
+        String picture
 ) {}

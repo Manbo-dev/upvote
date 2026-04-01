@@ -1,6 +1,7 @@
 package com.upvote.api.service;
 
 import com.upvote.api.domain.Canal;
+import com.upvote.api.domain.PasswordResetCode;
 import com.upvote.api.domain.Plano;
 import com.upvote.api.domain.Subscription;
 import com.upvote.api.domain.User;
@@ -9,6 +10,7 @@ import com.upvote.api.dto.GoogleTokenInfo;
 import com.upvote.api.dto.LoginRequest;
 import com.upvote.api.dto.RegisterRequest;
 import com.upvote.api.repository.CanalRepository;
+import com.upvote.api.repository.PasswordResetCodeRepository;
 import com.upvote.api.repository.SubscriptionRepository;
 import com.upvote.api.repository.UserRepository;
 import com.upvote.api.security.JwtTokenProvider;
@@ -18,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.util.HexFormat;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -34,6 +36,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final GoogleAuthService googleAuthService;
+    private final EmailService emailService;
+    private final PasswordResetCodeRepository codeRepository;
 
     /**
      * Registers a new user, creates default subscription and canal
@@ -59,7 +63,7 @@ public class AuthService {
         subscriptionRepository.save(subscription);
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getName(), user.getEmail(), Plano.FREE.name());
+        return new AuthResponse(token, user.getName(), user.getEmail(), Plano.FREE.name(), user.getAvatar());
     }
 
     /**
@@ -78,7 +82,7 @@ public class AuthService {
                 .orElse(Plano.FREE.name());
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getName(), user.getEmail(), plano);
+        return new AuthResponse(token, user.getName(), user.getEmail(), plano, user.getAvatar());
     }
 
     /**
@@ -93,14 +97,14 @@ public class AuthService {
         String name = tokenInfo.name();
         String googleId = tokenInfo.sub();
 
-        // Fast path: user already linked this Google account
+        // Fast path: user already linked this Google account — do NOT override avatar
         Optional<User> byGoogleId = userRepository.findByGoogleId(googleId);
         if (byGoogleId.isPresent()) {
             User user = byGoogleId.get();
             String plano = subscriptionRepository.findByUserId(user.getId())
                     .map(sub -> sub.getPlano().name())
                     .orElse(Plano.FREE.name());
-            return new AuthResponse(jwtTokenProvider.generateToken(email), user.getName(), email, plano);
+            return new AuthResponse(jwtTokenProvider.generateToken(email), user.getName(), email, plano, user.getAvatar());
         }
 
         // Merge case: user registered via email/password, now signing in with same email via Google
@@ -109,19 +113,24 @@ public class AuthService {
             User user = byEmail.get();
             if (user.getGoogleId() == null) {
                 user.setGoogleId(googleId);
-                userRepository.save(user);
             }
+            // Backfill avatar if not already set
+            if (user.getAvatar() == null && tokenInfo.picture() != null) {
+                user.setAvatar(tokenInfo.picture());
+            }
+            userRepository.save(user);
             String plano = subscriptionRepository.findByUserId(user.getId())
                     .map(sub -> sub.getPlano().name())
                     .orElse(Plano.FREE.name());
-            return new AuthResponse(jwtTokenProvider.generateToken(email), user.getName(), email, plano);
+            return new AuthResponse(jwtTokenProvider.generateToken(email), user.getName(), email, plano, user.getAvatar());
         }
 
-        // New user: create account without password
+        // New user: create account without password, set avatar from Google profile
         User user = User.builder()
                 .name(name)
                 .email(email)
                 .googleId(googleId)
+                .avatar(tokenInfo.picture())
                 .build();
         user = userRepository.save(user);
 
@@ -131,7 +140,63 @@ public class AuthService {
                 .build();
         subscriptionRepository.save(subscription);
 
-        return new AuthResponse(jwtTokenProvider.generateToken(email), name, email, Plano.FREE.name());
+        return new AuthResponse(jwtTokenProvider.generateToken(email), name, email, Plano.FREE.name(), user.getAvatar());
     }
 
+    /**
+     * Sends a password reset code to the given email.
+     * Silently ignores unknown emails to avoid user enumeration.
+     */
+    @Transactional
+    public void forgotPassword(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            // Don't reveal if email exists
+            return;
+        }
+        User user = userOpt.get();
+        codeRepository.invalidatePreviousCodes(user.getId(), PasswordResetCode.CodeType.PASSWORD_RESET);
+
+        String code = generateCode();
+        PasswordResetCode record = PasswordResetCode.builder()
+                .user(user)
+                .code(code)
+                .type(PasswordResetCode.CodeType.PASSWORD_RESET)
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .used(false)
+                .build();
+        codeRepository.save(record);
+
+        emailService.sendPasswordResetCode(email, code);
+    }
+
+    /**
+     * Validates the reset code and updates the user's password.
+     */
+    @Transactional
+    public void resetPassword(String email, String code, String newPassword) {
+        PasswordResetCode record = codeRepository.findByCodeAndUsedFalse(code)
+                .orElseThrow(() -> new IllegalArgumentException("Código inválido ou já utilizado"));
+        if (!record.getUser().getEmail().equals(email)) {
+            throw new IllegalArgumentException("Código inválido");
+        }
+        if (record.getType() != PasswordResetCode.CodeType.PASSWORD_RESET) {
+            throw new IllegalArgumentException("Código inválido");
+        }
+        if (record.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Código expirado. Solicite um novo.");
+        }
+
+        User user = record.getUser();
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        record.setUsed(true);
+        codeRepository.save(record);
+    }
+
+    private String generateCode() {
+        SecureRandom random = new SecureRandom();
+        return String.format("%06d", random.nextInt(1_000_000));
+    }
 }

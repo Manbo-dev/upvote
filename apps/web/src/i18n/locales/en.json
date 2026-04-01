@@ -77,6 +77,28 @@
         "quote": "We stopped losing hours reading repeated feedback. Upvote delivers what really matters.",
         "author": "— Product Manager, B2B SaaS"
       }
+    },
+    "forgot": {
+      "title": "Reset password",
+      "emailSubtitle": "Enter your email and we'll send you a verification code.",
+      "emailLabel": "Your account email",
+      "sendCode": "Send code",
+      "sending": "Sending...",
+      "codeTitle": "Check your email",
+      "codeSent": "We sent a 6-digit code to {{email}}",
+      "codeLabel": "Verification code",
+      "codeError": "Enter the 6-digit code",
+      "verify": "Verify",
+      "newPasswordTitle": "New password",
+      "newPasswordSubtitle": "Choose a secure password for your account.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords do not match",
+      "reset": "Reset password",
+      "resetting": "Resetting...",
+      "backToLogin": "Back to login",
+      "successMessage": "Password reset! Login with your new password.",
+      "errorDefault": "Error resetting password"
     }
   },
   "dashboard": {
@@ -213,6 +235,28 @@
     "profile": "Profile",
     "name": "Name",
     "email": "Email",
+    "emailReadOnly": "not editable",
+    "avatar": {
+      "change": "Change photo",
+      "hint": "JPG, PNG or GIF · max 256×256px"
+    },
+    "avatarUpdated": "Photo updated successfully",
+    "nameUpdated": "Name updated successfully",
+    "security": "Security",
+    "securityDesc": "Manage your account password",
+    "passwordLabel": "Password",
+    "changePassword": "Change password",
+    "changePasswordDesc": "Fill in the fields below. We'll send a verification code to your email.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordMismatch": "Passwords do not match",
+    "sendCode": "Send code",
+    "codeLabel": "Verification code",
+    "codeSent": "We sent a code to {{email}}",
+    "confirmChange": "Confirm change",
+    "passwordChanged": "Password changed successfully!",
+    "errorDefault": "An error occurred. Please try again.",
     "widgetSection": "Feedback Widget",
     "widgetDescription": "Add the widget to your site in 3 simple steps.",
     "widget": {

@@ -77,6 +77,28 @@
         "quote": "Paramos de perder horas lendo feedbacks repetidos. O Upvote entrega o que realmente importa.",
         "author": "— Product Manager, B2B SaaS"
       }
+    },
+    "forgot": {
+      "title": "Redefinir senha",
+      "emailSubtitle": "Digite seu email e enviaremos um código de verificação.",
+      "emailLabel": "Email da sua conta",
+      "sendCode": "Enviar código",
+      "sending": "Enviando...",
+      "codeTitle": "Verifique seu email",
+      "codeSent": "Enviamos um código de 6 dígitos para {{email}}",
+      "codeLabel": "Código de verificação",
+      "codeError": "Digite os 6 dígitos do código",
+      "verify": "Verificar",
+      "newPasswordTitle": "Nova senha",
+      "newPasswordSubtitle": "Escolha uma senha segura para sua conta.",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar senha",
+      "passwordMismatch": "As senhas não coincidem",
+      "reset": "Redefinir senha",
+      "resetting": "Redefinindo...",
+      "backToLogin": "Voltar ao login",
+      "successMessage": "Senha redefinida! Faça login com sua nova senha.",
+      "errorDefault": "Erro ao redefinir senha"
     }
   },
   "dashboard": {
@@ -213,6 +235,28 @@
     "profile": "Perfil",
     "name": "Nome",
     "email": "Email",
+    "emailReadOnly": "não editável",
+    "avatar": {
+      "change": "Alterar foto",
+      "hint": "JPG, PNG ou GIF · máx. 256×256px"
+    },
+    "avatarUpdated": "Foto atualizada com sucesso",
+    "nameUpdated": "Nome atualizado com sucesso",
+    "security": "Segurança",
+    "securityDesc": "Gerencie a senha da sua conta",
+    "passwordLabel": "Senha",
+    "changePassword": "Alterar senha",
+    "changePasswordDesc": "Preencha os campos abaixo. Enviaremos um código de verificação para seu email.",
+    "currentPassword": "Senha atual",
+    "newPassword": "Nova senha",
+    "confirmPassword": "Confirmar nova senha",
+    "passwordMismatch": "As senhas não coincidem",
+    "sendCode": "Enviar código",
+    "codeLabel": "Código de verificação",
+    "codeSent": "Enviamos um código para {{email}}",
+    "confirmChange": "Confirmar alteração",
+    "passwordChanged": "Senha alterada com sucesso!",
+    "errorDefault": "Ocorreu um erro. Tente novamente.",
     "widgetSection": "Widget de Feedback",
     "widgetDescription": "Adicione o widget ao seu site em 3 passos simples.",
     "widget": {

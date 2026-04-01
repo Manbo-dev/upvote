@@ -37,6 +37,9 @@ public class User {
     @Column(name = "google_id", unique = true)
     private String googleId;
 
+    @Column(columnDefinition = "TEXT")
+    private String avatar;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

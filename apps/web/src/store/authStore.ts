@@ -4,6 +4,7 @@ interface UserInfo {
   name: string;
   email: string;
   plano: string;
+  avatar?: string;
 }
 
 interface AuthState {
@@ -12,6 +13,7 @@ interface AuthState {
   login: (token: string, user: UserInfo) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
+  updateUser: (partial: Partial<UserInfo>) => void;
 }
 
 // Recupera estado inicial do localStorage
@@ -36,5 +38,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   isAuthenticated: () => {
     return !!get().token;
+  },
+
+  updateUser: (partial: Partial<UserInfo>) => {
+    const current = get().user;
+    if (!current) return;
+    const updated = { ...current, ...partial };
+    localStorage.setItem('user', JSON.stringify(updated));
+    set({ user: updated });
   },
 }));

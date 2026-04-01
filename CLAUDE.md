@@ -289,9 +289,9 @@ O frontend obtém um ID token do Google e o envia ao backend, que valida e retor
 ### Três casos tratados pelo backend
 | Caso | Ação |
 |---|---|
-| Usuário novo | Cria conta sem senha + Subscription FREE |
-| Usuário existente pelo `google_id` | Login direto (fast path) |
-| Merge: mesmo email, cadastro via senha | Login + backfill do `google_id` |
+| Usuário novo | Cria conta sem senha + Subscription FREE + salva foto do Google |
+| Usuário existente pelo `google_id` | Login direto (fast path); avatar **não** é sobrescrito |
+| Merge: mesmo email, cadastro via senha | Login + backfill do `google_id` + backfill do avatar se ainda nulo |
 
 ### Arquitetura backend
 - **`GoogleAuthService`** — valida o ID token via `RestClient` (sem SDK externo); verifica `aud` e `email_verified`
@@ -299,11 +299,13 @@ O frontend obtém um ID token do Google e o envia ao backend, que valida e retor
 - **Endpoint**: `POST /api/auth/google` — público (já coberto por `/api/auth/**`)
 - **`User.passwordHash`** — agora nullable (usuários Google não têm senha)
 - **`User.googleId`** — novo campo para lookup direto em logins subsequentes
+- **`User.avatar`** — coluna TEXT; armazena URL da foto do Google ou base64 JPEG do upload manual
+- **`GoogleTokenInfo.picture`** — campo adicionado para capturar a URL da foto do perfil Google
 
 ### Frontend
 - **`GoogleSignInButton.tsx`** — carrega o script GIS (`accounts.google.com/gsi/client`) e renderiza o botão oficial via `renderButton()`
 - **`src/types/google.d.ts`** — ambient types para `window.google` (sem dependência npm)
-- **`LoginPage.tsx`** e **`RegisterPage.tsx`** — divider + botão abaixo do formulário
+- **`AuthPage.tsx`** — login e registro na mesma página com painel deslizante
 
 ### Variável de ambiente necessária
 ```
@@ -322,6 +324,76 @@ Mesmo Client ID para os dois. Sem `GOOGLE_CLIENT_ID`, a validação do `aud` fal
 
 ### Migration
 - `V20260329000000__add_google_auth_to_users.sql` — `password_hash` nullable, coluna `google_id`, index
+
+## Perfil de Usuário e Troca de Senha
+
+### Visão geral
+Usuários podem atualizar nome e foto de perfil na página de Configurações, além de trocar a senha via fluxo com código de verificação por email. O link "Esqueceu sua senha?" no login também usa o mesmo mecanismo de código.
+
+### Avatar / foto de perfil
+- Campo `avatar TEXT` na tabela `users` — armazena indistintamente:
+  - Base64 JPEG (upload manual): redimensionado para máx. 256×256px no frontend via `<canvas>` antes do envio
+  - URL da foto do Google (login social): salva automaticamente na criação/merge da conta
+- O campo é renderizado como `<img src={avatar}>` em qualquer formato (base64 data-URI ou URL)
+
+### Fluxo de troca de senha (Configurações)
+1. Usuário preenche senha atual + nova senha + confirmação
+2. Backend valida a senha atual com BCrypt e gera um código de 6 dígitos (válido 10 min)
+3. Código salvo em `password_reset_codes` com `type=PASSWORD_CHANGE` e `new_password_hash` já computado
+4. Email com o código é enviado (quando `MAIL_*` configurado)
+5. Usuário insere o código → backend aplica o hash e invalida o código
+
+### Fluxo de recuperação de senha (login — "Esqueceu sua senha?")
+1. Usuário digita o email na tela de login
+2. Backend gera código 6 dígitos, salva com `type=PASSWORD_RESET` (não salva novo hash ainda)
+3. Email enviado; frontend avança para input do código e depois para nova senha
+4. `POST /api/auth/reset-password` com email + código + nova senha → valida, aplica hash, invalida código
+5. Frontend redireciona para modo login
+
+**Segurança:** `forgotPassword` retorna sempre 200 independente de o email existir (evita enumeração).
+
+### Tabela `password_reset_codes`
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `id` | UUID | PK |
+| `user_id` | UUID | FK users |
+| `code` | VARCHAR(6) | 6 dígitos numéricos |
+| `type` | VARCHAR(30) | `PASSWORD_RESET` ou `PASSWORD_CHANGE` |
+| `new_password_hash` | TEXT | Preenchido apenas no fluxo de troca (settings) |
+| `expires_at` | TIMESTAMP | 10 minutos após criação |
+| `used` | BOOLEAN | Invalidado após uso |
+
+### Endpoints da API
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| GET | `/api/users/me` | JWT | Retorna perfil completo (name, email, avatar, plano) |
+| PUT | `/api/users/me` | JWT | Atualiza name e/ou avatar |
+| POST | `/api/users/me/request-password-change` | JWT | Valida senha atual, gera e envia código |
+| POST | `/api/users/me/confirm-password-change` | JWT | Valida código e aplica nova senha |
+| POST | `/api/auth/forgot-password` | Público | Envia código para o email |
+| POST | `/api/auth/reset-password` | Público | Valida código e redefine senha |
+
+### Arquitetura backend
+- **`UserService`** — lógica de perfil e troca de senha autenticada
+- **`UserController`** — endpoints `/api/users/me/**` (requer JWT)
+- **`AuthService.forgotPassword/resetPassword`** — fluxo de recuperação público
+- **`EmailService`** — `sendPasswordResetCode` e `sendPasswordChangeCode` via `JavaMailSender`; falha silenciosa (warn no log) enquanto credenciais não estão configuradas
+- **`PasswordResetCode`** — entidade JPA com enum `CodeType`
+- **`PasswordResetCodeRepository`** — `findByCodeAndUsedFalse`, `invalidatePreviousCodes`
+
+### Frontend
+- **`SettingsPage.tsx`** — avatar clicável (resize canvas → base64 → PUT /api/users/me), nome editável, card de Segurança com dialog 2-step (form → código)
+- **`AuthPage.tsx`** — modo `'forgot'` integrado com 3 steps (email → código 6 dígitos → nova senha); painel verde mantido; link "Esqueceu sua senha?" conectado
+- **`authStore.ts`** — campo `avatar` no `UserInfo` + método `updateUser(partial)` para atualizar store e localStorage sem re-login
+- **`services/users.ts`** — `getProfile`, `updateProfile`, `requestPasswordChange`, `confirmPasswordChange`
+- **`Layout.tsx`** — `<AvatarImage src={user.avatar}>` no sidebar, com fallback para iniciais
+
+### EmailService — configuração pendente
+Credenciais SMTP serão configuradas em PR separado. Enquanto isso, o serviço loga `[EMAIL] Falha ao enviar` como `WARN` mas não quebra os endpoints. Para testar localmente, inspecionar o código no log do backend (nível DEBUG).
+
+### Migration
+- `V20260401000000__add_avatar_and_password_reset_codes.sql` — coluna `avatar` em `users`, tabela `password_reset_codes`, índices
 
 ## Integrações Externas (Jira / ClickUp)
 

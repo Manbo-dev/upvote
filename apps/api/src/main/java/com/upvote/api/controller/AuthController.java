@@ -2,9 +2,11 @@ package com.upvote.api.controller;
 
 import com.upvote.api.dto.ApiResponse;
 import com.upvote.api.dto.AuthResponse;
+import com.upvote.api.dto.ForgotPasswordRequest;
 import com.upvote.api.dto.GoogleLoginRequest;
 import com.upvote.api.dto.LoginRequest;
 import com.upvote.api.dto.RegisterRequest;
+import com.upvote.api.dto.ResetPasswordRequest;
 import com.upvote.api.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,20 @@ public class AuthController {
         log.info("Google login attempt received");
         AuthResponse response = authService.googleLogin(request.idToken());
         return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        log.info("Forgot password request received");
+        authService.forgotPassword(request.email());
+        return ResponseEntity.ok(ApiResponse.ok(null, "Se o email estiver cadastrado, você receberá um código em instantes"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        log.info("Password reset attempt");
+        authService.resetPassword(request.email(), request.code(), request.newPassword());
+        return ResponseEntity.ok(ApiResponse.ok(null, "Senha redefinida com sucesso"));
     }
 
 }

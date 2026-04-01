@@ -19,7 +19,7 @@ import { useThemeStore } from '../store/themeStore';
 import { useLanguageStore } from '../store/languageStore';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Separator } from './ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -229,6 +229,9 @@ export default function Layout() {
               )}
             >
               <Avatar className="h-9 w-9 border border-warm-200 dark:border-warm-700">
+                {user?.avatar && (
+                  <AvatarImage src={user.avatar} alt={user?.name} className="object-cover" />
+                )}
                 <AvatarFallback className="bg-primary-100 text-sm font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
                   {getInitials(user?.name)}
                 </AvatarFallback>
