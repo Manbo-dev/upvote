@@ -31,6 +31,11 @@ Apenas o owner do canal pode alterar o status.
   Exemplo: V20260320143000__add_webhook_event_log.sql
   Migrations V1-V10 usam formato legado sequencial — NÃO renomear.
   outOfOrder habilitado para suportar branches paralelas.
+  ⚠️  NUNCA deletar nem renomear uma migration que já foi commitada no repositório.
+  O Flyway registra o checksum e a descrição de cada migration aplicada no banco.
+  Deletar ou renomear o arquivo local causa "applied migration not resolved locally"
+  e derruba o boot em produção. Se uma feature for revertida, mantenha o arquivo
+  SQL e crie uma nova migration de rollback (ex: V{timestamp}__rollback_xyz.sql).
 - Exceptions customizadas em com.upvote.api.exception:
     - ResourceNotFoundException → 404
     - BusinessException → 422
