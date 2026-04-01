@@ -96,7 +96,7 @@ management:
         http.server.requests: true
   health:
     mail:
-      enabled: false
+      enabled: true
 
 logging:
   # Nível padrão da aplicação
