@@ -392,8 +392,6 @@ Usuários podem atualizar nome e foto de perfil na página de Configurações, a
 ### EmailService — configuração pendente
 Credenciais SMTP serão configuradas em PR separado. Enquanto isso, o serviço loga `[EMAIL] Falha ao enviar` como `WARN` mas não quebra os endpoints. Para testar localmente, inspecionar o código no log do backend (nível DEBUG).
 
-### Migration
-- `V20260401000000__add_avatar_and_password_reset_codes.sql` — coluna `avatar` em `users`, tabela `password_reset_codes`, índices
 
 ## Integrações Externas (Jira / ClickUp)
 
