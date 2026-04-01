@@ -136,13 +136,6 @@
             <version>1.0.10</version>
         </dependency>
 
-        <!-- Apple Sign-In: JWKS-based JWT verification -->
-        <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-            <version>10.8</version>
-        </dependency>
-
         <!-- Prometheus metrics via Micrometer -->
         <dependency>
             <groupId>io.micrometer</groupId>

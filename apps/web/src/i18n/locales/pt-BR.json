@@ -61,9 +61,6 @@
       "or": "ou continue com",
       "errorDefault": "Erro ao fazer login com Google"
     },
-    "apple": {
-      "errorDefault": "Erro ao fazer login com Apple"
-    },
     "panel": {
       "slide0": {
         "tagline": "Feedback sem ruído.",

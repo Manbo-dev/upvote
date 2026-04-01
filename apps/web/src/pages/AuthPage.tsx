@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { login, register, googleLogin, appleLogin } from '../services/auth';
+import { login, register, googleLogin } from '../services/auth';
 import type { AuthResponse } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
 import AuthPanel from '../components/AuthPanel';
 import GoogleSignInButton from '../components/GoogleSignInButton';
-import AppleSignInButton from '../components/AppleSignInButton';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -38,15 +37,6 @@ function SocialSection({ mode, onError }: SocialSectionProps) {
     }
   };
 
-  const handleAppleCredential = async (idToken: string, name?: string) => {
-    try {
-      const response = await appleLogin(idToken, name);
-      handleAuthResponse(response);
-    } catch {
-      onError(t('auth.apple.errorDefault'));
-    }
-  };
-
   const googleText = mode === 'signin' ? 'signin_with' : 'signup_with';
 
   return (
@@ -56,9 +46,8 @@ function SocialSection({ mode, onError }: SocialSectionProps) {
         <span className="mx-3 flex-shrink text-xs text-muted-foreground">{t('auth.google.or')}</span>
         <div className="flex-grow border-t border-border" />
       </div>
-      <div className="mt-4 space-y-3">
+      <div className="mt-4">
         <GoogleSignInButton onCredential={handleGoogleCredential} text={googleText} />
-        <AppleSignInButton onCredential={handleAppleCredential} />
       </div>
     </div>
   );

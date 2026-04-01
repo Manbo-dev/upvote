@@ -61,9 +61,6 @@
       "or": "or continue with",
       "errorDefault": "Error signing in with Google"
     },
-    "apple": {
-      "errorDefault": "Error signing in with Apple"
-    },
     "panel": {
       "slide0": {
         "tagline": "Noise-free feedback.",

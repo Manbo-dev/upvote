@@ -43,11 +43,3 @@ export async function googleLogin(idToken: string): Promise<AuthResponse> {
   });
   return data.data;
 }
-
-export async function appleLogin(idToken: string, name?: string): Promise<AuthResponse> {
-  const { data } = await api.post<ApiResult<AuthResponse>>('/auth/apple', {
-    idToken,
-    name,
-  });
-  return data.data;
-}

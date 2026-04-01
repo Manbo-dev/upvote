@@ -1,7 +1,6 @@
 package com.upvote.api.controller;
 
 import com.upvote.api.dto.ApiResponse;
-import com.upvote.api.dto.AppleLoginRequest;
 import com.upvote.api.dto.AuthResponse;
 import com.upvote.api.dto.GoogleLoginRequest;
 import com.upvote.api.dto.LoginRequest;
@@ -47,10 +46,4 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    @PostMapping("/apple")
-    public ResponseEntity<ApiResponse<AuthResponse>> appleLogin(@Valid @RequestBody AppleLoginRequest request) {
-        log.info("Apple login attempt received");
-        AuthResponse response = authService.appleLogin(request.idToken(), request.name());
-        return ResponseEntity.ok(ApiResponse.ok(response));
-    }
 }

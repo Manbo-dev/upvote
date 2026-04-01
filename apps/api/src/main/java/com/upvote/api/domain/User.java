@@ -37,9 +37,6 @@ public class User {
     @Column(name = "google_id", unique = true)
     private String googleId;
 
-    @Column(name = "apple_id", unique = true)
-    private String appleId;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
