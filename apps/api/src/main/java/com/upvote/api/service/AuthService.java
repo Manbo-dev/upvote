@@ -155,6 +155,15 @@ public class AuthService {
                 .build();
         subscriptionRepository.save(subscription);
 
+        // Queue welcome email for new Google users — same pattern as email/password registration
+        final User savedUser = user;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                emailProducer.send(new EmailMessage(EmailType.WELCOME, savedUser.getId()));
+            }
+        });
+
         return new AuthResponse(jwtTokenProvider.generateToken(email), name, email, Plano.FREE.name(), user.getAvatar());
     }
 
