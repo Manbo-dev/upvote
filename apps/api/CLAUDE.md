@@ -147,6 +147,7 @@ Widget → POST /api/widget/feedback
 
 ### Topologia RabbitMQ
 
+#### Feedback pipeline
 | Nome | Tipo | Descrição |
 |------|------|-----------|
 | `feedback.exchange` | Direct exchange | Entrada para processamento |
@@ -154,13 +155,25 @@ Widget → POST /api/widget/feedback
 | `feedback.dlq.exchange` | Direct exchange | Exchange do dead letter |
 | `feedback.dlq` | Queue (durable) | Dead Letter Queue — mensagens que esgotaram as tentativas |
 
+#### Email pipeline
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `email.exchange` | Direct exchange | Entrada para envio de emails |
+| `email.send` | Queue (durable) | Fila principal; DLX aponta para `email.dlq.exchange` |
+| `email.dlq.exchange` | Direct exchange | Exchange do dead letter de emails |
+| `email.dlq` | Queue (durable) | Dead Letter Queue — emails que esgotaram as tentativas |
+
 ### Pacote
 
 `com.upvote.api.messaging`
-- `RabbitMQConfig` — declaração da topologia e configuração do container com retry
-- `FeedbackProcessingMessage` — DTO da mensagem (apenas `feedbackId`)
-- `FeedbackProducer` — publica na fila via `RabbitTemplate`
-- `FeedbackProcessingConsumer` — consome da fila, delega ao `FeedbackService`
+- `RabbitMQConfig` — declaração de ambas as topologias (feedback + email) e configuração do container com retry
+- `FeedbackProcessingMessage` — DTO da mensagem de feedback (apenas `feedbackId`)
+- `FeedbackProducer` — publica na fila de feedback via `RabbitTemplate`
+- `FeedbackProcessingConsumer` — consome da fila de feedback, delega ao `FeedbackService`
+- `EmailType` — enum discriminador: `WELCOME` (extensível)
+- `EmailMessage` — DTO da mensagem de email (`EmailType type`, `UUID userId`)
+- `EmailProducer` — publica em `email.exchange` via `RabbitTemplate`
+- `EmailConsumer` — consome de `email.send`, carrega `User` do DB, delega ao `EmailService`
 
 ### Status do Feedback
 

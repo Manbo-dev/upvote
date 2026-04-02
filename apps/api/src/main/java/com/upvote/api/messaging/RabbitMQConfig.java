@@ -12,14 +12,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 /**
- * RabbitMQ topology for the async feedback processing pipeline.
+ * RabbitMQ topology for async pipelines: feedback processing and transactional emails.
  *
- * <p>Flow:
+ * <p>Feedback flow:
  * <pre>
- *   feedback.exchange  ──routing-key──►  feedback.processing  ──(on failure)──►  feedback.dlq.exchange  ──►  feedback.dlq
+ *   feedback.exchange  ──►  feedback.processing  ──(on failure)──►  feedback.dlq.exchange  ──►  feedback.dlq
  * </pre>
  *
- * <p>Retry strategy (container-level, in-memory):
+ * <p>Email flow:
+ * <pre>
+ *   email.exchange  ──►  email.send  ──(on failure)──►  email.dlq.exchange  ──►  email.dlq
+ * </pre>
+ *
+ * <p>Retry strategy (container-level, in-memory, shared):
  * <ul>
  *   <li>3 attempts with exponential backoff (1 s → 2 s → 4 s)</li>
  *   <li>After all attempts fail, the message is nacked and routed to the DLQ</li>
@@ -28,12 +33,21 @@ import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 @Configuration
 public class RabbitMQConfig {
 
+    // ── Feedback pipeline ────────────────────────────────────────────────────
     public static final String EXCHANGE          = "feedback.exchange";
     public static final String ROUTING_KEY       = "feedback.process";
     public static final String QUEUE             = "feedback.processing";
 
     public static final String DLQ_EXCHANGE      = "feedback.dlq.exchange";
     public static final String DLQ               = "feedback.dlq";
+
+    // ── Email pipeline ───────────────────────────────────────────────────────
+    public static final String EMAIL_EXCHANGE    = "email.exchange";
+    public static final String EMAIL_ROUTING_KEY = "email.send";
+    public static final String EMAIL_QUEUE       = "email.send";
+
+    public static final String EMAIL_DLQ_EXCHANGE = "email.dlq.exchange";
+    public static final String EMAIL_DLQ          = "email.dlq";
 
     // ── Exchanges ────────────────────────────────────────────────────────────
 
@@ -45,6 +59,16 @@ public class RabbitMQConfig {
     @Bean
     DirectExchange dlqExchange() {
         return new DirectExchange(DLQ_EXCHANGE);
+    }
+
+    @Bean
+    DirectExchange emailExchange() {
+        return new DirectExchange(EMAIL_EXCHANGE);
+    }
+
+    @Bean
+    DirectExchange emailDlqExchange() {
+        return new DirectExchange(EMAIL_DLQ_EXCHANGE);
     }
 
     // ── Queues ───────────────────────────────────────────────────────────────
@@ -63,6 +87,19 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(DLQ).build();
     }
 
+    @Bean
+    Queue emailQueue() {
+        return QueueBuilder.durable(EMAIL_QUEUE)
+                .withArgument("x-dead-letter-exchange", EMAIL_DLQ_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", EMAIL_DLQ)
+                .build();
+    }
+
+    @Bean
+    Queue emailDeadLetterQueue() {
+        return QueueBuilder.durable(EMAIL_DLQ).build();
+    }
+
     // ── Bindings ─────────────────────────────────────────────────────────────
 
     @Bean
@@ -73,6 +110,16 @@ public class RabbitMQConfig {
     @Bean
     Binding dlqBinding(Queue deadLetterQueue, DirectExchange dlqExchange) {
         return BindingBuilder.bind(deadLetterQueue).to(dlqExchange).with(DLQ);
+    }
+
+    @Bean
+    Binding emailBinding(Queue emailQueue, DirectExchange emailExchange) {
+        return BindingBuilder.bind(emailQueue).to(emailExchange).with(EMAIL_ROUTING_KEY);
+    }
+
+    @Bean
+    Binding emailDlqBinding(Queue emailDeadLetterQueue, DirectExchange emailDlqExchange) {
+        return BindingBuilder.bind(emailDeadLetterQueue).to(emailDlqExchange).with(EMAIL_DLQ);
     }
 
     // ── Message converter (JSON) ──────────────────────────────────────────────

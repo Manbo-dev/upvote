@@ -393,6 +393,65 @@ Usuários podem atualizar nome e foto de perfil na página de Configurações, a
 Credenciais SMTP serão configuradas em PR separado. Enquanto isso, o serviço loga `[EMAIL] Falha ao enviar` como `WARN` mas não quebra os endpoints. Para testar localmente, inspecionar o código no log do backend (nível DEBUG).
 
 
+## Emails Transacionais
+
+### Visão geral
+Emails HTML enviados via Resend SMTP usando uma fila RabbitMQ dedicada — mesma resiliência do pipeline de feedback (retry 3×, backoff exponencial, DLQ). Templates em Thymeleaf com paleta warm neutral do design system.
+
+### Fluxo
+
+```
+Gatilho de negócio (ex: registro)
+    └─ após DB commit (TransactionSynchronization)
+           └─ EmailProducer.send(EmailMessage(type, userId))
+                  └─ email.exchange → email.send queue
+                         └─ EmailConsumer (@RabbitListener)
+                                └─ carrega User do DB
+                                └─ EmailService.sendXxx(user)
+                                       └─ Thymeleaf render → MimeMessage HTML → Resend SMTP
+```
+
+### Emails implementados
+
+| Tipo | Gatilho | Assunto |
+|------|---------|---------|
+| `WELCOME` | `AuthService.register()` | "Bem-vindo ao Upvote!" |
+
+### Como adicionar um novo email
+
+1. Adicionar valor em `EmailType` (ex: `PAYMENT_FAILED`)
+2. Criar template em `apps/api/src/main/resources/templates/emails/<tipo>.html`
+3. Adicionar método em `EmailService` (renderiza template + chama `send()`)
+4. Adicionar `case` no `EmailConsumer.handle()`
+5. Publicar `new EmailMessage(EmailType.PAYMENT_FAILED, userId)` via `EmailProducer` no gatilho certo
+
+### Arquitetura backend
+
+- **`EmailType`** — enum discriminador dos tipos de email
+- **`EmailMessage`** — record `(EmailType type, UUID userId)` — payload mínimo, consumer carrega dados do DB
+- **`EmailProducer`** — publica em `email.exchange` via `RabbitTemplate`
+- **`EmailConsumer`** — `@RabbitListener` em `email.send`; switch em `type` → delega ao `EmailService`
+- **`EmailService`** — renderiza template Thymeleaf, envia `MimeMessage` HTML; falha silenciosa (warn no log)
+- **Templates**: `apps/api/src/main/resources/templates/emails/`
+
+### Topologia RabbitMQ (email)
+
+| Nome | Tipo |
+|------|------|
+| `email.exchange` | Direct exchange |
+| `email.send` | Queue durable (DLX → `email.dlq.exchange`) |
+| `email.dlq.exchange` | Direct exchange |
+| `email.dlq` | Dead Letter Queue |
+
+Retry: 3 tentativas, backoff 1 s → 2 s → 4 s (compartilha o `SimpleRabbitListenerContainerFactory` do pipeline de feedback).
+
+### Variável de ambiente
+
+```
+APP_BASE_URL=https://app.upvote.pro   # usado nos links dos templates (default já configurado)
+```
+As variáveis `MAIL_*` são compartilhadas com os emails de senha (já documentadas na seção de Perfil de Usuário).
+
 ## Integrações Externas (Jira / ClickUp)
 
 ### Visão geral

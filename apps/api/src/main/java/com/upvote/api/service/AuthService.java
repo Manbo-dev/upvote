@@ -9,6 +9,9 @@ import com.upvote.api.dto.AuthResponse;
 import com.upvote.api.dto.GoogleTokenInfo;
 import com.upvote.api.dto.LoginRequest;
 import com.upvote.api.dto.RegisterRequest;
+import com.upvote.api.messaging.EmailMessage;
+import com.upvote.api.messaging.EmailProducer;
+import com.upvote.api.messaging.EmailType;
 import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.PasswordResetCodeRepository;
 import com.upvote.api.repository.SubscriptionRepository;
@@ -18,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -37,6 +42,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final GoogleAuthService googleAuthService;
     private final EmailService emailService;
+    private final EmailProducer emailProducer;
     private final PasswordResetCodeRepository codeRepository;
 
     /**
@@ -61,6 +67,15 @@ public class AuthService {
                 .plano(Plano.FREE)
                 .build();
         subscriptionRepository.save(subscription);
+
+        // Queue welcome email — published after commit so the consumer finds the user in the DB
+        final User savedUser = user;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                emailProducer.send(new EmailMessage(EmailType.WELCOME, savedUser.getId()));
+            }
+        });
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
         return new AuthResponse(token, user.getName(), user.getEmail(), Plano.FREE.name(), user.getAvatar());
