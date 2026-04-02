@@ -1,7 +1,6 @@
 package com.upvote.api.service;
 
 import com.upvote.api.domain.User;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,9 +64,9 @@ public class EmailService {
             helper.setText(htmlBody, true);
             mailSender.send(message);
             log.info("[EMAIL] Sent: to={}, subject={}", toEmail, subject);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.warn("[EMAIL] Failed to send: to={}, subject={}, error={}", toEmail, subject, e.getMessage());
-            // Don't rethrow — email failure must not break the API response
+            // Don't rethrow — email failure must not break the queue consumer or API response
         }
     }
 }
