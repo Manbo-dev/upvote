@@ -177,6 +177,9 @@ spec:
             # Ativa o perfil de produção → logs JSON estruturado para Cloud Logging
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            # Force UTC in the JVM — avoids DST shifts from the GKE node timezone
+            - name: TZ
+              value: "UTC"
           resources:
             requests:
               memory: "256Mi"
