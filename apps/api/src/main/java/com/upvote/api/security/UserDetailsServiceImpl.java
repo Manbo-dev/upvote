@@ -23,9 +23,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 
+        // Google-only users have no password hash — Spring Security User rejects null, use empty string.
+        // Password is never checked here; authentication is done via JWT signature.
+        String password = user.getPasswordHash() != null ? user.getPasswordHash() : "";
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
-                user.getPasswordHash(),
+                password,
                 Collections.emptyList()
         );
     }
