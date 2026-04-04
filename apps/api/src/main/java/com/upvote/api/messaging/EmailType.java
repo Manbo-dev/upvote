@@ -6,6 +6,10 @@ package com.upvote.api.messaging;
  * implement handling in EmailConsumer and EmailService.
  */
 public enum EmailType {
-    WELCOME
-    // Future: SUBSCRIPTION_UPGRADED, PAYMENT_FAILED, SUBSCRIPTION_CANCELED, FEEDBACK_DIGEST
+    WELCOME,
+    SUBSCRIPTION_ACTIVATED,
+    SUBSCRIPTION_UPDATED,
+    SUBSCRIPTION_CANCELED,
+    SUBSCRIPTION_PAYMENT_FAILED,
+    MONTHLY_DIGEST
 }

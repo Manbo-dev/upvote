@@ -170,10 +170,17 @@ Widget → POST /api/widget/feedback
 - `FeedbackProcessingMessage` — DTO da mensagem de feedback (apenas `feedbackId`)
 - `FeedbackProducer` — publica na fila de feedback via `RabbitTemplate`
 - `FeedbackProcessingConsumer` — consome da fila de feedback, delega ao `FeedbackService`
-- `EmailType` — enum discriminador: `WELCOME` (extensível)
+- `EmailType` — enum discriminador: `WELCOME`, `SUBSCRIPTION_ACTIVATED`, `SUBSCRIPTION_UPDATED`, `SUBSCRIPTION_CANCELED`, `SUBSCRIPTION_PAYMENT_FAILED`, `MONTHLY_DIGEST`
 - `EmailMessage` — DTO da mensagem de email (`EmailType type`, `UUID userId`)
 - `EmailProducer` — publica em `email.exchange` via `RabbitTemplate`
 - `EmailConsumer` — consome de `email.send`, carrega `User` do DB, delega ao `EmailService`
+
+`com.upvote.api.scheduler`
+- `MonthlyDigestScheduler` — cron `0 0 8 ? * MON#1` (primeira segunda do mês, 8h); enfileira `MONTHLY_DIGEST` para cada usuário com canais. Log prefix: `[DIGEST]`
+
+`@EnableScheduling` habilitado em `UpvoteApiApplication`.
+
+Emails de assinatura são disparados pelos handlers de webhook em `StripeService` (log prefix `[EMAIL]`). `SUBSCRIPTION_UPDATED` só é enfileirado quando o plano efetivamente muda — evita emails duplicados em eventos de status sem troca de plano.
 
 ### Status do Feedback
 

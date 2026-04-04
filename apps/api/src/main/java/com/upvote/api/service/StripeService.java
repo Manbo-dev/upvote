@@ -14,6 +14,9 @@ import com.upvote.api.dto.PortalSessionResponse;
 import com.upvote.api.dto.SubscriptionResponse;
 import com.upvote.api.exception.BusinessException;
 import com.upvote.api.exception.ResourceNotFoundException;
+import com.upvote.api.messaging.EmailMessage;
+import com.upvote.api.messaging.EmailProducer;
+import com.upvote.api.messaging.EmailType;
 import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.FeedbackRepository;
 import com.upvote.api.repository.SubscriptionRepository;
@@ -41,6 +44,7 @@ public class StripeService {
     private final SubscriptionRepository subscriptionRepository;
     private final CanalRepository canalRepository;
     private final FeedbackRepository feedbackRepository;
+    private final EmailProducer emailProducer;
 
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
@@ -273,6 +277,13 @@ public class StripeService {
         subscriptionRepository.save(subscription);
         log.info("[STRIPE] eventId={} Checkout completo: userId={}, plano={}, customerId={}, stripeSubId={}",
                 eventId, userId, plano, session.getCustomer(), session.getSubscription());
+
+        try {
+            emailProducer.send(new EmailMessage(EmailType.SUBSCRIPTION_ACTIVATED, userId));
+            log.info("[EMAIL] Queued SUBSCRIPTION_ACTIVATED: userId={}, plano={}", userId, plano);
+        } catch (Exception e) {
+            log.warn("[EMAIL] Failed to queue SUBSCRIPTION_ACTIVATED: userId={}, error={}", userId, e.getMessage());
+        }
     }
 
     private void processarFaturaPaga(Event event, String eventId) {
@@ -332,6 +343,14 @@ public class StripeService {
                     subscription.setStripeStatus(StripeStatus.PAST_DUE);
                     subscriptionRepository.save(subscription);
                     log.warn("[STRIPE] eventId={} Falha no pagamento da fatura: subscriptionId={}", eventId, subId);
+
+                    UUID userId = subscription.getUser().getId();
+                    try {
+                        emailProducer.send(new EmailMessage(EmailType.SUBSCRIPTION_PAYMENT_FAILED, userId));
+                        log.info("[EMAIL] Queued SUBSCRIPTION_PAYMENT_FAILED: userId={}", userId);
+                    } catch (Exception e) {
+                        log.warn("[EMAIL] Failed to queue SUBSCRIPTION_PAYMENT_FAILED: userId={}, error={}", userId, e.getMessage());
+                    }
                 });
     }
 
@@ -345,6 +364,7 @@ public class StripeService {
 
         subscriptionRepository.findByStripeSubscriptionId(stripeSub.getId())
                 .ifPresent(subscription -> {
+                    Plano previousPlano = subscription.getPlano();
                     subscription.setStripeStatus(mapStripeStatus(stripeSub.getStatus()));
 
                     Plano newPlano = subscription.getPlano();
@@ -371,6 +391,17 @@ public class StripeService {
                     subscriptionRepository.save(subscription);
                     log.info("[STRIPE] eventId={} Assinatura atualizada: stripeSubId={}, status={}, plano={}",
                             eventId, stripeSub.getId(), stripeSub.getStatus(), newPlano);
+
+                    if (!newPlano.equals(previousPlano)) {
+                        UUID userId = subscription.getUser().getId();
+                        try {
+                            emailProducer.send(new EmailMessage(EmailType.SUBSCRIPTION_UPDATED, userId));
+                            log.info("[EMAIL] Queued SUBSCRIPTION_UPDATED: userId={}, previousPlano={}, newPlano={}",
+                                    userId, previousPlano, newPlano);
+                        } catch (Exception e) {
+                            log.warn("[EMAIL] Failed to queue SUBSCRIPTION_UPDATED: userId={}, error={}", userId, e.getMessage());
+                        }
+                    }
                 });
     }
 
@@ -384,11 +415,19 @@ public class StripeService {
 
         subscriptionRepository.findByStripeSubscriptionId(stripeSub.getId())
                 .ifPresent(subscription -> {
+                    UUID userId = subscription.getUser().getId();
                     subscription.setPlano(Plano.FREE);
                     subscription.setStripeStatus(StripeStatus.CANCELED);
                     subscription.setStripeSubscriptionId(null);
                     subscriptionRepository.save(subscription);
                     log.info("[STRIPE] eventId={} Assinatura cancelada: stripeSubId={}, revertido para FREE", eventId, stripeSub.getId());
+
+                    try {
+                        emailProducer.send(new EmailMessage(EmailType.SUBSCRIPTION_CANCELED, userId));
+                        log.info("[EMAIL] Queued SUBSCRIPTION_CANCELED: userId={}", userId);
+                    } catch (Exception e) {
+                        log.warn("[EMAIL] Failed to queue SUBSCRIPTION_CANCELED: userId={}, error={}", userId, e.getMessage());
+                    }
                 });
     }
 

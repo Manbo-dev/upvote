@@ -2,6 +2,7 @@ package com.upvote.api.repository;
 
 import com.upvote.api.domain.Canal;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,4 +16,7 @@ public interface CanalRepository extends JpaRepository<Canal, UUID> {
     Optional<Canal> findByApiKey(String apiKey);
 
     long countByUserId(UUID userId);
+
+    @Query("SELECT DISTINCT c.user.id FROM Canal c")
+    List<UUID> findDistinctUserIds();
 }

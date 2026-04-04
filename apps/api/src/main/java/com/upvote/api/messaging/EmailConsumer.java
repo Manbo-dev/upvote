@@ -34,7 +34,12 @@ public class EmailConsumer {
                         "User not found for email delivery: userId=" + message.userId()));
 
         switch (message.type()) {
-            case WELCOME -> emailService.sendWelcomeEmail(user);
+            case WELCOME                    -> emailService.sendWelcomeEmail(user);
+            case SUBSCRIPTION_ACTIVATED     -> emailService.sendSubscriptionActivatedEmail(user);
+            case SUBSCRIPTION_UPDATED       -> emailService.sendSubscriptionUpdatedEmail(user);
+            case SUBSCRIPTION_CANCELED      -> emailService.sendSubscriptionCanceledEmail(user);
+            case SUBSCRIPTION_PAYMENT_FAILED -> emailService.sendSubscriptionPaymentFailedEmail(user);
+            case MONTHLY_DIGEST             -> emailService.sendMonthlyDigestEmail(user);
             default -> log.warn("Unknown email type, skipping: type={}", message.type());
         }
     }

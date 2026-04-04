@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resumo mensal</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f8f5f0;font-family:'DM Sans',Arial,sans-serif;color:#2c1810;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f5f0;padding:40px 16px;">
+    <tr>
+      <td align="center">
+
+        <table width="100%" cellpadding="0" cellspacing="0" border="0"
+               style="max-width:560px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(44,24,16,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#1F5C45;padding:32px 40px;">
+              <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;">Upvote</p>
+              <p style="margin:4px 0 0;font-size:13px;color:#a8d5c2;letter-spacing:0.2px;">Feedback sem ruído.</p>
+            </td>
+          </tr>
+
+          <!-- Intro -->
+          <tr>
+            <td style="padding:40px 40px 24px;">
+              <p style="margin:0 0 8px;font-size:24px;font-weight:700;color:#2c1810;line-height:1.3;">
+                Seu resumo de <span th:text="${month}">Março 2026</span>
+              </p>
+              <p style="margin:0;font-size:15px;color:#6b4c3b;line-height:1.6;">
+                Olá, <span th:text="${userName}">Fulano</span>! Aqui está o status dos seus canais nos últimos 30 dias.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Per-canal sections -->
+          <th:block th:each="canal : ${canais}">
+
+            <!-- Canal header -->
+            <tr>
+              <td style="padding:0 40px 8px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:12px 16px;background-color:#f0f9f4;border-radius:8px;">
+                      <p style="margin:0;font-size:14px;font-weight:700;color:#1F5C45;" th:text="${canal.name}">Canal</p>
+                      <p style="margin:2px 0 0;font-size:12px;color:#6b4c3b;">
+                        <span th:text="${canal.totalActive}">0</span> grupos ativos ·
+                        <span th:text="${canal.newThisMonth}">0</span> novos nos últimos 30 dias
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Status counts -->
+            <tr>
+              <td style="padding:8px 40px 16px;">
+                <table cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <!-- Open -->
+                    <td style="padding-right:8px;">
+                      <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="padding:6px 12px;background-color:#dbeafe;border-radius:20px;">
+                            <p style="margin:0;font-size:12px;font-weight:600;color:#1d4ed8;">
+                              Aberto&nbsp;<span th:text="${canal.countOpen}">0</span>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <!-- Planned -->
+                    <td style="padding-right:8px;">
+                      <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="padding:6px 12px;background-color:#fef3c7;border-radius:20px;">
+                            <p style="margin:0;font-size:12px;font-weight:600;color:#b45309;">
+                              Planejado&nbsp;<span th:text="${canal.countPlanned}">0</span>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <!-- In Progress -->
+                    <td style="padding-right:8px;">
+                      <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="padding:6px 12px;background-color:#ffedd5;border-radius:20px;">
+                            <p style="margin:0;font-size:12px;font-weight:600;color:#c2410c;">
+                              Em progresso&nbsp;<span th:text="${canal.countInProgress}">0</span>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <!-- Done -->
+                    <td>
+                      <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="padding:6px 12px;background-color:#d1fae5;border-radius:20px;">
+                            <p style="margin:0;font-size:12px;font-weight:600;color:#065f46;">
+                              Concluído&nbsp;<span th:text="${canal.countDone}">0</span>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Top groups table -->
+            <tr th:if="${not #lists.isEmpty(canal.topGroups)}">
+              <td style="padding:0 40px 24px;">
+                <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#9c8e87;text-transform:uppercase;letter-spacing:0.4px;">Top grupos por votos</p>
+                <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                       style="border:1px solid #f0ebe4;border-radius:8px;overflow:hidden;">
+                  <th:block th:each="group, iterStat : ${canal.topGroups}">
+                    <tr>
+                      <td th:style="${iterStat.last} ? 'padding:12px 16px;' : 'padding:12px 16px;border-bottom:1px solid #f0ebe4;'">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                          <tr>
+                            <td style="width:100%;">
+                              <p style="margin:0;font-size:13px;font-weight:600;color:#2c1810;" th:text="${group.title}">Título</p>
+                              <p style="margin:2px 0 0;font-size:12px;color:#9c8e87;" th:text="${group.category}">CATEGORY</p>
+                            </td>
+                            <td style="white-space:nowrap;padding-left:12px;text-align:right;">
+                              <p style="margin:0;font-size:13px;font-weight:700;color:#1F5C45;">
+                                <span th:text="${group.voteCount}">0</span> votos
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </th:block>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Spacer between canals -->
+            <tr th:unless="${iterStat.last}">
+              <td style="padding:0 40px 8px;">
+                <hr style="border:none;border-top:1px solid #f0ebe4;margin:0;"/>
+              </td>
+            </tr>
+
+          </th:block>
+
+          <!-- CTA -->
+          <tr>
+            <td style="padding:8px 40px 32px;">
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="border-radius:8px;background-color:#1F5C45;">
+                    <a th:href="${dashboardUrl}" href="#"
+                       style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.1px;">
+                      Acessar o dashboard →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;">
+              <hr style="border:none;border-top:1px solid #f0ebe4;margin:0;"/>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 40px 32px;">
+              <p style="margin:0;font-size:13px;color:#a08070;line-height:1.6;">
+                Você recebe este resumo porque tem canais ativos no
+                <a href="https://upvote.pro" style="color:#1F5C45;text-decoration:none;">Upvote</a>.
+              </p>
+              <p style="margin:12px 0 0;font-size:12px;color:#c4b4a8;">© 2025 Upvote · upvote.pro</p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

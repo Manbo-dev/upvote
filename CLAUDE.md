@@ -416,6 +416,15 @@ Gatilho de negócio (ex: registro)
 | Tipo | Gatilho | Assunto |
 |------|---------|---------|
 | `WELCOME` | `AuthService.register()` | "Bem-vindo ao Upvote!" |
+| `SUBSCRIPTION_ACTIVATED` | `StripeService.processarCheckoutCompleto()` | "Sua assinatura [PLANO] está ativa!" |
+| `SUBSCRIPTION_UPDATED` | `StripeService.processarAssinaturaAtualizada()` — só quando o plano muda | "Seu plano foi atualizado para [PLANO]" |
+| `SUBSCRIPTION_CANCELED` | `StripeService.processarAssinaturaCancelada()` | "Sua assinatura foi cancelada" |
+| `SUBSCRIPTION_PAYMENT_FAILED` | `StripeService.processarFalhaFatura()` | "Falha no pagamento — ação necessária" |
+| `MONTHLY_DIGEST` | `MonthlyDigestScheduler` — toda primeira segunda do mês, 8h | "Seu resumo mensal do Upvote — [Mês]" |
+
+**Lógica de deduplicação em `SUBSCRIPTION_UPDATED`:** o email só é enfileirado se o novo plano (`newPlano`) diferir do plano anterior (`previousPlano`) capturado no início do handler. Evita envios duplicados quando o Stripe dispara `customer.subscription.updated` por mudanças de status sem troca de plano.
+
+**`MONTHLY_DIGEST` — skip automático:** `EmailService.sendMonthlyDigestEmail()` ignora silenciosamente usuários sem canais ou cujos canais não possuem nenhum grupo ativo (nenhuma request de email falha, apenas `INFO` no log).
 
 ### Como adicionar um novo email
 
@@ -425,13 +434,24 @@ Gatilho de negócio (ex: registro)
 4. Adicionar `case` no `EmailConsumer.handle()`
 5. Publicar `new EmailMessage(EmailType.PAYMENT_FAILED, userId)` via `EmailProducer` no gatilho certo
 
+### Scheduler mensal
+
+- **`MonthlyDigestScheduler`** — `@Component` em `com.upvote.api.scheduler`
+- Cron: `0 0 8 ? * MON#1` (primeira segunda-feira do mês, 8h)
+- Consulta `CanalRepository.findDistinctUserIds()` para obter todos os usuários com pelo menos um canal
+- Enfileira um `EmailMessage(MONTHLY_DIGEST, userId)` por usuário — o processamento pesado é feito pelo consumer
+- Falhas de enfileiramento individuais são logadas como `WARN` e não interrompem o batch
+- Log prefix: `[DIGEST]`
+- `@EnableScheduling` adicionado em `UpvoteApiApplication`
+
 ### Arquitetura backend
 
 - **`EmailType`** — enum discriminador dos tipos de email
 - **`EmailMessage`** — record `(EmailType type, UUID userId)` — payload mínimo, consumer carrega dados do DB
 - **`EmailProducer`** — publica em `email.exchange` via `RabbitTemplate`
 - **`EmailConsumer`** — `@RabbitListener` em `email.send`; switch em `type` → delega ao `EmailService`
-- **`EmailService`** — renderiza template Thymeleaf, envia `MimeMessage` HTML; falha silenciosa (warn no log)
+- **`EmailService`** — renderiza template Thymeleaf, envia `MimeMessage` HTML; falha silenciosa (warn no log). Injeta `SubscriptionRepository`, `CanalRepository` e `FeedbackGroupRepository` para montar o conteúdo dos emails de assinatura e digest
+- **`MonthlyDigestScheduler`** — agenda e enfileira o digest mensal
 - **Templates**: `apps/api/src/main/resources/templates/emails/`
 
 ### Topologia RabbitMQ (email)
