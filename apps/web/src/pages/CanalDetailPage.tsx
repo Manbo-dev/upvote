@@ -24,9 +24,12 @@ import {
   type FeedbackGroupResponse,
   type FeedbackGroupStatus,
 } from '../services/feedbackGroups';
+import { LayoutGrid, Heart } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import FeedbackGroupCard from '../components/FeedbackGroupCard';
 import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
 import KanbanColumn from '../components/KanbanColumn';
+import PraiseGrid from '../components/PraiseGrid';
 
 const CATEGORY_FILTERS: {
   value: FeedbackCategory | 'ALL';
@@ -69,16 +72,6 @@ const CATEGORY_FILTERS: {
     ),
     activeClasses: 'bg-orange-600 text-white dark:bg-orange-500',
     dropClasses: 'ring-2 ring-orange-400 bg-orange-50 dark:bg-orange-900/20 dark:ring-orange-500',
-  },
-  {
-    value: 'PRAISE',
-    icon: (
-      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    activeClasses: 'bg-green-600 text-white dark:bg-green-500',
-    dropClasses: 'ring-2 ring-green-400 bg-green-50 dark:bg-green-900/20 dark:ring-green-500',
   },
 ];
 
@@ -194,6 +187,7 @@ export default function CanalDetailPage() {
   const { t } = useTranslation();
   const { canalId: slug } = useParams<{ canalId: string }>();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<'board' | 'praise'>('board');
   const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [draggingGroup, setDraggingGroup] = useState<FeedbackGroupResponse | null>(null);
@@ -341,9 +335,10 @@ export default function CanalDetailPage() {
 
   const activeDateLabel = t(`canal.datePresets.${datePreset}`);
 
-  const filtered = feedbackGroups?.filter((g) => {
-    const matchesCategory = activeCategory === 'ALL' || g.category === activeCategory;
-    if (!matchesCategory) return false;
+  const praiseGroups = feedbackGroups?.filter((g) => g.category === 'PRAISE') ?? [];
+  const boardGroups = feedbackGroups?.filter((g) => g.category !== 'PRAISE') ?? [];
+
+  const applyDateAndSearchFilters = (g: FeedbackGroupResponse) => {
     if (datePreset !== 'ALL') {
       const created = new Date(g.createdAt);
       if (dateRange.from && created < dateRange.from) return false;
@@ -356,13 +351,25 @@ export default function CanalDetailPage() {
       g.summary?.toLowerCase().includes(q) ||
       g.topContext?.toLowerCase().includes(q)
     );
+  };
+
+  const filtered = boardGroups.filter((g) => {
+    const matchesCategory = activeCategory === 'ALL' || g.category === activeCategory;
+    if (!matchesCategory) return false;
+    return applyDateAndSearchFilters(g);
   });
+
+  const filteredPraise = praiseGroups.filter(applyDateAndSearchFilters);
 
   // Derive selectedGroup from live cache so modal reflects optimistic updates
   const selectedGroup = feedbackGroups?.find((g) => g.id === selectedGroupId) ?? null;
 
-  const maxVotes = feedbackGroups
-    ? Math.max(0, ...feedbackGroups.map((g) => g.voteCount))
+  const maxVotes = boardGroups.length > 0
+    ? Math.max(0, ...boardGroups.map((g) => g.voteCount))
+    : 0;
+
+  const praiseMaxVotes = praiseGroups.length > 0
+    ? Math.max(0, ...praiseGroups.map((g) => g.voteCount))
     : 0;
 
   const groupsByStatus = (status: FeedbackGroupStatus) =>
@@ -419,10 +426,14 @@ export default function CanalDetailPage() {
   async function handleExport() {
     setExporting(true);
     try {
+      const categoryParam = activeTab === 'praise'
+        ? 'PRAISE' as FeedbackCategory
+        : (activeCategory !== 'ALL' ? activeCategory : undefined);
+
       if (exportFormat === 'csv') {
         await exportFeedbackGroups(slug!, {
           status: exportStatus !== 'ALL' ? exportStatus : undefined,
-          category: activeCategory !== 'ALL' ? activeCategory : undefined,
+          category: categoryParam,
           from: toDateParam(dateRange.from),
           to: toDateParam(dateRange.to),
           includeDetails: exportIncludeDetails,
@@ -430,7 +441,7 @@ export default function CanalDetailPage() {
       } else {
         await exportFeedbackGroupsPdf(slug!, {
           status: exportStatus !== 'ALL' ? exportStatus : undefined,
-          category: activeCategory !== 'ALL' ? activeCategory : undefined,
+          category: categoryParam,
           from: toDateParam(dateRange.from),
           to: toDateParam(dateRange.to),
         });
@@ -677,120 +688,147 @@ export default function CanalDetailPage() {
         </div>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        {/* Category filter pills — expand to drop zones while dragging */}
-        <div className={`mb-6 flex gap-3 ${draggingGroup ? '' : 'overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden'}`}>
-          {CATEGORY_FILTERS.filter((f) => !draggingGroup || f.value !== 'ALL').map((filter) => (
-            <DroppableCategoryPill
-              key={filter.value}
-              filter={filter}
-              isActive={activeCategory === filter.value}
-              isDragging={!!draggingGroup}
-              count={feedbackGroups?.filter((g) => g.category === filter.value).length ?? 0}
-              onClick={() => setActiveCategory(filter.value)}
-            />
-          ))}
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
         </div>
+      ) : !feedbackGroups || feedbackGroups.length === 0 ? (
+        <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
+          <svg
+            className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+            />
+          </svg>
+          <h3 className="mt-4 text-lg font-medium text-foreground">
+            {t('canal.empty.title', 'No feedback received yet')}
+          </h3>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            {t('canal.empty.description', 'Install the widget on your product to start capturing feedback.')}
+          </p>
+        </div>
+      ) : (
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'board' | 'praise')}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="board" className="gap-1.5">
+              <LayoutGrid className="h-4 w-4" />
+              {t('canal.tabs.board')}
+              <span className="ml-1 rounded-full bg-warm-200 px-1.5 py-0.5 text-xs dark:bg-warm-700">
+                {boardGroups.length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="praise" className="gap-1.5">
+              <Heart className="h-4 w-4" />
+              {t('canal.tabs.praise')}
+              <span className="ml-1 rounded-full bg-green-100 px-1.5 py-0.5 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                {praiseGroups.length}
+              </span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Kanban board */}
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
-          </div>
-        ) : !feedbackGroups || feedbackGroups.length === 0 ? (
-          <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <TabsContent value="board">
+            <DndContext
+              sensors={sensors}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-              />
-            </svg>
-            <h3 className="mt-4 text-lg font-medium text-foreground">
-              {t('canal.empty.title', 'No feedback received yet')}
-            </h3>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {t('canal.empty.description', 'Install the widget on your product to start capturing feedback.')}
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {KANBAN_COLUMNS.map((col) => (
-                <KanbanColumn
-                  key={col.status}
-                  title={t(`canal.kanban.${col.status}`)}
-                  status={col.status}
-                  color={col.color}
-                  groups={groupsByStatus(col.status)}
-                  onCardClick={(g) => setSelectedGroupId(g.id)}
-                  maxVotes={maxVotes}
-                  onArchive={(id) => archiveMutation.mutate(id)}
-                  headerAction={
-                    col.status === 'DONE' && groupsByStatus('DONE').length > 0 ? (
-                      <button
-                        onClick={() => archiveAllMutation.mutate()}
-                        disabled={archiveAllMutation.isPending}
-                        className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-warm-200 dark:bg-warm-700 dark:text-gray-400 dark:hover:bg-gray-600"
-                        title={t('canal.archiveAll')}
-                      >
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                        </svg>
-                        {archiveAllMutation.isPending ? t('canal.archiving') : t('canal.archiveAll')}
-                      </button>
-                    ) : undefined
-                  }
-                />
-              ))}
-            </div>
-
-            {filtered?.length === 0 && (
-              <div className="col-span-full mt-2 rounded-xl border border-gray-200 p-8 text-center dark:border-gray-700">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {t('common.noResults')}
-                  {debouncedQuery && <span className="font-medium"> "{debouncedQuery}"</span>}
-                  {activeCategory !== 'ALL' && (
-                    <span className="font-medium"> · {t(`canal.categories.${activeCategory}`)}</span>
-                  )}
-                  {datePreset !== 'ALL' && (
-                    <span className="font-medium"> · {activeDateLabel}</span>
-                  )}
-                </p>
-                <button
-                  onClick={() => { setSearchQuery(''); setActiveCategory('ALL'); setDatePreset('ALL'); }}
-                  className="mt-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
-                >
-                  {t('canal.clearFilters', 'Clear filters')}
-                </button>
-              </div>
-            )}
-
-            <DragOverlay>
-              {draggingGroup ? (
-                <div className="rotate-2 opacity-90">
-                  <FeedbackGroupCard
-                    group={draggingGroup}
-                    onClick={() => {}}
-                    compact
-                    maxVotes={maxVotes}
+              {/* Category filter pills — expand to drop zones while dragging */}
+              <div className={`mb-6 flex gap-3 ${draggingGroup ? '' : 'overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden'}`}>
+                {CATEGORY_FILTERS.filter((f) => !draggingGroup || f.value !== 'ALL').map((filter) => (
+                  <DroppableCategoryPill
+                    key={filter.value}
+                    filter={filter}
+                    isActive={activeCategory === filter.value}
+                    isDragging={!!draggingGroup}
+                    count={boardGroups.filter((g) => g.category === filter.value).length}
+                    onClick={() => setActiveCategory(filter.value)}
                   />
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {KANBAN_COLUMNS.map((col) => (
+                  <KanbanColumn
+                    key={col.status}
+                    title={t(`canal.kanban.${col.status}`)}
+                    status={col.status}
+                    color={col.color}
+                    groups={groupsByStatus(col.status)}
+                    onCardClick={(g) => setSelectedGroupId(g.id)}
+                    maxVotes={maxVotes}
+                    onArchive={(id) => archiveMutation.mutate(id)}
+                    headerAction={
+                      col.status === 'DONE' && groupsByStatus('DONE').length > 0 ? (
+                        <button
+                          onClick={() => archiveAllMutation.mutate()}
+                          disabled={archiveAllMutation.isPending}
+                          className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-warm-200 dark:bg-warm-700 dark:text-gray-400 dark:hover:bg-gray-600"
+                          title={t('canal.archiveAll')}
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                          </svg>
+                          {archiveAllMutation.isPending ? t('canal.archiving') : t('canal.archiveAll')}
+                        </button>
+                      ) : undefined
+                    }
+                  />
+                ))}
+              </div>
+
+              {filtered.length === 0 && (
+                <div className="col-span-full mt-2 rounded-xl border border-gray-200 p-8 text-center dark:border-gray-700">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {t('common.noResults')}
+                    {debouncedQuery && <span className="font-medium"> "{debouncedQuery}"</span>}
+                    {activeCategory !== 'ALL' && (
+                      <span className="font-medium"> · {t(`canal.categories.${activeCategory}`)}</span>
+                    )}
+                    {datePreset !== 'ALL' && (
+                      <span className="font-medium"> · {activeDateLabel}</span>
+                    )}
+                  </p>
+                  <button
+                    onClick={() => { setSearchQuery(''); setActiveCategory('ALL'); setDatePreset('ALL'); }}
+                    className="mt-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                  >
+                    {t('canal.clearFilters', 'Clear filters')}
+                  </button>
                 </div>
-              ) : null}
-            </DragOverlay>
-          </>
-        )}
-      </DndContext>
+              )}
+
+              <DragOverlay>
+                {draggingGroup ? (
+                  <div className="rotate-2 opacity-90">
+                    <FeedbackGroupCard
+                      group={draggingGroup}
+                      onClick={() => {}}
+                      compact
+                      maxVotes={maxVotes}
+                    />
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          </TabsContent>
+
+          <TabsContent value="praise">
+            <PraiseGrid
+              groups={filteredPraise}
+              maxVotes={praiseMaxVotes}
+              onCardClick={(g) => setSelectedGroupId(g.id)}
+              onArchive={(id) => archiveMutation.mutate(id)}
+            />
+          </TabsContent>
+        </Tabs>
+      )}
 
       <FeedbackGroupDetailModal
         group={selectedGroup}

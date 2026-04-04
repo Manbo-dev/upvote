@@ -29,6 +29,8 @@ interface FeedbackGroupCardProps {
   maxVotes?: number;
   onArchive?: () => void;
   onRestore?: () => void;
+  draggable?: boolean;
+  showStatus?: boolean;
 }
 
 export default function FeedbackGroupCard({
@@ -38,6 +40,8 @@ export default function FeedbackGroupCard({
   maxVotes = 1,
   onArchive,
   onRestore,
+  draggable = true,
+  showStatus = true,
 }: FeedbackGroupCardProps) {
   const { t, i18n } = useTranslation();
   const { theme } = useThemeStore();
@@ -48,18 +52,20 @@ export default function FeedbackGroupCard({
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: group.id,
+    disabled: !draggable,
   });
 
   const dragStyle = isDragging ? 'opacity-40' : '';
+  const cursorClass = draggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer';
 
   if (compact) {
     return (
       <div
         ref={setNodeRef}
-        className={`group cursor-grab rounded-lg border border-warm-200 border-l-4 bg-card p-3 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-warm-700 dark:hover:border-primary-600 ${dragStyle}`}
+        className={`group ${cursorClass} rounded-lg border border-warm-200 border-l-4 bg-card p-3 transition-all hover:border-primary-300 hover:shadow-md dark:border-warm-700 dark:hover:border-primary-600 ${dragStyle}`}
         style={{ borderLeftColor: accentColor?.border }}
-        {...listeners}
-        {...attributes}
+        {...(draggable ? listeners : {})}
+        {...(draggable ? attributes : {})}
       >
         <div className="mb-1.5 flex items-center gap-2">
           <span
@@ -138,10 +144,10 @@ export default function FeedbackGroupCard({
   return (
     <div
       ref={setNodeRef}
-      className={`flex cursor-grab gap-4 rounded-lg border border-warm-200 border-l-4 bg-card p-4 transition-all active:cursor-grabbing hover:border-primary-300 hover:shadow-md dark:border-warm-700 dark:hover:border-primary-600 ${dragStyle}`}
+      className={`flex ${cursorClass} gap-4 rounded-lg border border-warm-200 border-l-4 bg-card p-4 transition-all hover:border-primary-300 hover:shadow-md dark:border-warm-700 dark:hover:border-primary-600 ${dragStyle}`}
       style={{ borderLeftColor: accentColor?.border }}
-      {...listeners}
-      {...attributes}
+      {...(draggable ? listeners : {})}
+      {...(draggable ? attributes : {})}
     >
       {/* Vote count */}
       <div
@@ -169,7 +175,7 @@ export default function FeedbackGroupCard({
             {group.title}
           </h3>
           <CategoryBadge category={group.category} />
-          <StatusBadge status={group.status} />
+          {showStatus && <StatusBadge status={group.status} />}
           {group.externalIssues?.map((issue) => (
             <a
               key={issue.id}

@@ -176,6 +176,15 @@
     "empty": {
       "title": "No feedback received yet",
       "description": "Install the widget on your product to start capturing feedback."
+    },
+    "tabs": {
+      "board": "Board",
+      "praise": "Praise"
+    },
+    "praise": {
+      "subtitle": "Positive feedback received",
+      "emptyTitle": "No praise yet",
+      "emptyDescription": "When your users send positive feedback, it will appear here."
     }
   },
   "archive": {

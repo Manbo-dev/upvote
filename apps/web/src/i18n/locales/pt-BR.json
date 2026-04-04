@@ -176,6 +176,15 @@
     "empty": {
       "title": "Nenhum feedback recebido ainda",
       "description": "Instale o widget no seu produto para começar a capturar feedbacks."
+    },
+    "tabs": {
+      "board": "Board",
+      "praise": "Elogios"
+    },
+    "praise": {
+      "subtitle": "Feedbacks positivos recebidos",
+      "emptyTitle": "Nenhum elogio ainda",
+      "emptyDescription": "Quando seus usuários enviarem feedback positivo, ele aparecerá aqui."
     }
   },
   "archive": {

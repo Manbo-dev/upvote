@@ -87,6 +87,11 @@ Sem essa variável, o `StubAiService` é usado (comportamento seguro para dev/te
 - Visão para PO/PM que permite decisão sem investigação técnica
 - Kanban board com colunas: Open, Planned, In Progress, Done
 - Drag-and-drop para mover cards entre status e categorias (@dnd-kit)
+- **Tabs na página do canal**: "Board" (kanban — BUG, SUGGESTION, COMPLAINT) e "Elogios" (PRAISE em grid dedicada)
+  - PRAISE nunca aparece no kanban nem nos filtros de categoria do board
+  - Tab Elogios mostra grid responsiva (1/2/3 colunas) com visual mint, sem progressão de status
+  - Export respeita a tab ativa (tab Elogios força `category=PRAISE`)
+  - Componente: `apps/web/src/components/PraiseGrid.tsx`
 
 ### Design System (Frontend)
 - **Warm neutral palette**: cream/beige light mode, dark chocolate dark mode, forest green primary (`#1F5C45`)
