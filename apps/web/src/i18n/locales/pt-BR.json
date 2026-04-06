@@ -537,28 +537,28 @@
           "name": "Free",
           "price": "R$ 0",
           "period": "para sempre",
-          "features": ["1 canal", "50 sugestões/mês", "Board público", "Sem widget"],
+          "features": ["1 canal", "20 sugestões/mês", "Widget básico", "Dashboard de padrões"],
           "cta": "Começar grátis"
         },
         {
           "name": "Starter",
           "price": "R$ 49",
           "period": "/mês",
-          "features": ["3 canais", "Sugestões ilimitadas", "Widget básico", "Dashboard de padrões"],
+          "features": ["3 canais", "500 sugestões/mês", "Widget básico", "Integrações Jira/ClickUp", "Roadmap público"],
           "cta": "Começar"
         },
         {
           "name": "Pro",
           "price": "R$ 129",
           "period": "/mês",
-          "features": ["10 canais", "Changelog integrado", "Roadmap público", "IA avançada", "Suporte prioritário"],
+          "features": ["20 canais", "Sugestões ilimitadas", "Widget customizável", "Integrações Jira/ClickUp", "Roadmap público"],
           "cta": "Começar"
         },
         {
           "name": "Business",
           "price": "R$ 299",
           "period": "/mês",
-          "features": ["Canais ilimitados", "SSO", "API pública", "White-label", "SLA garantido"],
+          "features": ["Canais ilimitados", "Sugestões ilimitadas", "Widget white-label", "Integrações Jira/ClickUp", "Suporte dedicado"],
           "cta": "Falar com vendas"
         }
       ]

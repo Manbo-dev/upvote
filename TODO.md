@@ -17,7 +17,7 @@ Após implementar os planos corretamente no backend, atualizar o frontend de mar
 - Atualizar feature lists para refletir o que realmente está implementado
 - Garantir que os botões de upgrade/downgrade funcionam corretamente com BUSINESS
 
-**i18n:** Atualizar `landing.pricing.*` em `pt-BR.json` e `en.json`.
+
 
 
 Membros de equipe (múltiplos usuários por org) — feature grande, requer novo modelo de auth

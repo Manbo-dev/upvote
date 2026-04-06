@@ -528,37 +528,37 @@
       ]
     },
     "pricing": {
-      "title": "Fair pricing",
+      "title": "Fair pricing for your business",
       "subtitle": "Start free. Scale as you grow.",
       "mostPopular": "Most popular",
       "forever": "forever",
       "plans": [
         {
           "name": "Free",
-          "price": "$0",
+          "price": "R$ 0",
           "period": "forever",
-          "features": ["1 channel", "50 suggestions/month", "Public board", "No widget"],
+          "features": ["1 channel", "20 suggestions/month", "Basic widget", "Pattern dashboard"],
           "cta": "Get started free"
         },
         {
           "name": "Starter",
-          "price": "$12",
+          "price": "R$ 49",
           "period": "/month",
-          "features": ["3 channels", "Unlimited suggestions", "Basic widget", "Pattern dashboard"],
+          "features": ["3 channels", "500 suggestions/month", "Basic widget", "Jira/ClickUp integrations", "Public roadmap"],
           "cta": "Get started"
         },
         {
           "name": "Pro",
-          "price": "$34",
+          "price": "R$ 129",
           "period": "/month",
-          "features": ["10 channels", "Integrated changelog", "Public roadmap", "Advanced AI", "Priority support"],
+          "features": ["20 channels", "Unlimited suggestions", "Custom widget", "Jira/ClickUp integrations", "Public roadmap"],
           "cta": "Get started"
         },
         {
           "name": "Business",
-          "price": "Custom",
-          "period": "",
-          "features": ["Unlimited channels", "SSO", "Public API", "White-label", "Guaranteed SLA"],
+          "price": "R$ 299",
+          "period": "/month",
+          "features": ["Unlimited channels", "Unlimited suggestions", "White-label widget", "Jira/ClickUp integrations", "Dedicated support"],
           "cta": "Talk to sales"
         }
       ]
