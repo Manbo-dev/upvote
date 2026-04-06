@@ -179,7 +179,28 @@
     },
     "tabs": {
       "board": "Board",
-      "praise": "Praise"
+      "praise": "Praise",
+      "settings": "Settings"
+    },
+    "widget": {
+      "title": "Widget Settings",
+      "color": "Primary color",
+      "position": "Position",
+      "positions": {
+        "BOTTOM_RIGHT": "Bottom right",
+        "BOTTOM_LEFT": "Bottom left",
+        "TOP_RIGHT": "Top right",
+        "TOP_LEFT": "Top left"
+      },
+      "customTitle": "Custom title",
+      "customTitlePlaceholder": "E.g. Send your feedback",
+      "placeholder": "Text field placeholder",
+      "placeholderPlaceholder": "E.g. Describe your issue or suggestion...",
+      "save": "Save settings",
+      "saveSuccess": "Saved successfully!",
+      "upgradeRequired": "Available on PRO plan",
+      "upgradeDescription": "Customize the widget's color, position, title, and placeholder on your PRO plan or above.",
+      "upgradeLink": "Upgrade plan"
     },
     "praise": {
       "subtitle": "Positive feedback received",
@@ -298,6 +319,11 @@
     "notConnected": "Not connected",
     "connecting": "Connecting...",
     "callbackError": "Failed to complete integration. Please try again.",
+    "planGating": {
+      "title": "Integrations available on STARTER plan or above",
+      "description": "Connect Jira and ClickUp to push feedback groups as issues or tasks.",
+      "upgradeLink": "Upgrade plan"
+    },
     "push": {
       "title": "Push to external tool",
       "pushButton": "Push",

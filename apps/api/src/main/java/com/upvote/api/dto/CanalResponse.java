@@ -9,6 +9,9 @@ public record CanalResponse(
         String slug,
         String apiKey,
         String widgetColor,
+        String widgetPosition,
+        String widgetTitle,
+        String widgetPlaceholder,
         LocalDateTime createdAt
 ) {
 }

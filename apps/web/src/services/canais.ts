@@ -6,7 +6,17 @@ export interface CanalResponse {
   slug: string;
   apiKey: string;
   widgetColor: string;
+  widgetPosition: string;
+  widgetTitle: string | null;
+  widgetPlaceholder: string | null;
   createdAt: string;
+}
+
+export interface WidgetSettingsRequest {
+  color: string;
+  position: string;
+  title?: string | null;
+  placeholder?: string | null;
 }
 
 interface ApiResult<T> {
@@ -50,4 +60,15 @@ export async function renameCanal(id: string, name: string, slug: string): Promi
 
 export async function deleteCanal(id: string): Promise<void> {
   await api.delete(`/canais/${id}`);
+}
+
+export async function updateWidgetSettings(
+  id: string,
+  request: WidgetSettingsRequest,
+): Promise<CanalResponse> {
+  const { data } = await api.patch<ApiResult<CanalResponse>>(
+    `/canais/${id}/widget`,
+    request,
+  );
+  return data.data;
 }

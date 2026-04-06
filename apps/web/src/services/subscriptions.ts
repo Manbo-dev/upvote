@@ -1,7 +1,7 @@
 import api from './api';
 
 export interface SubscriptionInfo {
-  plano: 'FREE' | 'STARTER' | 'PRO';
+  plano: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS';
   stripeStatus: string | null;
   currentPeriodEnd: string | null;
   limiteCanais: number;
@@ -9,6 +9,8 @@ export interface SubscriptionInfo {
   limiteSugestoesMes: number;
   sugestoesUsadasMes: number;
   widgetHabilitado: boolean;
+  widgetCustomizationEnabled: boolean;
+  integrationsEnabled: boolean;
 }
 
 interface ApiResult<T> {

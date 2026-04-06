@@ -270,5 +270,37 @@ export function getStyles(color: string): string {
     @keyframes upvote-spin {
       to { transform: rotate(360deg); }
     }
+
+    /* Position overrides — default (BOTTOM_RIGHT) is set in base styles above */
+    .upvote-widget-btn.upvote-pos-bottom-left {
+      right: auto;
+      left: 24px;
+    }
+    .upvote-widget-panel.upvote-pos-bottom-left {
+      right: auto;
+      left: 24px;
+    }
+
+    .upvote-widget-btn.upvote-pos-top-right {
+      bottom: auto;
+      top: 24px;
+    }
+    .upvote-widget-panel.upvote-pos-top-right {
+      bottom: auto;
+      top: 92px;
+    }
+
+    .upvote-widget-btn.upvote-pos-top-left {
+      bottom: auto;
+      top: 24px;
+      right: auto;
+      left: 24px;
+    }
+    .upvote-widget-panel.upvote-pos-top-left {
+      bottom: auto;
+      top: 92px;
+      right: auto;
+      left: 24px;
+    }
   `;
 }

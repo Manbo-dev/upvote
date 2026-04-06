@@ -4,17 +4,20 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Planos disponíveis no sistema com seus limites
+ * Available plans with their limits and feature flags
  */
 @Getter
 @RequiredArgsConstructor
 public enum Plano {
 
-    FREE(1, 50, false),
-    STARTER(3, Integer.MAX_VALUE, true),
-    PRO(10, Integer.MAX_VALUE, true);
+    FREE    (1,                 20,                false, false, false),
+    STARTER (3,                 500,               true,  false, true),
+    PRO     (20,                Integer.MAX_VALUE, true,  true,  true),
+    BUSINESS(Integer.MAX_VALUE, Integer.MAX_VALUE, true,  true,  true);
 
-    private final int limiteCanais;
-    private final int limiteSugestoesMes;
+    private final int     limiteCanais;
+    private final int     limiteSugestoesMes;
     private final boolean widgetHabilitado;
+    private final boolean widgetCustomizationEnabled;
+    private final boolean integrationsEnabled;
 }

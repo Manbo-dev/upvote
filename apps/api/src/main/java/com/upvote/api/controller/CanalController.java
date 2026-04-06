@@ -4,10 +4,12 @@ import com.upvote.api.dto.ApiResponse;
 import com.upvote.api.dto.CanalRequest;
 import com.upvote.api.dto.CanalResponse;
 import com.upvote.api.dto.RenameCanelRequest;
+import com.upvote.api.dto.WidgetSettingsRequest;
 import com.upvote.api.repository.UserRepository;
 import com.upvote.api.service.CanalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/canais")
 @RequiredArgsConstructor
+@Slf4j
 public class CanalController {
 
     private final CanalService canalService;
@@ -73,6 +76,21 @@ public class CanalController {
                 .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
         CanalResponse canal = canalService.renameCanal(id, request, user.getId());
         return ResponseEntity.ok(ApiResponse.ok(canal, "Canal renomeado com sucesso"));
+    }
+
+    /**
+     * Updates widget customization settings for a channel (PRO+ only).
+     */
+    @PatchMapping("/{id}/widget")
+    public ResponseEntity<ApiResponse<CanalResponse>> updateWidgetSettings(
+            @PathVariable UUID id,
+            @Valid @RequestBody WidgetSettingsRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        log.info("PATCH /api/canais/{}/widget: user={}", id, userDetails.getUsername());
+        var user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
+        CanalResponse canal = canalService.updateWidgetSettings(id, request, user.getId());
+        return ResponseEntity.ok(ApiResponse.ok(canal, "Widget settings updated successfully"));
     }
 
     /**

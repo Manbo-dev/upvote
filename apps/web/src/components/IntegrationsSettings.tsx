@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Zap } from 'lucide-react';
 import {
   getIntegrations,
   getJiraAuthorizationUrl,
@@ -8,6 +10,7 @@ import {
   disconnectIntegration,
   type IntegrationResponse,
 } from '../services/integrations';
+import { getSubscription } from '../services/subscriptions';
 
 const PROVIDERS = [
   {
@@ -40,6 +43,14 @@ export default function IntegrationsSettings() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
+
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: getSubscription,
+  });
+
+  // Default true to avoid a flash of locked state while subscription loads
+  const integrationsEnabled = subscription?.integrationsEnabled ?? true;
 
   const { data: integrations = [], isLoading } = useQuery({
     queryKey: ['integrations'],
@@ -82,6 +93,26 @@ export default function IntegrationsSettings() {
       <p className="mb-5 text-sm text-muted-foreground">
         {t('integrations.description')}
       </p>
+
+      {!integrationsEnabled && (
+        <div className="mb-5 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+          <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              {t('integrations.planGating.title')}
+            </p>
+            <p className="mt-0.5 text-sm text-amber-700 dark:text-amber-300">
+              {t('integrations.planGating.description')}
+            </p>
+            <Link
+              to="/dashboard/billing"
+              className="mt-1.5 inline-block text-sm font-medium text-primary-600 hover:underline dark:text-primary-400"
+            >
+              {t('integrations.planGating.upgradeLink')} →
+            </Link>
+          </div>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="flex justify-center py-8">
@@ -135,8 +166,8 @@ export default function IntegrationsSettings() {
                 ) : (
                   <button
                     onClick={() => handleConnect(provider.key)}
-                    disabled={isConnecting}
-                    className="flex-shrink-0 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-primary-700 disabled:opacity-50"
+                    disabled={isConnecting || !integrationsEnabled}
+                    className="flex-shrink-0 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isConnecting ? t('common.loading') : t('integrations.connect')}
                   </button>

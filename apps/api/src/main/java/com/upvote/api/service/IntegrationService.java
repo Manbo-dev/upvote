@@ -9,6 +9,7 @@ import com.upvote.api.repository.ExternalIssueRepository;
 import com.upvote.api.repository.FeedbackGroupRepository;
 import com.upvote.api.repository.FeedbackRepository;
 import com.upvote.api.repository.IntegrationRepository;
+import com.upvote.api.repository.SubscriptionRepository;
 import com.upvote.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class IntegrationService {
     private final FeedbackGroupRepository feedbackGroupRepository;
     private final FeedbackRepository feedbackRepository;
     private final UserRepository userRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final JiraIntegrationService jiraService;
     private final ClickUpIntegrationService clickUpService;
 
@@ -68,9 +70,25 @@ public class IntegrationService {
                 ));
     }
 
+    // ── Plan enforcement ────────────────────────────────────────────────────
+
+    /**
+     * Ensures the user's plan allows integrations (STARTER+).
+     * FREE plan users cannot connect or use Jira/ClickUp integrations.
+     */
+    private void requireIntegrationAccess(UUID userId) {
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalStateException("Assinatura não encontrada"));
+        if (!subscription.getPlano().isIntegrationsEnabled()) {
+            throw new BusinessException(
+                    "Integrations with Jira and ClickUp require STARTER plan or above. Upgrade to access this feature.");
+        }
+    }
+
     // ── OAuth: Jira ─────────────────────────────────────────────────────────
 
     public String getJiraAuthorizationUrl(UUID userId) {
+        requireIntegrationAccess(userId);
         return jiraService.buildAuthorizationUrl(userId.toString());
     }
 
@@ -112,6 +130,7 @@ public class IntegrationService {
     // ── OAuth: ClickUp ──────────────────────────────────────────────────────
 
     public String getClickUpAuthorizationUrl(UUID userId) {
+        requireIntegrationAccess(userId);
         return clickUpService.buildAuthorizationUrl(userId.toString());
     }
 
@@ -192,6 +211,7 @@ public class IntegrationService {
     public ExternalIssueResponse pushToExternal(UUID userId, UUID feedbackGroupId,
                                                  UUID integrationId, String projectKey,
                                                  String issueType, String listId) {
+        requireIntegrationAccess(userId);
         Integration integration = getIntegrationForUser(userId, integrationId);
 
         FeedbackGroup group = feedbackGroupRepository.findById(feedbackGroupId)

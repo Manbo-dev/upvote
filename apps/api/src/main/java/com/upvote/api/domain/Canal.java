@@ -42,6 +42,16 @@ public class Canal {
     @Builder.Default
     private String widgetColor = "#6366f1";
 
+    @Column(name = "widget_position", length = 20)
+    @Builder.Default
+    private String widgetPosition = "BOTTOM_RIGHT";
+
+    @Column(name = "widget_title", length = 100)
+    private String widgetTitle;
+
+    @Column(name = "widget_placeholder", length = 200)
+    private String widgetPlaceholder;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

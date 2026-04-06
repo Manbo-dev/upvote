@@ -1,32 +1,74 @@
 # TODOs do Projeto
 
-## Infraestrutura
 
-### [ ] Configurar HTTPS no GKE (alta prioridade antes de ir a produção)
 
-Atualmente o backend está exposto via HTTP puro (http://34.140.194.229).
-O frontend na Vercel usa um proxy reverso como solução temporária.
+### [ ] Enforce limite de sugestões na submissão do widget
 
-**O que precisa ser feito:**
+Hoje o limite de sugestões/mês é **rastreado** mas **nunca bloqueia** a submissão. O campo `sugestoesUsadasMes` é calculado e retornado no `/api/subscriptions` mas o endpoint `POST /api/widget/feedback` nunca verifica o limite.
 
-1. Reservar IP estático global no GCP:
-   ```bash
-   gcloud compute addresses create upvote-api-ip --global \
-     --project=project-38c32df4-c37c-41d9-b5d
-   ```
+**O que fazer:**
 
-2. Apontar DNS: `api.upvote.com` → IP estático reservado (registro A)
+Em `FeedbackService.java` (método que processa a submissão do widget, provavelmente `receiveFeedback` ou similar), após buscar o canal pelo API key:
+1. Buscar a subscription do dono do canal
+2. Calcular as sugestões usadas no mês atual (mesma query que já existe no `StripeService.obterAssinatura()`)
+3. Se `sugestoesUsadas >= plano.getLimiteSugestoesMes()`, retornar erro 429 (ou 422 com mensagem clara)
 
-3. Criar `infra/k8s/managed-certificate.yaml` com ManagedCertificate do GKE
-   para `api.upvote.com`
+**Nota:** `Integer.MAX_VALUE` como limite significa ilimitado — a comparação `x >= Integer.MAX_VALUE` nunca será true para valores reais, não precisa de tratamento especial.
 
-4. Substituir o `ingress.yaml` atual (usa nginx, não instalado no Autopilot)
-   por ingress nativo GKE (`ingressClassName: gce`) com a ManagedCertificate
+---
 
-5. Mudar `api-service` de `type: LoadBalancer` para `type: NodePort`
-   (GKE Ingress L7 exige NodePort ou NEG)
+### [ ] Roadmap Público (/b/:slug) — STARTER+
 
-6. Atualizar `VITE_API_URL` na Vercel para `https://api.upvote.com`
-   e remover o proxy do `vercel.json`
+Parceiros no plano STARTER+ podem compartilhar uma URL pública com seus usuários onde eles veem os feedback groups agrupados por status (tipo roadmap). Usuários finais veem sem criar conta.
 
-**Referência:** https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs
+**Backend:**
+
+1. Adicionar campo `publicBoardEnabled BOOLEAN DEFAULT FALSE` à tabela `canais` (nova migration)
+2. Adicionar campo `publicBoardEnabled` na entidade `Canal.java`
+3. Endpoint público (sem JWT): `GET /api/public/canais/{slug}/board`
+   - Verificar que `canal.publicBoardEnabled == true` — se false, retornar 404 (não revelar existência)
+   - Verificar que o plano do dono é STARTER+ — se não, retornar 404
+   - Retornar grupos com: id, título, resumo, status, categoria, votoCount (sem dados PII)
+4. Endpoint autenticado: `PATCH /api/canais/{id}/public-board` para ativar/desativar
+   - Verificar plano STARTER+ antes de permitir ativação
+
+**Frontend:**
+
+1. Nova página `apps/web/src/pages/PublicBoardPage.tsx`
+   - Rota `/b/:slug` em `App.tsx` (pública, sem ProtectedRoute)
+   - Exibe grupos agrupados por status em lista (sem kanban drag-and-drop)
+   - Sem ações de gestão — apenas leitura
+   - Header com nome do canal, sem branding do dashboard
+2. Na aba "Configurações" do canal (criada no passo 17), adicionar toggle para ativar board público
+   - Mostra link compartilhável quando ativo: `app.upvote.pro/b/{slug}`
+   - Bloqueado com upgrade CTA para usuários FREE
+
+---
+
+### [ ] Atualizar Landing Page e Billing Page com nova estrutura de planos
+
+Após implementar os planos corretamente no backend, atualizar o frontend de marketing e gerenciamento.
+
+**`apps/web/src/pages/LandingPage.tsx`** — seção `#precos`:
+- Atualizar cards dos planos com os benefícios reais implementados
+- FREE: 1 canal, 20 sugestões/mês, widget básico
+- STARTER: 3 canais, 500 sugestões/mês, widget, integrações, roadmap público
+- PRO: 20 canais, ilimitado, personalização do widget, membros de equipe
+- BUSINESS: ilimitado, white-label, suporte dedicado
+
+**`apps/web/src/pages/BillingPage.tsx`** — cards de plano:
+- Atualizar feature lists para refletir o que realmente está implementado
+- Garantir que os botões de upgrade/downgrade funcionam corretamente com BUSINESS
+
+**i18n:** Atualizar `landing.pricing.*` em `pt-BR.json` e `en.json`.
+
+
+Membros de equipe (múltiplos usuários por org) — feature grande, requer novo modelo de auth
+Roadmap público /b/:slug — nova página pública
+Widget sidebar/inline embed modes — tipos diferentes de widget
+White-label widget (remover "Powered by Upvote") — BUSINESS only
+IA avançada (prioridade automática, detecção de tendências, resumo executivo)
+Enforce limite de sugestões na submissão (atualmente só rastreado)
+Gate export PDF por plano
+Atualizar landing page / billing page com novos planos
+Stripe BUSINESS price ID e checkout

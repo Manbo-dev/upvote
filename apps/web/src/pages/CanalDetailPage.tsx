@@ -24,12 +24,18 @@ import {
   type FeedbackGroupResponse,
   type FeedbackGroupStatus,
 } from '../services/feedbackGroups';
-import { LayoutGrid, Heart } from 'lucide-react';
+import { LayoutGrid, Heart, Settings, Lock } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Button } from '../components/ui/button';
 import FeedbackGroupCard from '../components/FeedbackGroupCard';
 import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
 import KanbanColumn from '../components/KanbanColumn';
 import PraiseGrid from '../components/PraiseGrid';
+import { getCanais, updateWidgetSettings } from '../services/canais';
+import { getSubscription } from '../services/subscriptions';
 
 const CATEGORY_FILTERS: {
   value: FeedbackCategory | 'ALL';
@@ -187,7 +193,14 @@ export default function CanalDetailPage() {
   const { t } = useTranslation();
   const { canalId: slug } = useParams<{ canalId: string }>();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'board' | 'praise'>('board');
+  const [activeTab, setActiveTab] = useState<'board' | 'praise' | 'settings'>('board');
+
+  // Widget settings state (for the settings tab)
+  const [widgetColor, setWidgetColor] = useState('#6366f1');
+  const [widgetPosition, setWidgetPosition] = useState('BOTTOM_RIGHT');
+  const [widgetTitle, setWidgetTitle] = useState('');
+  const [widgetPlaceholder, setWidgetPlaceholder] = useState('');
+  const [widgetSaveSuccess, setWidgetSaveSuccess] = useState(false);
   const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [draggingGroup, setDraggingGroup] = useState<FeedbackGroupResponse | null>(null);
@@ -242,6 +255,44 @@ export default function CanalDetailPage() {
     queryKey: ['feedback-groups', slug],
     queryFn: () => getFeedbackGroups(slug!),
     enabled: !!slug,
+  });
+
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: getSubscription,
+  });
+
+  const { data: canais } = useQuery({
+    queryKey: ['canais'],
+    queryFn: getCanais,
+  });
+
+  const canal = canais?.find((c) => c.slug === slug);
+  const canCustomizeWidget = subscription?.widgetCustomizationEnabled ?? false;
+
+  // Sync widget settings form when canal data loads
+  useEffect(() => {
+    if (canal) {
+      setWidgetColor(canal.widgetColor);
+      setWidgetPosition(canal.widgetPosition ?? 'BOTTOM_RIGHT');
+      setWidgetTitle(canal.widgetTitle ?? '');
+      setWidgetPlaceholder(canal.widgetPlaceholder ?? '');
+    }
+  }, [canal]);
+
+  const widgetMutation = useMutation({
+    mutationFn: () =>
+      updateWidgetSettings(canal!.id, {
+        color: widgetColor,
+        position: widgetPosition,
+        title: widgetTitle || null,
+        placeholder: widgetPlaceholder || null,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['canais'] });
+      setWidgetSaveSuccess(true);
+      setTimeout(() => setWidgetSaveSuccess(false), 3000);
+    },
   });
 
   const statusMutation = useMutation({
@@ -715,7 +766,7 @@ export default function CanalDetailPage() {
           </p>
         </div>
       ) : (
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'board' | 'praise')}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'board' | 'praise' | 'settings')}>
           <TabsList className="mb-4">
             <TabsTrigger value="board" className="gap-1.5">
               <LayoutGrid className="h-4 w-4" />
@@ -730,6 +781,10 @@ export default function CanalDetailPage() {
               <span className="ml-1 rounded-full bg-green-100 px-1.5 py-0.5 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-400">
                 {praiseGroups.length}
               </span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-1.5">
+              <Settings className="h-4 w-4" />
+              {t('canal.tabs.settings')}
             </TabsTrigger>
           </TabsList>
 
@@ -826,6 +881,103 @@ export default function CanalDetailPage() {
               onCardClick={(g) => setSelectedGroupId(g.id)}
               onArchive={(id) => archiveMutation.mutate(id)}
             />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="max-w-lg">
+              {!canCustomizeWidget ? (
+                <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warm-100 dark:bg-warm-800">
+                    <Lock className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">
+                      {t('canal.widget.upgradeRequired')}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {t('canal.widget.upgradeDescription')}
+                    </p>
+                  </div>
+                  <Link
+                    to="/dashboard/billing"
+                    className="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+                  >
+                    {t('canal.widget.upgradeLink')}
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-5 rounded-xl border border-border bg-card p-6">
+                  <h2 className="text-lg font-semibold text-foreground">
+                    {t('canal.widget.title')}
+                  </h2>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="widget-color">{t('canal.widget.color')}</Label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        id="widget-color"
+                        type="color"
+                        value={widgetColor}
+                        onChange={(e) => setWidgetColor(e.target.value)}
+                        className="h-9 w-16 cursor-pointer rounded-md border border-input bg-card p-0.5"
+                      />
+                      <span className="font-mono text-sm text-muted-foreground">{widgetColor}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="widget-position">{t('canal.widget.position')}</Label>
+                    <Select value={widgetPosition} onValueChange={setWidgetPosition}>
+                      <SelectTrigger id="widget-position">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BOTTOM_RIGHT">{t('canal.widget.positions.BOTTOM_RIGHT')}</SelectItem>
+                        <SelectItem value="BOTTOM_LEFT">{t('canal.widget.positions.BOTTOM_LEFT')}</SelectItem>
+                        <SelectItem value="TOP_RIGHT">{t('canal.widget.positions.TOP_RIGHT')}</SelectItem>
+                        <SelectItem value="TOP_LEFT">{t('canal.widget.positions.TOP_LEFT')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="widget-custom-title">{t('canal.widget.customTitle')}</Label>
+                    <Input
+                      id="widget-custom-title"
+                      value={widgetTitle}
+                      onChange={(e) => setWidgetTitle(e.target.value)}
+                      placeholder={t('canal.widget.customTitlePlaceholder')}
+                      maxLength={100}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="widget-placeholder">{t('canal.widget.placeholder')}</Label>
+                    <Input
+                      id="widget-placeholder"
+                      value={widgetPlaceholder}
+                      onChange={(e) => setWidgetPlaceholder(e.target.value)}
+                      placeholder={t('canal.widget.placeholderPlaceholder')}
+                      maxLength={200}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      onClick={() => widgetMutation.mutate()}
+                      disabled={widgetMutation.isPending || !canal}
+                    >
+                      {widgetMutation.isPending ? t('common.loading') : t('canal.widget.save')}
+                    </Button>
+                    {widgetSaveSuccess && (
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                        {t('canal.widget.saveSuccess')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       )}

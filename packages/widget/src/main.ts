@@ -44,6 +44,12 @@ declare global {
 
   const apiKey: string = apiKeyAttr;
 
+  // Mutable config — initialized from script tag attrs, overridden by backend fetch
+  let configColor = color;
+  let configPosition = 'BOTTOM_RIGHT';
+  let configTitle: string | null = null;
+  let configPlaceholder: string | null = null;
+
   // Inicia o rastreamento de interações do usuário na página
   iniciarRastreamento();
 
@@ -94,7 +100,7 @@ declare global {
   header.className = 'upvote-widget-header';
 
   const title = document.createElement('h3');
-  title.textContent = 'Feedback';
+  title.textContent = configTitle || 'Feedback';
   header.appendChild(title);
 
   const closeBtn = document.createElement('button');
@@ -115,6 +121,59 @@ declare global {
 
   // Renderiza o formulário inicial
   renderizarFormulario();
+
+  // Applies a position class to button and panel, overriding the default bottom-right CSS.
+  // BOTTOM_RIGHT is the base CSS default — no class needed for it.
+  function applyPosition(pos: string): void {
+    const posClass = `upvote-pos-${pos.toLowerCase().replace('_', '-')}`;
+    const allPosClasses = [
+      'upvote-pos-bottom-left',
+      'upvote-pos-top-right',
+      'upvote-pos-top-left',
+    ];
+    floatingBtn.classList.remove(...allPosClasses);
+    panel.classList.remove(...allPosClasses);
+    if (pos !== 'BOTTOM_RIGHT') {
+      floatingBtn.classList.add(posClass);
+      panel.classList.add(posClass);
+    }
+  }
+
+  // Fetches widget configuration from the backend and applies it.
+  // Fire-and-forget — does not block initial render. Silently falls back to defaults on error.
+  async function fetchConfig(): Promise<void> {
+    try {
+      const res = await fetch(`${baseUrl}/api/widget/config`, {
+        method: 'GET',
+        headers: { 'X-API-Key': apiKey },
+      });
+      if (!res.ok) return;
+      const body = await res.json();
+      const cfg = body?.data;
+      if (!cfg) return;
+
+      if (cfg.color && cfg.color !== configColor) {
+        configColor = cfg.color;
+        styleEl.textContent = getStyles(configColor);
+      }
+      if (cfg.position) {
+        configPosition = cfg.position;
+        applyPosition(configPosition);
+      }
+      if (cfg.title) {
+        configTitle = cfg.title;
+        title.textContent = configTitle;
+      }
+      if (cfg.placeholder) {
+        configPlaceholder = cfg.placeholder;
+      }
+    } catch {
+      // Network error or invalid response — silently use defaults
+    }
+  }
+
+  // Load backend config asynchronously after initial render
+  fetchConfig();
 
   // --- Funções de abertura/fechamento ---
 
@@ -166,7 +225,7 @@ declare global {
 
     const textarea = document.createElement('textarea');
     textarea.className = 'upvote-widget-textarea';
-    textarea.placeholder = 'Descreva seu feedback, bug ou sugestão...';
+    textarea.placeholder = configPlaceholder || 'Descreva seu feedback, bug ou sugestão...';
     textarea.setAttribute('rows', '4');
 
     const errorMsg = document.createElement('p');

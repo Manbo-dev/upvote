@@ -10,6 +10,8 @@ public record SubscriptionResponse(
         long canaisAtivos,
         int limiteSugestoesMes,
         long sugestoesUsadasMes,
-        boolean widgetHabilitado
+        boolean widgetHabilitado,
+        boolean widgetCustomizationEnabled,
+        boolean integrationsEnabled
 ) {
 }

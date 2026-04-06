@@ -62,8 +62,8 @@ public class StripeService {
      * Cria uma sessão de checkout do Stripe para o plano desejado
      */
     public CheckoutSessionResponse criarCheckoutSession(UUID userId, Plano planoDesejado, String userEmail) {
-        if (planoDesejado != Plano.STARTER && planoDesejado != Plano.PRO) {
-            throw new BusinessException("Apenas os planos STARTER e PRO podem ser assinados via checkout");
+        if (planoDesejado != Plano.STARTER && planoDesejado != Plano.PRO && planoDesejado != Plano.BUSINESS) {
+            throw new BusinessException("Apenas os planos STARTER, PRO e BUSINESS podem ser assinados via checkout");
         }
         log.info("[STRIPE] Validação ok: userId={}, plano={}", userId, planoDesejado);
 
@@ -185,7 +185,9 @@ public class StripeService {
                 canaisAtivos,
                 plano.getLimiteSugestoesMes(),
                 sugestoesUsadasMes,
-                plano.isWidgetHabilitado()
+                plano.isWidgetHabilitado(),
+                plano.isWidgetCustomizationEnabled(),
+                plano.isIntegrationsEnabled()
         );
     }
 

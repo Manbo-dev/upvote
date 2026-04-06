@@ -1,6 +1,7 @@
 package com.upvote.api.controller;
 
 import com.upvote.api.dto.*;
+import com.upvote.api.service.CanalService;
 import com.upvote.api.service.FeedbackService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,18 @@ import java.util.Map;
 public class FeedbackController {
 
     private final FeedbackService feedbackService;
+    private final CanalService canalService;
+
+    /**
+     * Returns widget configuration for a channel (public endpoint, no auth).
+     * Called by the widget script on initialization to apply dashboard-configured settings.
+     */
+    @GetMapping("/api/widget/config")
+    public ResponseEntity<ApiResponse<WidgetConfigResponse>> getWidgetConfig(
+            @RequestHeader("X-API-Key") String apiKey) {
+        WidgetConfigResponse config = canalService.getWidgetConfig(apiKey);
+        return ResponseEntity.ok(ApiResponse.ok(config));
+    }
 
     /**
      * Receives a feedback submission from the widget (public endpoint, no auth).

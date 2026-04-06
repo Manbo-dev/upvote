@@ -200,10 +200,10 @@ npm install && npm run dev
 - **Documentação obrigatória**: toda alteração que mude a estrutura do projeto (novas seções de infra, novos módulos, mudança de stack, novo serviço, nova integração, mudança de formato de dados/logs) **deve** ser documentada no `CLAUDE.md` correspondente (raiz ou por app) no mesmo commit ou PR. Código sem documentação de mudança estrutural não deve ser mergeado
 
 ## Modelo de negócio
-- Plano Free: 1 canal, 50 sugestões, sem widget
-- Plano Starter R$49/mês: 3 canais, widget básico
-- Plano Pro R$129/mês: 10 canais, changelog, roadmap público
-- Plano Business R$299/mês: ilimitado, SSO, API, white-label
+- Plano Free: 1 canal, 20 sugestões/mês, widget básico (sem customização), sem integrações
+- Plano Starter R$49/mês: 3 canais, 500 sugestões/mês, widget básico, integrações Jira/ClickUp
+- Plano Pro R$129/mês: 20 canais, ilimitado, widget customizável (cor/posição/título/placeholder), integrações
+- Plano Business R$299/mês: ilimitado, tudo do PRO + white-label widget
 
 ## Assinaturas e Pagamentos (Stripe)
 
@@ -214,17 +214,17 @@ Plano Business é tratado pelo time comercial — não passa pelo checkout.
 
 ### Planos implementados
 
-| Plano      | Canais | Sugestões/mês     | Widget | Preço        |
-|------------|--------|--------------------|--------|--------------|
-| FREE       | 1      | 50                 | Não    | Grátis       |
-| STARTER    | 3      | Ilimitado          | Sim    | R$49/mês     |
-| PRO        | 10     | Ilimitado          | Sim    | R$129/mês    |
-| BUSINESS   | Ilimitado | Ilimitado       | Sim    | Sob consulta |
+| Plano    | Canais    | Sugestões/mês | Widget customizável | Integrações Jira/ClickUp | Preço        |
+|----------|-----------|---------------|---------------------|--------------------------|--------------|
+| FREE     | 1         | 20            | Não                 | Não                      | Grátis       |
+| STARTER  | 3         | 500           | Não                 | Sim                      | R$49/mês     |
+| PRO      | 20        | Ilimitado     | Sim                 | Sim                      | R$129/mês    |
+| BUSINESS | Ilimitado | Ilimitado     | Sim                 | Sim                      | Sob consulta |
 
 ### Arquitetura backend
 
 - **Entidade `Subscription`** — relação 1:1 com `Organization`, armazena `stripeCustomerId`, `stripeSubscriptionId`, `stripeStatus`, `plano` e `currentPeriodEnd`
-- **Enum `Plano`** — define limites de cada plano (canais, sugestões/mês, widget habilitado)
+- **Enum `Plano`** — define limites de cada plano: `limiteCanais`, `limiteSugestoesMes`, `widgetHabilitado`, `widgetCustomizationEnabled`, `integrationsEnabled`
 - **Enum `StripeStatus`** — ACTIVE, PAST_DUE, CANCELED, INCOMPLETE
 - **`StripeConfig`** — inicializa a API key do Stripe via `@PostConstruct`
 - **`StripeService`** — lógica core: criação de checkout session, portal session e processamento de webhooks
@@ -251,12 +251,34 @@ Plano Business é tratado pelo time comercial — não passa pelo checkout.
 
 ### Enforcement de limites
 - **Canais**: `CanalService.createCanal()` verifica `countByOrganizationId()` vs limite do plano
-- **Sugestões**: `SuggestionService.createSuggestion()` conta sugestões do mês atual vs limite (FREE = 50/mês)
+- **Sugestões**: rastreado no `GET /api/subscriptions` (campo `sugestoesUsadasMes`); bloqueio na submissão do widget ainda não implementado
+- **Widget customization**: `CanalService.updateWidgetSettings()` verifica `plano.isWidgetCustomizationEnabled()` → 422 se false
+- **Integrações**: `IntegrationService.requireIntegrationAccess()` verifica `plano.isIntegrationsEnabled()` — chamado em `getJiraAuthorizationUrl`, `getClickUpAuthorizationUrl` e `pushToExternal`; **não** em `getIntegrations` nem `disconnect` (downgrade não remove acesso às integrações já conectadas)
 - Toda Organization recebe automaticamente uma `Subscription` FREE no registro
+
+### Widget customization (PRO+)
+
+Parceiros no plano PRO ou BUSINESS podem personalizar o widget diretamente no dashboard.
+
+**Backend:**
+- `PATCH /api/canais/{id}/widget` (JWT) — salva cor, posição, título e placeholder; verifica plano
+- `GET /api/widget/config` (público, `X-API-Key` header) — retorna `WidgetConfigResponse`; sem check de plano (leitura é pública para todos os widgets)
+- Novos campos na tabela `canais`: `widget_position VARCHAR(20) DEFAULT 'BOTTOM_RIGHT'`, `widget_title VARCHAR(100)`, `widget_placeholder VARCHAR(200)` (migration `V20260406120000`)
+- `SubscriptionResponse` expõe `widgetCustomizationEnabled` e `integrationsEnabled`
+
+**Widget (`packages/widget/src/main.ts`):**
+- Após render inicial (síncrono, com fallbacks dos atributos do script tag), dispara `fetchConfig()` fire-and-forget
+- Aplica cor, posição (via classes CSS `upvote-pos-{bottom-right|bottom-left|top-right|top-left}`), título e placeholder do backend
+- Posições disponíveis: `BOTTOM_RIGHT` (padrão), `BOTTOM_LEFT`, `TOP_RIGHT`, `TOP_LEFT`
+
+**Frontend:**
+- Aba "Configurações" em `CanalDetailPage.tsx` — formulário com color picker, Select de posição, Input de título e placeholder
+- Estado bloqueado para FREE/STARTER: card com Lock icon e CTA para `/dashboard/billing`
 
 ### Frontend
 - **`BillingPage.tsx`** — página de gerenciamento de assinatura com cards de planos, métricas de uso e botões de upgrade/gerenciar
 - **`subscriptions.ts`** — service layer com `getSubscription()`, `createCheckoutSession()`, `createPortalSession()`
+- **`IntegrationsSettings.tsx`** — banner de upgrade para FREE (`integrationsEnabled = false`), botões Connect desabilitados
 
 ### Variáveis de ambiente necessárias (Stripe)
 ```

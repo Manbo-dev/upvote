@@ -179,7 +179,28 @@
     },
     "tabs": {
       "board": "Board",
-      "praise": "Elogios"
+      "praise": "Elogios",
+      "settings": "Configurações"
+    },
+    "widget": {
+      "title": "Configurações do Widget",
+      "color": "Cor principal",
+      "position": "Posição",
+      "positions": {
+        "BOTTOM_RIGHT": "Inferior direito",
+        "BOTTOM_LEFT": "Inferior esquerdo",
+        "TOP_RIGHT": "Superior direito",
+        "TOP_LEFT": "Superior esquerdo"
+      },
+      "customTitle": "Título personalizado",
+      "customTitlePlaceholder": "Ex: Envie seu feedback",
+      "placeholder": "Placeholder do campo de texto",
+      "placeholderPlaceholder": "Ex: Descreva seu problema ou sugestão...",
+      "save": "Salvar configurações",
+      "saveSuccess": "Salvo com sucesso!",
+      "upgradeRequired": "Disponível no plano PRO",
+      "upgradeDescription": "Personalize a cor, posição, título e placeholder do widget no seu plano PRO ou superior.",
+      "upgradeLink": "Fazer upgrade de plano"
     },
     "praise": {
       "subtitle": "Feedbacks positivos recebidos",
@@ -298,6 +319,11 @@
     "notConnected": "Não conectado",
     "connecting": "Conectando...",
     "callbackError": "Falha ao completar a integração. Tente novamente.",
+    "planGating": {
+      "title": "Integrações disponíveis no plano STARTER ou superior",
+      "description": "Conecte o Jira e o ClickUp para enviar grupos de feedback como issues ou tarefas.",
+      "upgradeLink": "Fazer upgrade de plano"
+    },
     "push": {
       "title": "Enviar para ferramenta externa",
       "pushButton": "Enviar",
