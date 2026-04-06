@@ -12,9 +12,11 @@ import com.upvote.api.dto.FeedbackSubmitRequest;
 import com.upvote.api.dto.FeedbackSubmitResponse;
 import com.upvote.api.messaging.FeedbackProducer;
 import com.upvote.api.messaging.FeedbackProcessingMessage;
+import com.upvote.api.exception.BusinessException;
 import com.upvote.api.repository.CanalRepository;
 import com.upvote.api.repository.FeedbackGroupRepository;
 import com.upvote.api.repository.FeedbackRepository;
+import com.upvote.api.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +55,7 @@ public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final FeedbackGroupRepository feedbackGroupRepository;
     private final CanalRepository canalRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final AiService aiService;
     private final FeedbackProducer feedbackProducer;
     private final IntegrationService integrationService;
@@ -72,6 +77,21 @@ public class FeedbackService {
     public FeedbackSubmitResponse receiveFeedback(String apiKey, FeedbackSubmitRequest request) {
         Canal canal = canalRepository.findByApiKey(apiKey)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid API key"));
+
+        UUID ownerId = canal.getUser().getId();
+        Subscription subscription = subscriptionRepository.findByUserId(ownerId)
+                .orElseThrow(() -> new IllegalStateException("Subscription not found for canal owner: " + ownerId));
+
+        LocalDateTime startOfMonth = LocalDateTime.now()
+                .with(TemporalAdjusters.firstDayOfMonth())
+                .withHour(0).withMinute(0).withSecond(0).withNano(0);
+        long used = feedbackRepository.countByUserIdAndCreatedAtAfter(ownerId, startOfMonth);
+
+        if (used >= subscription.getPlano().getLimiteSugestoesMes()) {
+            log.warn("Monthly feedback limit reached: canal={}, plan={}, used={}, limit={}",
+                    canal.getSlug(), subscription.getPlano(), used, subscription.getPlano().getLimiteSugestoesMes());
+            throw new BusinessException("Monthly feedback limit reached for this channel");
+        }
 
         Feedback feedback = Feedback.builder()
                 .canal(canal)

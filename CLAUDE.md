@@ -251,7 +251,7 @@ Plano Business é tratado pelo time comercial — não passa pelo checkout.
 
 ### Enforcement de limites
 - **Canais**: `CanalService.createCanal()` verifica `countByOrganizationId()` vs limite do plano
-- **Sugestões**: rastreado no `GET /api/subscriptions` (campo `sugestoesUsadasMes`); bloqueio na submissão do widget ainda não implementado
+- **Sugestões**: rastreado no `GET /api/subscriptions` (campo `sugestoesUsadasMes`); bloqueio implementado em `FeedbackService.receiveFeedback()` — retorna 422 quando `sugestoesUsadas >= plano.getLimiteSugestoesMes()`
 - **Widget customization**: `CanalService.updateWidgetSettings()` verifica `plano.isWidgetCustomizationEnabled()` → 422 se false
 - **Integrações**: `IntegrationService.requireIntegrationAccess()` verifica `plano.isIntegrationsEnabled()` — chamado em `getJiraAuthorizationUrl`, `getClickUpAuthorizationUrl` e `pushToExternal`; **não** em `getIntegrations` nem `disconnect` (downgrade não remove acesso às integrações já conectadas)
 - Toda Organization recebe automaticamente uma `Subscription` FREE no registro

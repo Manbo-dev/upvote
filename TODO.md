@@ -2,21 +2,6 @@
 
 
 
-### [ ] Enforce limite de sugestões na submissão do widget
-
-Hoje o limite de sugestões/mês é **rastreado** mas **nunca bloqueia** a submissão. O campo `sugestoesUsadasMes` é calculado e retornado no `/api/subscriptions` mas o endpoint `POST /api/widget/feedback` nunca verifica o limite.
-
-**O que fazer:**
-
-Em `FeedbackService.java` (método que processa a submissão do widget, provavelmente `receiveFeedback` ou similar), após buscar o canal pelo API key:
-1. Buscar a subscription do dono do canal
-2. Calcular as sugestões usadas no mês atual (mesma query que já existe no `StripeService.obterAssinatura()`)
-3. Se `sugestoesUsadas >= plano.getLimiteSugestoesMes()`, retornar erro 429 (ou 422 com mensagem clara)
-
-**Nota:** `Integer.MAX_VALUE` como limite significa ilimitado — a comparação `x >= Integer.MAX_VALUE` nunca será true para valores reais, não precisa de tratamento especial.
-
----
-
 ### [ ] Roadmap Público (/b/:slug) — STARTER+
 
 Parceiros no plano STARTER+ podem compartilhar uma URL pública com seus usuários onde eles veem os feedback groups agrupados por status (tipo roadmap). Usuários finais veem sem criar conta.
