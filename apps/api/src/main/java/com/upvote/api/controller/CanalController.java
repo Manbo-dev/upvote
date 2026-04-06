@@ -5,6 +5,8 @@ import com.upvote.api.dto.CanalRequest;
 import com.upvote.api.dto.CanalResponse;
 import com.upvote.api.dto.RenameCanelRequest;
 import com.upvote.api.dto.WidgetSettingsRequest;
+
+import java.util.Map;
 import com.upvote.api.repository.UserRepository;
 import com.upvote.api.service.CanalService;
 import jakarta.validation.Valid;
@@ -91,6 +93,22 @@ public class CanalController {
                 .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
         CanalResponse canal = canalService.updateWidgetSettings(id, request, user.getId());
         return ResponseEntity.ok(ApiResponse.ok(canal, "Widget settings updated successfully"));
+    }
+
+    /**
+     * Enables or disables the public board for a channel (STARTER+ only).
+     */
+    @PatchMapping("/{id}/public-board")
+    public ResponseEntity<ApiResponse<CanalResponse>> togglePublicBoard(
+            @PathVariable UUID id,
+            @RequestBody Map<String, Boolean> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        boolean enabled = Boolean.TRUE.equals(body.get("enabled"));
+        log.info("PATCH /api/canais/{}/public-board: enabled={}, user={}", id, enabled, userDetails.getUsername());
+        var user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
+        CanalResponse canal = canalService.togglePublicBoard(id, enabled, user.getId());
+        return ResponseEntity.ok(ApiResponse.ok(canal, "Public board updated successfully"));
     }
 
     /**

@@ -206,7 +206,22 @@
       "subtitle": "Feedbacks positivos recebidos",
       "emptyTitle": "Nenhum elogio ainda",
       "emptyDescription": "Quando seus usuários enviarem feedback positivo, ele aparecerá aqui."
+    },
+    "publicBoard": {
+      "title": "Roadmap público",
+      "description": "Compartilhe o progresso dos feedbacks com seus usuários",
+      "linkLabel": "Link público",
+      "upgradeRequired": "Disponível no plano STARTER",
+      "upgradeDescription": "Compartilhe um roadmap público com seus usuários no plano STARTER ou superior.",
+      "upgradeLink": "Fazer upgrade de plano"
     }
+  },
+  "publicBoard": {
+    "subtitle": "Acompanhe o progresso dos nossos feedbacks",
+    "notAvailable": "Este roadmap não está disponível",
+    "notAvailableDescription": "O link pode estar incorreto ou o roadmap foi desativado.",
+    "emptyColumn": "Nenhum item",
+    "poweredBy": "Desenvolvido com"
   },
   "archive": {
     "backToBoard": "Voltar ao board",

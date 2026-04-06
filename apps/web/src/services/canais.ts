@@ -9,6 +9,7 @@ export interface CanalResponse {
   widgetPosition: string;
   widgetTitle: string | null;
   widgetPlaceholder: string | null;
+  publicBoardEnabled: boolean;
   createdAt: string;
 }
 
@@ -69,6 +70,14 @@ export async function updateWidgetSettings(
   const { data } = await api.patch<ApiResult<CanalResponse>>(
     `/canais/${id}/widget`,
     request,
+  );
+  return data.data;
+}
+
+export async function togglePublicBoard(id: string, enabled: boolean): Promise<CanalResponse> {
+  const { data } = await api.patch<ApiResult<CanalResponse>>(
+    `/canais/${id}/public-board`,
+    { enabled },
   );
   return data.data;
 }

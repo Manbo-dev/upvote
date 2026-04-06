@@ -187,7 +187,8 @@ public class StripeService {
                 sugestoesUsadasMes,
                 plano.isWidgetHabilitado(),
                 plano.isWidgetCustomizationEnabled(),
-                plano.isIntegrationsEnabled()
+                plano.isIntegrationsEnabled(),
+                plano.isPublicBoardEnabled()
         );
     }
 

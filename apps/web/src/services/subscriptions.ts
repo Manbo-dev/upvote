@@ -11,6 +11,7 @@ export interface SubscriptionInfo {
   widgetHabilitado: boolean;
   widgetCustomizationEnabled: boolean;
   integrationsEnabled: boolean;
+  publicBoardEnabled: boolean;
 }
 
 interface ApiResult<T> {

@@ -12,6 +12,7 @@ public record SubscriptionResponse(
         long sugestoesUsadasMes,
         boolean widgetHabilitado,
         boolean widgetCustomizationEnabled,
-        boolean integrationsEnabled
+        boolean integrationsEnabled,
+        boolean publicBoardEnabled
 ) {
 }

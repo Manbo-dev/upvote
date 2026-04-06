@@ -1,10 +1,14 @@
 package com.upvote.api.service;
 
 import com.upvote.api.domain.Canal;
+import com.upvote.api.domain.FeedbackGroup;
+import com.upvote.api.domain.FeedbackGroupStatus;
 import com.upvote.api.domain.Subscription;
 import com.upvote.api.domain.User;
 import com.upvote.api.dto.CanalRequest;
 import com.upvote.api.dto.CanalResponse;
+import com.upvote.api.dto.PublicBoardGroupResponse;
+import com.upvote.api.dto.PublicBoardResponse;
 import com.upvote.api.dto.RenameCanelRequest;
 import com.upvote.api.dto.WidgetConfigResponse;
 import com.upvote.api.dto.WidgetSettingsRequest;
@@ -159,6 +163,68 @@ public class CanalService {
     }
 
     /**
+     * Enables or disables the public board for a channel. Requires STARTER or higher plan.
+     */
+    @Transactional
+    public CanalResponse togglePublicBoard(UUID canalId, boolean enabled, UUID userId) {
+        Canal canal = canalRepository.findById(canalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Canal não encontrado"));
+
+        if (!canal.getUser().getId().equals(userId)) {
+            throw new SecurityException("Você não tem permissão para editar este canal");
+        }
+
+        if (enabled) {
+            Subscription subscription = subscriptionRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalStateException("Assinatura não encontrada"));
+
+            if (!subscription.getPlano().isPublicBoardEnabled()) {
+                throw new BusinessException(
+                        "Public board requires STARTER or higher plan. Upgrade to share your roadmap.");
+            }
+        }
+
+        canal.setPublicBoardEnabled(enabled);
+        canal = canalRepository.save(canal);
+        return toResponse(canal);
+    }
+
+    /**
+     * Returns the public board data for a channel (no auth required).
+     * Returns 404 if the board is disabled or the plan doesn't support it.
+     */
+    public PublicBoardResponse getPublicBoard(String slug) {
+        Canal canal = canalRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Canal não encontrado"));
+
+        if (!canal.isPublicBoardEnabled()) {
+            throw new ResourceNotFoundException("Public board not available");
+        }
+
+        Subscription subscription = subscriptionRepository.findByUserId(canal.getUser().getId())
+                .orElseThrow(() -> new IllegalStateException("Assinatura não encontrada"));
+
+        if (!subscription.getPlano().isPublicBoardEnabled()) {
+            throw new ResourceNotFoundException("Public board not available");
+        }
+
+        List<FeedbackGroup> groups = feedbackGroupRepository.findByCanalIdAndStatusNotInOrderByVoteCountDesc(
+                canal.getId(), List.of(FeedbackGroupStatus.ARCHIVED, FeedbackGroupStatus.CLOSED));
+
+        List<PublicBoardGroupResponse> groupResponses = groups.stream()
+                .map(g -> new PublicBoardGroupResponse(
+                        g.getId(),
+                        g.getTitle(),
+                        g.getSummary(),
+                        g.getStatus().name(),
+                        g.getCategory().name(),
+                        g.getVoteCount()))
+                .toList();
+
+        return new PublicBoardResponse(canal.getName(), canal.getSlug(), groupResponses);
+    }
+
+    /**
      * Returns widget configuration for a channel by API key (public, no plan check).
      * Called by the widget script on initialization.
      */
@@ -183,6 +249,7 @@ public class CanalService {
                 canal.getWidgetPosition(),
                 canal.getWidgetTitle(),
                 canal.getWidgetPlaceholder(),
+                canal.isPublicBoardEnabled(),
                 canal.getCreatedAt()
         );
     }

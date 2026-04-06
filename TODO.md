@@ -2,34 +2,6 @@
 
 
 
-### [ ] Roadmap Público (/b/:slug) — STARTER+
-
-Parceiros no plano STARTER+ podem compartilhar uma URL pública com seus usuários onde eles veem os feedback groups agrupados por status (tipo roadmap). Usuários finais veem sem criar conta.
-
-**Backend:**
-
-1. Adicionar campo `publicBoardEnabled BOOLEAN DEFAULT FALSE` à tabela `canais` (nova migration)
-2. Adicionar campo `publicBoardEnabled` na entidade `Canal.java`
-3. Endpoint público (sem JWT): `GET /api/public/canais/{slug}/board`
-   - Verificar que `canal.publicBoardEnabled == true` — se false, retornar 404 (não revelar existência)
-   - Verificar que o plano do dono é STARTER+ — se não, retornar 404
-   - Retornar grupos com: id, título, resumo, status, categoria, votoCount (sem dados PII)
-4. Endpoint autenticado: `PATCH /api/canais/{id}/public-board` para ativar/desativar
-   - Verificar plano STARTER+ antes de permitir ativação
-
-**Frontend:**
-
-1. Nova página `apps/web/src/pages/PublicBoardPage.tsx`
-   - Rota `/b/:slug` em `App.tsx` (pública, sem ProtectedRoute)
-   - Exibe grupos agrupados por status em lista (sem kanban drag-and-drop)
-   - Sem ações de gestão — apenas leitura
-   - Header com nome do canal, sem branding do dashboard
-2. Na aba "Configurações" do canal (criada no passo 17), adicionar toggle para ativar board público
-   - Mostra link compartilhável quando ativo: `app.upvote.pro/b/{slug}`
-   - Bloqueado com upgrade CTA para usuários FREE
-
----
-
 ### [ ] Atualizar Landing Page e Billing Page com nova estrutura de planos
 
 Após implementar os planos corretamente no backend, atualizar o frontend de marketing e gerenciamento.

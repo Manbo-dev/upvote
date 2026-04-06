@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/integrations/jira/callback").permitAll()
                         .requestMatchers("/api/integrations/clickup/callback").permitAll()
                         .requestMatchers("/api/webhooks/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

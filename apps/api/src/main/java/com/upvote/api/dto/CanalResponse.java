@@ -12,6 +12,7 @@ public record CanalResponse(
         String widgetPosition,
         String widgetTitle,
         String widgetPlaceholder,
+        boolean publicBoardEnabled,
         LocalDateTime createdAt
 ) {
 }

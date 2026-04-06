@@ -206,7 +206,22 @@
       "subtitle": "Positive feedback received",
       "emptyTitle": "No praise yet",
       "emptyDescription": "When your users send positive feedback, it will appear here."
+    },
+    "publicBoard": {
+      "title": "Public roadmap",
+      "description": "Share feedback progress with your users",
+      "linkLabel": "Public link",
+      "upgradeRequired": "Available on STARTER plan",
+      "upgradeDescription": "Share a public roadmap with your users on the STARTER plan or above.",
+      "upgradeLink": "Upgrade plan"
     }
+  },
+  "publicBoard": {
+    "subtitle": "Track the progress of our feedback",
+    "notAvailable": "This roadmap is not available",
+    "notAvailableDescription": "The link may be incorrect or the roadmap has been disabled.",
+    "emptyColumn": "No items",
+    "poweredBy": "Powered by"
   },
   "archive": {
     "backToBoard": "Back to board",

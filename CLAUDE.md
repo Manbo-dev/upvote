@@ -254,7 +254,26 @@ Plano Business é tratado pelo time comercial — não passa pelo checkout.
 - **Sugestões**: rastreado no `GET /api/subscriptions` (campo `sugestoesUsadasMes`); bloqueio implementado em `FeedbackService.receiveFeedback()` — retorna 422 quando `sugestoesUsadas >= plano.getLimiteSugestoesMes()`
 - **Widget customization**: `CanalService.updateWidgetSettings()` verifica `plano.isWidgetCustomizationEnabled()` → 422 se false
 - **Integrações**: `IntegrationService.requireIntegrationAccess()` verifica `plano.isIntegrationsEnabled()` — chamado em `getJiraAuthorizationUrl`, `getClickUpAuthorizationUrl` e `pushToExternal`; **não** em `getIntegrations` nem `disconnect` (downgrade não remove acesso às integrações já conectadas)
+- **Roadmap público**: `CanalService.togglePublicBoard()` verifica `plano.isPublicBoardEnabled()` → 422 se FREE; `getPublicBoard()` retorna 404 se board desativado ou plano inválido
 - Toda Organization recebe automaticamente uma `Subscription` FREE no registro
+
+### Roadmap Público (/b/:slug) — STARTER+
+
+Parceiros no plano STARTER+ podem ativar um board público com o status dos feedback groups para compartilhar com seus usuários.
+
+**Plano**: `Plano.publicBoardEnabled` — FREE=false, STARTER/PRO/BUSINESS=true
+
+**Backend:**
+- `GET /api/public/canais/{slug}/board` — público (sem JWT); retorna 404 se `publicBoardEnabled=false` ou plano FREE; retorna `PublicBoardResponse` (canalName, slug, grupos sem PII)
+- `PATCH /api/canais/{id}/public-board` — autenticado; body `{ enabled: boolean }`; retorna 422 se FREE
+- `CanalService.togglePublicBoard()` / `CanalService.getPublicBoard()`
+- `/api/public/**` liberado no `SecurityConfig`
+- Migration: `V20260406140000__add_public_board_to_canais.sql`
+
+**Frontend:**
+- Página pública: `apps/web/src/pages/PublicBoardPage.tsx` — rota `/b/:slug` (sem ProtectedRoute)
+- Toggle na aba "Configurações" do canal: bloqueado para FREE, Switch + link copiável para STARTER+
+- `canal.publicBoardEnabled` exposto em `CanalResponse`; `subscription.publicBoardEnabled` em `SubscriptionResponse`
 
 ### Widget customization (PRO+)
 

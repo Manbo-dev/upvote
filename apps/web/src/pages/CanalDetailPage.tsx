@@ -24,7 +24,7 @@ import {
   type FeedbackGroupResponse,
   type FeedbackGroupStatus,
 } from '../services/feedbackGroups';
-import { LayoutGrid, Heart, Settings, Lock } from 'lucide-react';
+import { LayoutGrid, Heart, Settings, Lock, Copy, Check } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Input } from '../components/ui/input';
@@ -34,7 +34,8 @@ import FeedbackGroupCard from '../components/FeedbackGroupCard';
 import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
 import KanbanColumn from '../components/KanbanColumn';
 import PraiseGrid from '../components/PraiseGrid';
-import { getCanais, updateWidgetSettings } from '../services/canais';
+import { getCanais, updateWidgetSettings, togglePublicBoard } from '../services/canais';
+import { Switch } from '../components/ui/switch';
 import { getSubscription } from '../services/subscriptions';
 
 const CATEGORY_FILTERS: {
@@ -201,6 +202,7 @@ export default function CanalDetailPage() {
   const [widgetTitle, setWidgetTitle] = useState('');
   const [widgetPlaceholder, setWidgetPlaceholder] = useState('');
   const [widgetSaveSuccess, setWidgetSaveSuccess] = useState(false);
+  const [publicBoardCopied, setPublicBoardCopied] = useState(false);
   const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [draggingGroup, setDraggingGroup] = useState<FeedbackGroupResponse | null>(null);
@@ -269,6 +271,7 @@ export default function CanalDetailPage() {
 
   const canal = canais?.find((c) => c.slug === slug);
   const canCustomizeWidget = subscription?.widgetCustomizationEnabled ?? false;
+  const canUsePublicBoard = subscription?.publicBoardEnabled ?? false;
 
   // Sync widget settings form when canal data loads
   useEffect(() => {
@@ -292,6 +295,13 @@ export default function CanalDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['canais'] });
       setWidgetSaveSuccess(true);
       setTimeout(() => setWidgetSaveSuccess(false), 3000);
+    },
+  });
+
+  const publicBoardMutation = useMutation({
+    mutationFn: (enabled: boolean) => togglePublicBoard(canal!.id, enabled),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['canais'] });
     },
   });
 
@@ -884,7 +894,75 @@ export default function CanalDetailPage() {
           </TabsContent>
 
           <TabsContent value="settings">
-            <div className="max-w-lg">
+            <div className="max-w-lg space-y-4">
+              {/* Public Board */}
+              {!canUsePublicBoard ? (
+                <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warm-100 dark:bg-warm-800">
+                    <Lock className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">
+                      {t('canal.publicBoard.upgradeRequired')}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {t('canal.publicBoard.upgradeDescription')}
+                    </p>
+                  </div>
+                  <Link
+                    to="/dashboard/billing"
+                    className="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+                  >
+                    {t('canal.publicBoard.upgradeLink')}
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4 rounded-xl border border-border bg-card p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-base font-semibold text-foreground">
+                        {t('canal.publicBoard.title')}
+                      </h2>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {t('canal.publicBoard.description')}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={canal?.publicBoardEnabled ?? false}
+                      onCheckedChange={(checked) => publicBoardMutation.mutate(checked)}
+                      disabled={publicBoardMutation.isPending}
+                    />
+                  </div>
+
+                  {canal?.publicBoardEnabled && (
+                    <div className="space-y-1.5">
+                      <Label>{t('canal.publicBoard.linkLabel')}</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          readOnly
+                          value={`${window.location.origin}/b/${canal.slug}`}
+                          className="font-mono text-sm"
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/b/${canal.slug}`);
+                            setPublicBoardCopied(true);
+                            setTimeout(() => setPublicBoardCopied(false), 2000);
+                          }}
+                        >
+                          {publicBoardCopied
+                            ? <Check className="h-4 w-4 text-green-600" />
+                            : <Copy className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Widget Customization */}
               {!canCustomizeWidget ? (
                 <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warm-100 dark:bg-warm-800">

@@ -52,6 +52,10 @@ public class Canal {
     @Column(name = "widget_placeholder", length = 200)
     private String widgetPlaceholder;
 
+    @Column(name = "public_board_enabled", nullable = false)
+    @Builder.Default
+    private boolean publicBoardEnabled = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
