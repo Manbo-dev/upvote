@@ -226,8 +226,8 @@ export default function BillingPage() {
         </div>
       </div>
 
-      {/* Upgrade cards (if not on PRO) */}
-      {planoAtual !== 'PRO' && (
+      {/* Upgrade cards (if not on PRO or BUSINESS) */}
+      {planoAtual !== 'PRO' && planoAtual !== 'BUSINESS' && (
         <div>
           <h2 className="mb-4 text-lg font-semibold text-foreground">
             {planoAtual === 'FREE' ? t('billing.doUpgrade') : t('billing.upgradeAvailable')}

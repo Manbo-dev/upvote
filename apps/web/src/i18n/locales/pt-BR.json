@@ -250,14 +250,14 @@
     },
     "plans": {
       "starter": {
-        "features": ["3 canais", "Sugestões ilimitadas", "Widget básico"]
+        "features": ["3 canais", "500 sugestões/mês", "Widget básico", "Integrações Jira/ClickUp", "Roadmap público"]
       },
       "pro": {
         "popular": "Popular",
-        "features": ["10 canais", "Sugestões ilimitadas", "IA avançada + Changelog", "Suporte prioritário"]
+        "features": ["20 canais", "Sugestões ilimitadas", "Widget customizável", "Integrações Jira/ClickUp", "Roadmap público"]
       },
       "business": {
-        "description": "Canais ilimitados, SSO, API, white-label e SLA dedicado.",
+        "description": "Tudo do Pro + widget white-label e suporte dedicado.",
         "contact": "Fale conosco"
       }
     },

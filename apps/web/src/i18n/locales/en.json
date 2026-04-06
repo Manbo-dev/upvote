@@ -250,14 +250,14 @@
     },
     "plans": {
       "starter": {
-        "features": ["3 channels", "Unlimited suggestions", "Basic widget"]
+        "features": ["3 channels", "500 suggestions/month", "Basic widget", "Jira/ClickUp integrations", "Public roadmap"]
       },
       "pro": {
         "popular": "Popular",
-        "features": ["10 channels", "Unlimited suggestions", "Advanced AI + Changelog", "Priority support"]
+        "features": ["20 channels", "Unlimited suggestions", "Custom widget", "Jira/ClickUp integrations", "Public roadmap"]
       },
       "business": {
-        "description": "Unlimited channels, SSO, API, white-label and dedicated SLA.",
+        "description": "Everything in Pro + white-label widget and dedicated support.",
         "contact": "Contact us"
       }
     },

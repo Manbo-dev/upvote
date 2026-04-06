@@ -2,22 +2,6 @@
 
 
 
-### [ ] Atualizar Landing Page e Billing Page com nova estrutura de planos
-
-Após implementar os planos corretamente no backend, atualizar o frontend de marketing e gerenciamento.
-
-**`apps/web/src/pages/LandingPage.tsx`** — seção `#precos`:
-- Atualizar cards dos planos com os benefícios reais implementados
-- FREE: 1 canal, 20 sugestões/mês, widget básico
-- STARTER: 3 canais, 500 sugestões/mês, widget, integrações, roadmap público
-- PRO: 20 canais, ilimitado, personalização do widget, membros de equipe
-- BUSINESS: ilimitado, white-label, suporte dedicado
-
-**`apps/web/src/pages/BillingPage.tsx`** — cards de plano:
-- Atualizar feature lists para refletir o que realmente está implementado
-- Garantir que os botões de upgrade/downgrade funcionam corretamente com BUSINESS
-
-
 
 
 Membros de equipe (múltiplos usuários por org) — feature grande, requer novo modelo de auth
