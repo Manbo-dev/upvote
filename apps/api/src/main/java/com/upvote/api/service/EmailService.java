@@ -41,7 +41,7 @@ public class EmailService {
     @Value("${spring.mail.from}")
     private String fromAddress;
 
-    @Value("${app.base-url:https://app.upvote.pro}")
+    @Value("${app.base-url:https://upvote.pro}")
     private String appBaseUrl;
 
     // ── Transactional emails ─────────────────────────────────────────────────
