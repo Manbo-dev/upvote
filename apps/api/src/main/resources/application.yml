@@ -68,6 +68,7 @@ app:
     webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
     starter-price-id: ${STRIPE_STARTER_PRICE_ID:price_placeholder}
     pro-price-id: ${STRIPE_PRO_PRICE_ID:price_placeholder}
+    business-price-id: ${STRIPE_BUSINESS_PRICE_ID:price_placeholder}
   google:
     # Set GOOGLE_CLIENT_ID to validate the aud claim on Google ID tokens.
     client-id: ${GOOGLE_CLIENT_ID:}
