@@ -350,6 +350,29 @@ export function getStyles(color: string): string {
       }
     }
 
+    /* Powered by Upvote branding */
+    .upvote-widget-branding {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 0 2px;
+      gap: 4px;
+    }
+
+    .upvote-widget-branding a {
+      font-size: 10px;
+      color: #94a3b8;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      transition: color 0.15s ease;
+    }
+
+    .upvote-widget-branding a:hover {
+      color: ${color};
+    }
+
     /* Animação de rotação */
     @keyframes upvote-spin {
       to { transform: rotate(360deg); }

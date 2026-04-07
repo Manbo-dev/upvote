@@ -55,6 +55,7 @@ declare global {
   let configPosition = 'BOTTOM_RIGHT';
   let configTitle: string | null = null;
   let configPlaceholder: string | null = null;
+  let configWhiteLabel = false;
   let configMode: 'FLOATING' | 'SIDEBAR' | 'INLINE' = (
     ['FLOATING', 'SIDEBAR', 'INLINE'].includes(modeAttr) ? modeAttr : 'FLOATING'
   ) as 'FLOATING' | 'SIDEBAR' | 'INLINE';
@@ -274,6 +275,9 @@ declare global {
       if (cfg.placeholder) {
         configPlaceholder = cfg.placeholder;
       }
+      if (typeof cfg.whiteLabel === 'boolean') {
+        configWhiteLabel = cfg.whiteLabel;
+      }
 
       // Apply mode from backend — re-init the entire DOM if mode changed
       if (cfg.mode) {
@@ -352,6 +356,13 @@ declare global {
     bodyContainer.appendChild(errorMsg);
     bodyContainer.appendChild(submitBtn);
     bodyContainer.appendChild(consent);
+
+    if (!configWhiteLabel) {
+      const branding = document.createElement('div');
+      branding.className = 'upvote-widget-branding';
+      branding.innerHTML = `<a href="https://upvote.pro" target="_blank" rel="noopener noreferrer">Powered by Upvote</a>`;
+      bodyContainer.appendChild(branding);
+    }
 
     // Don't auto-focus in inline mode (disruptive on page load)
     if (configMode !== 'INLINE') {

@@ -232,12 +232,16 @@ public class CanalService {
     public WidgetConfigResponse getWidgetConfig(String apiKey) {
         Canal canal = canalRepository.findByApiKey(apiKey)
                 .orElseThrow(() -> new ResourceNotFoundException("Canal não encontrado"));
+        boolean whiteLabel = subscriptionRepository.findByUserId(canal.getUser().getId())
+                .map(s -> s.getPlano().isWhiteLabelEnabled())
+                .orElse(false);
         return new WidgetConfigResponse(
                 canal.getWidgetColor(),
                 canal.getWidgetPosition(),
                 canal.getWidgetTitle(),
                 canal.getWidgetPlaceholder(),
-                canal.getWidgetMode()
+                canal.getWidgetMode(),
+                whiteLabel
         );
     }
 

@@ -353,6 +353,7 @@ Parceiros no plano PRO ou BUSINESS podem personalizar o widget diretamente no da
 - **SIDEBAR**: tab vertical colada na borda da tela (deriva lado do `position`); painel desliza com `transform: translateX`
 - **INLINE**: form embedado diretamente no elemento `data-container`; sempre visível; reseta após sucesso em 3s; fallback para FLOATING se container não encontrado
 - Backend pode alterar o modo → widget destrói e reconstrói o DOM automaticamente
+- **White-label (BUSINESS)**: `WidgetConfigResponse.whiteLabel=true` remove o rodapé "Powered by Upvote"; `Plano.whiteLabelEnabled` — apenas BUSINESS=true
 
 **Frontend:**
 - Aba "Configurações" em `CanalDetailPage.tsx` — seletor de modo, color picker, Select de posição, Input de título e placeholder

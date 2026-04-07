@@ -10,6 +10,7 @@ public record WidgetConfigResponse(
         String position,
         String title,
         String placeholder,
-        String mode
+        String mode,
+        boolean whiteLabel
 ) {
 }
