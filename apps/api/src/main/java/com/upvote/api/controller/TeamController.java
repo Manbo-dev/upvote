@@ -2,10 +2,13 @@ package com.upvote.api.controller;
 
 import com.upvote.api.dto.AcceptInviteRequest;
 import com.upvote.api.dto.ApiResponse;
+import com.upvote.api.dto.AuthResponse;
 import com.upvote.api.dto.InvitePreviewResponse;
 import com.upvote.api.dto.InviteRequest;
 import com.upvote.api.dto.TeamMemberResponse;
 import com.upvote.api.exception.BusinessException;
+import com.upvote.api.security.JwtTokenProvider;
+import com.upvote.api.service.AuthService;
 import com.upvote.api.service.TeamService;
 import com.upvote.api.service.UserContextResolver;
 import jakarta.validation.Valid;
@@ -31,6 +34,8 @@ public class TeamController {
 
     private final TeamService teamService;
     private final UserContextResolver userContextResolver;
+    private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * Invites a new member to the authenticated owner's workspace.
@@ -73,16 +78,19 @@ public class TeamController {
     }
 
     /**
-     * Accepts a pending invite. The authenticated user must match the invite email.
+     * Accepts a pending invite. Returns a refreshed AuthResponse so the frontend can
+     * update the auth store with the new membership context without requiring re-login.
      */
     @PostMapping("/accept")
-    public ResponseEntity<ApiResponse<TeamMemberResponse>> acceptInvite(
+    public ResponseEntity<ApiResponse<AuthResponse>> acceptInvite(
             @Valid @RequestBody AcceptInviteRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         log.info("[TEAM] POST /api/team/accept: user={}", userDetails.getUsername());
         var acceptingUser = userContextResolver.resolveAuthenticatedUser(userDetails.getUsername());
-        TeamMemberResponse response = teamService.acceptInvite(request.token(), acceptingUser);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Convite aceito com sucesso"));
+        teamService.acceptInvite(request.token(), acceptingUser);
+        String newToken = jwtTokenProvider.generateToken(acceptingUser.getEmail());
+        AuthResponse authResponse = authService.buildAuthResponseForUser(newToken, acceptingUser);
+        return ResponseEntity.ok(ApiResponse.ok(authResponse, "Convite aceito com sucesso"));
     }
 
     /**

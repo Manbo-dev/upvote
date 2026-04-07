@@ -7,6 +7,8 @@ import com.upvote.api.repository.TeamMemberRepository;
 import com.upvote.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -28,10 +30,15 @@ public class UserContextResolver {
 
     /**
      * Returns the effective owner UUID for data queries.
-     * If the authenticated user is an ACTIVE member of another account,
-     * returns that account owner's id. Otherwise returns the user's own id.
+     * If the authenticated user is an ACTIVE member of another account AND the request
+     * does not carry the X-Workspace-Override: own header, returns the owner's id.
+     * Otherwise (own workspace explicitly requested, or no active membership) returns
+     * the user's own id.
      */
     public UUID resolveOwnerId(String email) {
+        if (isOwnWorkspaceRequested()) {
+            return loadUser(email).getId();
+        }
         User user = loadUser(email);
         return teamMemberRepository.findByMemberUserIdAndStatus(user.getId(), TeamMemberStatus.ACTIVE)
                 .map(m -> m.getOwner().getId())
@@ -50,9 +57,11 @@ public class UserContextResolver {
     /**
      * Returns true when the authenticated user is currently operating as a
      * MEMBER inside another account's workspace.
+     * Returns false when the own workspace override header is present.
      * Use this to block owner-only operations (billing, team management).
      */
     public boolean isMember(String email) {
+        if (isOwnWorkspaceRequested()) return false;
         User user = loadUser(email);
         return teamMemberRepository.findByMemberUserIdAndStatus(user.getId(), TeamMemberStatus.ACTIVE).isPresent();
     }
@@ -63,6 +72,18 @@ public class UserContextResolver {
      */
     public Optional<TeamMember> findActiveMembership(UUID userId) {
         return teamMemberRepository.findByMemberUserIdAndStatus(userId, TeamMemberStatus.ACTIVE);
+    }
+
+    /**
+     * Returns true when the current request explicitly requests the user's own workspace,
+     * bypassing the team membership proxy.
+     */
+    private boolean isOwnWorkspaceRequested() {
+        var attrs = RequestContextHolder.getRequestAttributes();
+        if (attrs instanceof ServletRequestAttributes servletAttrs) {
+            return "own".equals(servletAttrs.getRequest().getHeader("X-Workspace-Override"));
+        }
+        return false;
     }
 
     private User loadUser(String email) {

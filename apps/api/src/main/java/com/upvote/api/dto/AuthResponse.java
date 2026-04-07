@@ -7,6 +7,7 @@ public record AuthResponse(
         String plano,
         String avatar,
         String memberRole,
-        String workspaceName
+        String workspaceName,
+        String ownPlano
 ) {
 }

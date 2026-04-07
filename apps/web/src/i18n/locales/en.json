@@ -395,6 +395,9 @@
       "upgradeLink": "Upgrade plan"
     },
     "membersOf": "{{workspaceName}}'s workspace",
+    "switchWorkspace": "Switch workspace",
+    "switchToOwn": "Go to my workspace",
+    "switchToMember": "Go to {{workspaceName}}'s workspace",
     "noMembers": "No members yet",
     "noMembersDescription": "Invite colleagues to collaborate in your workspace.",
     "limitFreePlan": "Team members are available from the Starter plan.",

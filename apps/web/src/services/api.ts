@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
 
 // Instância do Axios configurada para a API
 const api = axios.create({
@@ -8,11 +9,17 @@ const api = axios.create({
   },
 });
 
-// Interceptor para adicionar token JWT em todas as requisições
+// Interceptor para adicionar token JWT e contexto de workspace em todas as requisições
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  // When the user switches to their own workspace, tell the backend to skip
+  // the team membership proxy (UserContextResolver checks this header).
+  const { activeWorkspace } = useAuthStore.getState();
+  if (activeWorkspace === 'own') {
+    config.headers['X-Workspace-Override'] = 'own';
   }
   return config;
 });

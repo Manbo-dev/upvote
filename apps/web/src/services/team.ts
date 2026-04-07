@@ -1,4 +1,5 @@
 import api from './api';
+import type { AuthResponse } from './auth';
 
 export interface TeamMember {
   id: string;
@@ -39,8 +40,9 @@ export async function removeMember(id: string): Promise<void> {
   await api.delete(`/team/members/${id}`);
 }
 
-export async function acceptInvite(token: string): Promise<void> {
-  await api.post('/team/accept', { token });
+export async function acceptInvite(token: string): Promise<AuthResponse> {
+  const { data } = await api.post<ApiResult<AuthResponse>>('/team/accept', { token });
+  return data.data;
 }
 
 export async function getInvitePreview(token: string): Promise<InvitePreviewResponse> {

@@ -14,10 +14,12 @@ import {
   PanelLeftOpen,
   Menu,
   Users,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useThemeStore } from '../store/themeStore';
 import { useLanguageStore } from '../store/languageStore';
+import { useAuthStore } from '../store/authStore';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -40,10 +42,12 @@ export default function Layout() {
   const location = useLocation();
   const { theme, toggle } = useThemeStore();
   const { language, setLanguage } = useLanguageStore();
+  const { activeWorkspace, setActiveWorkspace, canSwitchWorkspace } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isMember = user?.memberRole === 'MEMBER';
+  // isMember is true only when the user is in the member workspace context
+  const isMember = user?.memberRole === 'MEMBER' && activeWorkspace === 'member';
 
   const MAIN_NAV: NavItem[] = [
     {
@@ -259,6 +263,27 @@ export default function Layout() {
                     </p>
                   )}
                 </div>
+              )}
+              {/* Workspace switcher — only for MEMBER users with STARTER+ own plan */}
+              {canSwitchWorkspace() && sidebarOpen && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setActiveWorkspace(activeWorkspace === 'member' ? 'own' : 'member')}
+                      className="h-8 w-8 flex-shrink-0 text-warm-500 hover:text-primary-600 dark:text-warm-400 dark:hover:text-primary-400"
+                      aria-label={t('team.switchWorkspace')}
+                    >
+                      <ArrowLeftRight className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {activeWorkspace === 'member'
+                      ? t('team.switchToOwn')
+                      : t('team.switchToMember', { workspaceName: user?.workspaceName })}
+                  </TooltipContent>
+                </Tooltip>
               )}
 
               {sidebarOpen ? (

@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore';
 import { getInvitePreview, acceptInvite, type InvitePreviewResponse } from '../services/team';
 import { Button } from '../components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { useAuth } from '../hooks/useAuth';
 
 function getInitials(name?: string | null) {
   if (!name) return '?';
@@ -17,6 +18,7 @@ export default function InviteAcceptPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  const { login: storeLogin } = useAuth();
 
   const [preview, setPreview] = useState<InvitePreviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,19 @@ export default function InviteAcceptPage() {
 
     setAccepting(true);
     acceptInvite(token)
-      .then(() => navigate('/dashboard', { replace: true }))
+      .then((authResponse) => {
+        // Refresh auth store so the workspace switcher and sidebar reflect new membership
+        storeLogin(authResponse.token, {
+          name: authResponse.name,
+          email: authResponse.email,
+          plano: authResponse.plano,
+          ownPlano: authResponse.ownPlano,
+          avatar: authResponse.avatar,
+          memberRole: authResponse.memberRole,
+          workspaceName: authResponse.workspaceName,
+        });
+        navigate('/dashboard', { replace: true });
+      })
       .catch((err) => {
         setAccepting(false);
         setError(err?.response?.data?.message || t('common.error'));

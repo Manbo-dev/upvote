@@ -8,6 +8,7 @@ export interface AuthResponse {
   avatar?: string;
   memberRole: 'OWNER' | 'MEMBER';
   workspaceName: string;
+  ownPlano: string;
 }
 
 interface ApiResult<T> {

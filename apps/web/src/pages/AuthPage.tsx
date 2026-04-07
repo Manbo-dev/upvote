@@ -28,6 +28,7 @@ function SocialSection({ mode, onError }: SocialSectionProps) {
       name: response.name,
       email: response.email,
       plano: response.plano,
+      ownPlano: response.ownPlano,
       avatar: response.avatar,
       memberRole: response.memberRole,
       workspaceName: response.workspaceName,
@@ -69,6 +70,8 @@ interface LoginFormProps {
 
 function LoginForm({ showLogo = false, onForgotPassword }: LoginFormProps) {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -87,11 +90,12 @@ function LoginForm({ showLogo = false, onForgotPassword }: LoginFormProps) {
         name: response.name,
         email: response.email,
         plano: response.plano,
+        ownPlano: response.ownPlano,
         avatar: response.avatar,
         memberRole: response.memberRole,
         workspaceName: response.workspaceName,
       });
-      navigate('/dashboard');
+      navigate(redirect ?? '/dashboard');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || t('auth.login.errorDefault'));
@@ -200,6 +204,7 @@ function RegisterForm({ showLogo = false }: { showLogo?: boolean }) {
         name: response.name,
         email: response.email,
         plano: response.plano,
+        ownPlano: response.ownPlano,
         avatar: response.avatar,
         memberRole: response.memberRole,
         workspaceName: response.workspaceName,

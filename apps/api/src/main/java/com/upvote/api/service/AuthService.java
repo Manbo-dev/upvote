@@ -225,10 +225,16 @@ public class AuthService {
     /**
      * Builds an AuthResponse enriched with team context.
      * If the user is an ACTIVE member of another account, the response reflects the
-     * owner's plan, memberRole="MEMBER", and workspaceName=owner's name.
-     * Otherwise memberRole="OWNER" and workspaceName=user's own name.
+     * owner's plan (plano), memberRole="MEMBER", and workspaceName=owner's name.
+     * ownPlano always reflects the user's personal subscription plan so the frontend
+     * can decide whether to show the workspace switcher.
+     * Otherwise memberRole="OWNER" and all plan fields reflect the user's own data.
      */
     private AuthResponse buildAuthResponse(String token, User user) {
+        String ownPlano = subscriptionRepository.findByUserId(user.getId())
+                .map(sub -> sub.getPlano().name())
+                .orElse(Plano.FREE.name());
+
         Optional<TeamMember> membership = userContextResolver.findActiveMembership(user.getId());
         if (membership.isPresent()) {
             TeamMember m = membership.get();
@@ -237,12 +243,17 @@ public class AuthService {
                     .map(sub -> sub.getPlano().name())
                     .orElse(Plano.FREE.name());
             return new AuthResponse(token, user.getName(), user.getEmail(),
-                    ownerPlano, user.getAvatar(), "MEMBER", owner.getName());
+                    ownerPlano, user.getAvatar(), "MEMBER", owner.getName(), ownPlano);
         }
-        String plano = subscriptionRepository.findByUserId(user.getId())
-                .map(sub -> sub.getPlano().name())
-                .orElse(Plano.FREE.name());
         return new AuthResponse(token, user.getName(), user.getEmail(),
-                plano, user.getAvatar(), "OWNER", user.getName());
+                ownPlano, user.getAvatar(), "OWNER", user.getName(), ownPlano);
+    }
+
+    /**
+     * Public variant for use by TeamController after accepting an invite,
+     * so the response reflects the updated membership state.
+     */
+    public AuthResponse buildAuthResponseForUser(String token, User user) {
+        return buildAuthResponse(token, user);
     }
 }
