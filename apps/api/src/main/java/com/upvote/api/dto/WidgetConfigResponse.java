@@ -9,6 +9,7 @@ public record WidgetConfigResponse(
         String color,
         String position,
         String title,
-        String placeholder
+        String placeholder,
+        String mode
 ) {
 }

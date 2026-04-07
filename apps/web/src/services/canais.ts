@@ -9,6 +9,7 @@ export interface CanalResponse {
   widgetPosition: string;
   widgetTitle: string | null;
   widgetPlaceholder: string | null;
+  widgetMode: string;
   publicBoardEnabled: boolean;
   createdAt: string;
 }
@@ -18,6 +19,7 @@ export interface WidgetSettingsRequest {
   position: string;
   title?: string | null;
   placeholder?: string | null;
+  mode: string;
 }
 
 interface ApiResult<T> {

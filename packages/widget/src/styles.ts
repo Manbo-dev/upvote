@@ -5,7 +5,7 @@
  */
 export function getStyles(color: string): string {
   return `
-    /* Botão flutuante */
+    /* Botão flutuante (modo FLOATING) */
     .upvote-widget-btn {
       position: fixed;
       bottom: 24px;
@@ -36,7 +36,7 @@ export function getStyles(color: string): string {
       fill: white;
     }
 
-    /* Painel de feedback */
+    /* Painel de feedback (modos FLOATING e SIDEBAR) */
     .upvote-widget-panel {
       position: fixed;
       bottom: 92px;
@@ -63,7 +63,86 @@ export function getStyles(color: string): string {
       pointer-events: auto;
     }
 
-    /* Cabeçalho */
+    /* ---- Modo SIDEBAR ---- */
+
+    /* Tab clicável colada na borda */
+    .upvote-sidebar-tab {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: ${color};
+      color: white;
+      border: none;
+      border-radius: 8px 0 0 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+      z-index: 99998;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      box-shadow: -2px 0 12px rgba(0, 0, 0, 0.12);
+      transition: padding 0.2s ease;
+    }
+
+    .upvote-sidebar-tab:hover {
+      padding: 12px 18px;
+    }
+
+    /* Tab no lado esquerdo */
+    .upvote-sidebar-tab.upvote-sidebar-left {
+      right: auto;
+      left: 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Painel no modo sidebar — desliza da borda direita */
+    .upvote-widget-panel.upvote-mode-sidebar {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: auto;
+      width: 360px;
+      max-height: 100vh;
+      height: 100%;
+      border-radius: 0;
+      transform: translateX(100%);
+      opacity: 1;
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .upvote-widget-panel.upvote-mode-sidebar.upvote-open {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    /* Painel sidebar no lado esquerdo */
+    .upvote-widget-panel.upvote-mode-sidebar.upvote-sidebar-left {
+      right: auto;
+      left: 0;
+      transform: translateX(-100%);
+    }
+
+    .upvote-widget-panel.upvote-mode-sidebar.upvote-sidebar-left.upvote-open {
+      transform: translateX(0);
+    }
+
+    /* ---- Modo INLINE ---- */
+
+    .upvote-widget-inline {
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Cabeçalho — compartilhado por todos os modos */
     .upvote-widget-header {
       display: flex;
       align-items: center;
@@ -251,7 +330,7 @@ export function getStyles(color: string): string {
 
     /* Responsividade mobile */
     @media (max-width: 480px) {
-      .upvote-widget-panel {
+      .upvote-widget-panel:not(.upvote-mode-sidebar) {
         bottom: 0;
         right: 0;
         left: 0;
@@ -261,8 +340,13 @@ export function getStyles(color: string): string {
         transform: translateY(100%);
       }
 
-      .upvote-widget-panel.upvote-open {
+      .upvote-widget-panel:not(.upvote-mode-sidebar).upvote-open {
         transform: translateY(0);
+        opacity: 1;
+      }
+
+      .upvote-widget-panel.upvote-mode-sidebar {
+        width: 100%;
       }
     }
 
@@ -271,7 +355,7 @@ export function getStyles(color: string): string {
       to { transform: rotate(360deg); }
     }
 
-    /* Position overrides — default (BOTTOM_RIGHT) is set in base styles above */
+    /* Position overrides (modo FLOATING) — default (BOTTOM_RIGHT) já está no base CSS */
     .upvote-widget-btn.upvote-pos-bottom-left {
       right: auto;
       left: 24px;

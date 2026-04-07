@@ -193,6 +193,15 @@
         "TOP_RIGHT": "Top right",
         "TOP_LEFT": "Top left"
       },
+      "mode": "Display mode",
+      "modes": {
+        "FLOATING": "Floating (circular button)",
+        "SIDEBAR": "Sidebar (edge tab)",
+        "INLINE": "Inline (embedded in element)"
+      },
+      "inlineContainer": "Container CSS selector",
+      "inlineContainerPlaceholder": "E.g. #feedback-container",
+      "inlineContainerHelp": "Add data-container=\"#your-element\" to the script tag on your site.",
       "customTitle": "Custom title",
       "customTitlePlaceholder": "E.g. Send your feedback",
       "placeholder": "Text field placeholder",
@@ -200,7 +209,7 @@
       "save": "Save settings",
       "saveSuccess": "Saved successfully!",
       "upgradeRequired": "Available on PRO plan",
-      "upgradeDescription": "Customize the widget's color, position, title, and placeholder on your PRO plan or above.",
+      "upgradeDescription": "Customize the widget's color, mode, position, title, and placeholder on your PRO plan or above.",
       "upgradeLink": "Upgrade plan"
     },
     "praise": {

@@ -52,6 +52,10 @@ public class Canal {
     @Column(name = "widget_placeholder", length = 200)
     private String widgetPlaceholder;
 
+    @Column(name = "widget_mode", length = 20)
+    @Builder.Default
+    private String widgetMode = "FLOATING";
+
     @Column(name = "public_board_enabled", nullable = false)
     @Builder.Default
     private boolean publicBoardEnabled = false;

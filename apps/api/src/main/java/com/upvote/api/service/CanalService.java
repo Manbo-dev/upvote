@@ -158,6 +158,7 @@ public class CanalService {
         canal.setWidgetPosition(request.position());
         canal.setWidgetTitle(request.title());
         canal.setWidgetPlaceholder(request.placeholder());
+        canal.setWidgetMode(request.mode());
         canal = canalRepository.save(canal);
         return toResponse(canal);
     }
@@ -235,7 +236,8 @@ public class CanalService {
                 canal.getWidgetColor(),
                 canal.getWidgetPosition(),
                 canal.getWidgetTitle(),
-                canal.getWidgetPlaceholder()
+                canal.getWidgetPlaceholder(),
+                canal.getWidgetMode()
         );
     }
 
@@ -249,6 +251,7 @@ public class CanalService {
                 canal.getWidgetPosition(),
                 canal.getWidgetTitle(),
                 canal.getWidgetPlaceholder(),
+                canal.getWidgetMode(),
                 canal.isPublicBoardEnabled(),
                 canal.getCreatedAt()
         );

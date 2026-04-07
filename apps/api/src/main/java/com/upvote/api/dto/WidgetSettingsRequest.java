@@ -26,6 +26,13 @@ public record WidgetSettingsRequest(
         String title,
 
         @Size(max = 200)
-        String placeholder
+        String placeholder,
+
+        @NotNull
+        @Pattern(
+                regexp = "^(FLOATING|SIDEBAR|INLINE)$",
+                message = "Mode must be one of: FLOATING, SIDEBAR, INLINE"
+        )
+        String mode
 ) {
 }

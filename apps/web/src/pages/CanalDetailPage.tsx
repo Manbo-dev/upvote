@@ -199,6 +199,7 @@ export default function CanalDetailPage() {
   // Widget settings state (for the settings tab)
   const [widgetColor, setWidgetColor] = useState('#6366f1');
   const [widgetPosition, setWidgetPosition] = useState('BOTTOM_RIGHT');
+  const [widgetMode, setWidgetMode] = useState('FLOATING');
   const [widgetTitle, setWidgetTitle] = useState('');
   const [widgetPlaceholder, setWidgetPlaceholder] = useState('');
   const [widgetSaveSuccess, setWidgetSaveSuccess] = useState(false);
@@ -278,6 +279,7 @@ export default function CanalDetailPage() {
     if (canal) {
       setWidgetColor(canal.widgetColor);
       setWidgetPosition(canal.widgetPosition ?? 'BOTTOM_RIGHT');
+      setWidgetMode(canal.widgetMode ?? 'FLOATING');
       setWidgetTitle(canal.widgetTitle ?? '');
       setWidgetPlaceholder(canal.widgetPlaceholder ?? '');
     }
@@ -288,6 +290,7 @@ export default function CanalDetailPage() {
       updateWidgetSettings(canal!.id, {
         color: widgetColor,
         position: widgetPosition,
+        mode: widgetMode,
         title: widgetTitle || null,
         placeholder: widgetPlaceholder || null,
       }),
@@ -988,6 +991,23 @@ export default function CanalDetailPage() {
                   <h2 className="text-lg font-semibold text-foreground">
                     {t('canal.widget.title')}
                   </h2>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="widget-mode">{t('canal.widget.mode')}</Label>
+                    <Select value={widgetMode} onValueChange={setWidgetMode}>
+                      <SelectTrigger id="widget-mode">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FLOATING">{t('canal.widget.modes.FLOATING')}</SelectItem>
+                        <SelectItem value="SIDEBAR">{t('canal.widget.modes.SIDEBAR')}</SelectItem>
+                        <SelectItem value="INLINE">{t('canal.widget.modes.INLINE')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {widgetMode === 'INLINE' && (
+                      <p className="text-xs text-muted-foreground">{t('canal.widget.inlineContainerHelp')}</p>
+                    )}
+                  </div>
 
                   <div className="space-y-1.5">
                     <Label htmlFor="widget-color">{t('canal.widget.color')}</Label>

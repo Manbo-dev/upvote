@@ -341,18 +341,21 @@ Parceiros no plano STARTER+ podem ativar um board público com o status dos feed
 Parceiros no plano PRO ou BUSINESS podem personalizar o widget diretamente no dashboard.
 
 **Backend:**
-- `PATCH /api/canais/{id}/widget` (JWT) — salva cor, posição, título e placeholder; verifica plano
+- `PATCH /api/canais/{id}/widget` (JWT) — salva cor, posição, modo, título e placeholder; verifica plano
 - `GET /api/widget/config` (público, `X-API-Key` header) — retorna `WidgetConfigResponse`; sem check de plano (leitura é pública para todos os widgets)
-- Novos campos na tabela `canais`: `widget_position VARCHAR(20) DEFAULT 'BOTTOM_RIGHT'`, `widget_title VARCHAR(100)`, `widget_placeholder VARCHAR(200)` (migration `V20260406120000`)
+- Campos na tabela `canais`: `widget_position VARCHAR(20) DEFAULT 'BOTTOM_RIGHT'`, `widget_title VARCHAR(100)`, `widget_placeholder VARCHAR(200)`, `widget_mode VARCHAR(20) DEFAULT 'FLOATING'` (migrations `V20260406120000` e `V20260407100000`)
 - `SubscriptionResponse` expõe `widgetCustomizationEnabled` e `integrationsEnabled`
 
-**Widget (`packages/widget/src/main.ts`):**
+**Widget (`packages/widget/src/main.ts`) — 3 modos de exibição:**
 - Após render inicial (síncrono, com fallbacks dos atributos do script tag), dispara `fetchConfig()` fire-and-forget
-- Aplica cor, posição (via classes CSS `upvote-pos-{bottom-right|bottom-left|top-right|top-left}`), título e placeholder do backend
-- Posições disponíveis: `BOTTOM_RIGHT` (padrão), `BOTTOM_LEFT`, `TOP_RIGHT`, `TOP_LEFT`
+- Atributos do script tag: `data-mode` (floating|sidebar|inline), `data-container` (seletor CSS, somente inline)
+- **FLOATING** (padrão): botão circular fixo no canto; posições `BOTTOM_RIGHT`, `BOTTOM_LEFT`, `TOP_RIGHT`, `TOP_LEFT`
+- **SIDEBAR**: tab vertical colada na borda da tela (deriva lado do `position`); painel desliza com `transform: translateX`
+- **INLINE**: form embedado diretamente no elemento `data-container`; sempre visível; reseta após sucesso em 3s; fallback para FLOATING se container não encontrado
+- Backend pode alterar o modo → widget destrói e reconstrói o DOM automaticamente
 
 **Frontend:**
-- Aba "Configurações" em `CanalDetailPage.tsx` — formulário com color picker, Select de posição, Input de título e placeholder
+- Aba "Configurações" em `CanalDetailPage.tsx` — seletor de modo, color picker, Select de posição, Input de título e placeholder
 - Estado bloqueado para FREE/STARTER: card com Lock icon e CTA para `/dashboard/billing`
 
 ### Frontend
