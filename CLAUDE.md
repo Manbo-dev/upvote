@@ -426,7 +426,7 @@ Mesmo Client ID para os dois. Sem `GOOGLE_CLIENT_ID`, a validação do `aud` fal
 
 ### Configurar no Google Cloud Console
 1. APIs & Services → Credentials → Create OAuth 2.0 Client ID (tipo: Web application)
-2. Authorized JavaScript origins: `http://localhost:5173` e `https://app.upvote.pro`
+2. Authorized JavaScript origins: `http://localhost:5173` e `https://upvote.pro`
 3. Sem redirect URI (GIS usa popup, não server-side redirect)
 
 ### Migration
@@ -575,7 +575,7 @@ Retry: 3 tentativas, backoff 1 s → 2 s → 4 s (compartilha o `SimpleRabbitLis
 ### Variável de ambiente
 
 ```
-APP_BASE_URL=https://app.upvote.pro   # usado nos links dos templates (default já configurado)
+APP_BASE_URL=https://upvote.pro   # usado nos links dos templates (default já configurado)
 ```
 As variáveis `MAIL_*` são compartilhadas com os emails de senha (já documentadas na seção de Perfil de Usuário).
 
@@ -807,7 +807,7 @@ Lista completa em `infra/terraform/variables.tf` (variável `secret_names`). Val
 - `GCP_SERVICE_ACCOUNT` = `github-actions@project-38c32df4-c37c-41d9-b5d.iam.gserviceaccount.com`
 
 ### Domínios
-- app.upvote.pro (frontend)
+- upvote.pro (frontend)
 - api.upvote.pro (backend)
 
 ## Observabilidade (Grafana Cloud)

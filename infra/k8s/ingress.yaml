@@ -10,11 +10,11 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - app.upvote.pro
+        - upvote.pro
         - api.upvote.pro
       secretName: upvote-tls
   rules:
-    - host: app.upvote.pro
+    - host: upvote.pro
       http:
         paths:
           - path: /

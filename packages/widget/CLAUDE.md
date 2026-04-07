@@ -7,7 +7,7 @@ um modal com o board de sugestões do produto.
 
 ## Como o cliente usa
 <script
-  src="https://app.upvote.com/widget.js"
+  src="https://upvote.com/widget.js"
   data-api-key="upv_sua_chave_aqui"
   data-color="#6366f1"
   data-position="bottom-right"

@@ -276,7 +276,7 @@ function HeroSection() {
                 <span className="w-3 h-3 rounded-full bg-red-400"></span>
                 <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
                 <span className="w-3 h-3 rounded-full bg-green-400"></span>
-                <span className="ml-3 text-xs text-muted-foreground font-mono">app.upvote.com/dashboard</span>
+                <span className="ml-3 text-xs text-muted-foreground font-mono">upvote.com/dashboard</span>
               </div>
 
               <div className="p-5 space-y-3">
