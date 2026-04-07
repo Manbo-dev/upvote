@@ -235,6 +235,7 @@
   },
   "billing": {
     "title": "Subscription",
+    "plan": "Plan",
     "currentPlan": "Current plan",
     "currentUsage": "Current usage",
     "channels": "Channels",
@@ -389,7 +390,7 @@
       "REVOKED": "Revoked"
     },
     "limit": {
-      "used": "{{count}} of {{limit}} members",
+      "used": "{{used}} of {{max}} members",
       "unlimited": "Unlimited members",
       "reached": "Member limit reached",
       "upgradeLink": "Upgrade plan"

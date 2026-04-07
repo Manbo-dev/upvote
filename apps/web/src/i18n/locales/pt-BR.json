@@ -235,6 +235,7 @@
   },
   "billing": {
     "title": "Assinatura",
+    "plan": "Plano",
     "currentPlan": "Plano atual",
     "currentUsage": "Uso atual",
     "channels": "Canais",
@@ -389,7 +390,7 @@
       "REVOKED": "Revogado"
     },
     "limit": {
-      "used": "{{count}} de {{limit}} membros",
+      "used": "{{used}} de {{max}} membros",
       "unlimited": "Membros ilimitados",
       "reached": "Limite de membros atingido",
       "upgradeLink": "Fazer upgrade"
