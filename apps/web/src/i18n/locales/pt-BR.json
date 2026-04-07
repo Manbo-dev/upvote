@@ -25,7 +25,8 @@
     "groupMain": "Principal",
     "groupAccount": "Conta",
     "profile": "Perfil",
-    "uploadPhoto": "Enviar foto"
+    "uploadPhoto": "Enviar foto",
+    "team": "Equipe"
   },
   "auth": {
     "login": {
@@ -368,6 +369,50 @@
     "copyKey": "Copiar chave",
     "copySnippet": "Copiar snippet",
     "copied": "Copiado!"
+  },
+  "team": {
+    "title": "Equipe",
+    "description": "Convide colegas para colaborar no seu workspace.",
+    "inviteButton": "Convidar membro",
+    "inviteTitle": "Convidar membro",
+    "inviteEmailLabel": "Email",
+    "inviteEmailPlaceholder": "colega@empresa.com",
+    "inviteSending": "Enviando...",
+    "inviteSubmit": "Enviar convite",
+    "inviteSuccess": "Convite enviado para {{email}}",
+    "inviteError": "Erro ao enviar convite",
+    "revokeSuccess": "Membro removido",
+    "revokeConfirm": "Tem certeza que deseja remover este membro?",
+    "statuses": {
+      "ACTIVE": "Ativo",
+      "PENDING": "Pendente",
+      "REVOKED": "Revogado"
+    },
+    "limit": {
+      "used": "{{count}} de {{limit}} membros",
+      "unlimited": "Membros ilimitados",
+      "reached": "Limite de membros atingido",
+      "upgradeLink": "Fazer upgrade"
+    },
+    "membersOf": "Workspace de {{workspaceName}}",
+    "noMembers": "Nenhum membro ainda",
+    "noMembersDescription": "Convide colegas para colaborar no seu workspace.",
+    "limitFreePlan": "Membros de equipe estão disponíveis a partir do plano Starter.",
+    "revokeButton": "Remover",
+    "pendingBadge": "Pendente",
+    "activeBadge": "Ativo"
+  },
+  "invite": {
+    "title": "Você foi convidado",
+    "description": "{{ownerName}} te convidou para colaborar no workspace deles no Upvote.",
+    "createAccount": "Criar conta",
+    "signIn": "Já tenho conta",
+    "accepting": "Aceitando convite...",
+    "accepted": "Convite aceito! Redirecionando...",
+    "expired": "Convite expirado",
+    "expiredDescription": "Este link de convite expirou. Peça ao dono do workspace um novo convite.",
+    "invalid": "Convite inválido ou não encontrado.",
+    "alreadyAccepted": "Este convite já foi aceito."
   },
   "status": {
     "OPEN": "Aberta",

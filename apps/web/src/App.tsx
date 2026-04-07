@@ -18,6 +18,8 @@ import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import PublicBoardPage from './pages/PublicBoardPage';
+import TeamPage from './pages/TeamPage';
+import InviteAcceptPage from './pages/InviteAcceptPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import { useThemeStore } from './store/themeStore';
@@ -62,7 +64,9 @@ function App() {
         <Route path="settings" element={<SettingsPage />} />
         <Route path="integrations" element={<IntegrationsPage />} />
         <Route path="billing" element={<BillingPage />} />
+        <Route path="team" element={<TeamPage />} />
       </Route>
+      <Route path="/invite/:token" element={<InviteAcceptPage />} />
       <Route path="/b/:slug" element={<PublicBoardPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />

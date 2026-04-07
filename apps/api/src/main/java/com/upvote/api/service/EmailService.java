@@ -182,6 +182,31 @@ public class EmailService {
         send(user.getEmail(), "Seu resumo mensal do Upvote — " + monthLabel, html);
     }
 
+    // ── Team invitation emails ───────────────────────────────────────────────
+
+    public void sendTeamInviteEmail(String toEmail, String inviteToken, String ownerName) {
+        String acceptUrl = appBaseUrl + "/invite/" + inviteToken;
+        Context ctx = new Context();
+        ctx.setVariable("ownerName", ownerName);
+        ctx.setVariable("acceptUrl", acceptUrl);
+        ctx.setVariable("invitedEmail", toEmail);
+
+        String html = templateEngine.process("emails/team_invite", ctx);
+        log.info("[EMAIL] Sending TEAM_INVITE: to={}, owner={}", toEmail, ownerName);
+        send(toEmail, ownerName + " convidou você para o Upvote", html);
+    }
+
+    public void sendTeamInviteAcceptedEmail(User owner, String acceptingUserName) {
+        Context ctx = new Context();
+        ctx.setVariable("ownerName", owner.getName());
+        ctx.setVariable("acceptingUserName", acceptingUserName);
+        ctx.setVariable("teamUrl", appBaseUrl + "/dashboard/team");
+
+        String html = templateEngine.process("emails/team_invite_accepted", ctx);
+        log.info("[EMAIL] Sending TEAM_INVITE_ACCEPTED: ownerId={}, acceptedBy={}", owner.getId(), acceptingUserName);
+        send(owner.getEmail(), acceptingUserName + " aceitou seu convite — Upvote", html);
+    }
+
     // ── Security / code emails ───────────────────────────────────────────────
 
     public void sendPasswordResetCode(String toEmail, String code) {

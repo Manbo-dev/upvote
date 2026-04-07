@@ -10,10 +10,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Plano {
 
-    FREE    (1,                 20,                false, false, false, false),
-    STARTER (3,                 500,               true,  false, true,  true),
-    PRO     (20,                Integer.MAX_VALUE, true,  true,  true,  true),
-    BUSINESS(Integer.MAX_VALUE, Integer.MAX_VALUE, true,  true,  true,  true);
+    FREE    (1,                 20,                false, false, false, false, 0),
+    STARTER (3,                 500,               true,  false, true,  true,  3),
+    PRO     (20,                Integer.MAX_VALUE, true,  true,  true,  true,  10),
+    BUSINESS(Integer.MAX_VALUE, Integer.MAX_VALUE, true,  true,  true,  true,  Integer.MAX_VALUE);
 
     private final int     limiteCanais;
     private final int     limiteSugestoesMes;
@@ -21,4 +21,5 @@ public enum Plano {
     private final boolean widgetCustomizationEnabled;
     private final boolean integrationsEnabled;
     private final boolean publicBoardEnabled;
+    private final int     limiteMembrosTimes;
 }

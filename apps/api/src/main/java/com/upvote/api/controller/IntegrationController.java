@@ -1,8 +1,8 @@
 package com.upvote.api.controller;
 
 import com.upvote.api.dto.*;
-import com.upvote.api.repository.UserRepository;
 import com.upvote.api.service.IntegrationService;
+import com.upvote.api.service.UserContextResolver;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ import java.util.UUID;
 public class IntegrationController {
 
     private final IntegrationService integrationService;
-    private final UserRepository userRepository;
+    private final UserContextResolver userContextResolver;
 
     /**
      * Lists all connected integrations for the authenticated user.
@@ -159,8 +159,6 @@ public class IntegrationController {
     }
 
     private UUID getUserId(UserDetails userDetails) {
-        return userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalStateException("User not found"))
-                .getId();
+        return userContextResolver.resolveOwnerId(userDetails.getUsername());
     }
 }

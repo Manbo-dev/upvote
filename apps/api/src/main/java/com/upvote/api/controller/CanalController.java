@@ -5,10 +5,8 @@ import com.upvote.api.dto.CanalRequest;
 import com.upvote.api.dto.CanalResponse;
 import com.upvote.api.dto.RenameCanelRequest;
 import com.upvote.api.dto.WidgetSettingsRequest;
-
-import java.util.Map;
-import com.upvote.api.repository.UserRepository;
 import com.upvote.api.service.CanalService;
+import com.upvote.api.service.UserContextResolver;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -30,17 +29,16 @@ import java.util.UUID;
 public class CanalController {
 
     private final CanalService canalService;
-    private final UserRepository userRepository;
+    private final UserContextResolver userContextResolver;
 
     /**
-     * Lista canais do usuário autenticado
+     * Lista canais do usuário autenticado (ou do workspace do owner se for membro)
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<CanalResponse>>> getCanais(
             @AuthenticationPrincipal UserDetails userDetails) {
-        var user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
-        List<CanalResponse> canais = canalService.getCanaisByOwner(user.getId());
+        UUID ownerId = userContextResolver.resolveOwnerId(userDetails.getUsername());
+        List<CanalResponse> canais = canalService.getCanaisByOwner(ownerId);
         return ResponseEntity.ok(ApiResponse.ok(canais));
     }
 
@@ -51,9 +49,8 @@ public class CanalController {
     public ResponseEntity<ApiResponse<CanalResponse>> createCanal(
             @Valid @RequestBody CanalRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        var user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
-        CanalResponse canal = canalService.createCanal(request, user.getId());
+        UUID ownerId = userContextResolver.resolveOwnerId(userDetails.getUsername());
+        CanalResponse canal = canalService.createCanal(request, ownerId);
         return ResponseEntity.ok(ApiResponse.ok(canal, "Canal criado com sucesso"));
     }
 
@@ -74,9 +71,8 @@ public class CanalController {
             @PathVariable UUID id,
             @Valid @RequestBody RenameCanelRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        var user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
-        CanalResponse canal = canalService.renameCanal(id, request, user.getId());
+        UUID ownerId = userContextResolver.resolveOwnerId(userDetails.getUsername());
+        CanalResponse canal = canalService.renameCanal(id, request, ownerId);
         return ResponseEntity.ok(ApiResponse.ok(canal, "Canal renomeado com sucesso"));
     }
 
@@ -89,9 +85,8 @@ public class CanalController {
             @Valid @RequestBody WidgetSettingsRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         log.info("PATCH /api/canais/{}/widget: user={}", id, userDetails.getUsername());
-        var user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
-        CanalResponse canal = canalService.updateWidgetSettings(id, request, user.getId());
+        UUID ownerId = userContextResolver.resolveOwnerId(userDetails.getUsername());
+        CanalResponse canal = canalService.updateWidgetSettings(id, request, ownerId);
         return ResponseEntity.ok(ApiResponse.ok(canal, "Widget settings updated successfully"));
     }
 
@@ -105,9 +100,8 @@ public class CanalController {
             @AuthenticationPrincipal UserDetails userDetails) {
         boolean enabled = Boolean.TRUE.equals(body.get("enabled"));
         log.info("PATCH /api/canais/{}/public-board: enabled={}, user={}", id, enabled, userDetails.getUsername());
-        var user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
-        CanalResponse canal = canalService.togglePublicBoard(id, enabled, user.getId());
+        UUID ownerId = userContextResolver.resolveOwnerId(userDetails.getUsername());
+        CanalResponse canal = canalService.togglePublicBoard(id, enabled, ownerId);
         return ResponseEntity.ok(ApiResponse.ok(canal, "Public board updated successfully"));
     }
 
@@ -118,9 +112,8 @@ public class CanalController {
     public ResponseEntity<ApiResponse<Void>> deleteCanal(
             @PathVariable UUID id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        var user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"));
-        canalService.deleteCanal(id, user.getId());
+        UUID ownerId = userContextResolver.resolveOwnerId(userDetails.getUsername());
+        canalService.deleteCanal(id, ownerId);
         return ResponseEntity.ok(ApiResponse.ok(null, "Canal deletado com sucesso"));
     }
 }

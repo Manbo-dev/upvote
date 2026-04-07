@@ -5,6 +5,8 @@ interface UserInfo {
   email: string;
   plano: string;
   avatar?: string;
+  memberRole: 'OWNER' | 'MEMBER';
+  workspaceName: string;
 }
 
 interface AuthState {
@@ -14,6 +16,7 @@ interface AuthState {
   logout: () => void;
   isAuthenticated: () => boolean;
   updateUser: (partial: Partial<UserInfo>) => void;
+  isMember: () => boolean;
 }
 
 // Recupera estado inicial do localStorage
@@ -38,6 +41,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   isAuthenticated: () => {
     return !!get().token;
+  },
+
+  isMember: () => {
+    return get().user?.memberRole === 'MEMBER';
   },
 
   updateUser: (partial: Partial<UserInfo>) => {

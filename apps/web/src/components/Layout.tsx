@@ -13,6 +13,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Menu,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useThemeStore } from '../store/themeStore';
@@ -42,6 +43,8 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const isMember = user?.memberRole === 'MEMBER';
+
   const MAIN_NAV: NavItem[] = [
     {
       to: '/dashboard',
@@ -56,16 +59,21 @@ export default function Layout() {
   ];
 
   const ACCOUNT_NAV: NavItem[] = [
+    ...(!isMember ? [{
+      to: '/dashboard/team',
+      label: t('nav.team'),
+      icon: <Users className="h-5 w-5 flex-shrink-0" />,
+    }] : []),
     {
       to: '/dashboard/api-keys',
       label: t('nav.apiKeys'),
       icon: <Key className="h-5 w-5 flex-shrink-0" />,
     },
-    {
+    ...(!isMember ? [{
       to: '/dashboard/billing',
       label: t('nav.subscription'),
       icon: <CreditCard className="h-5 w-5 flex-shrink-0" />,
-    },
+    }] : []),
     {
       to: '/dashboard/settings',
       label: t('nav.settings'),
@@ -245,6 +253,11 @@ export default function Layout() {
                   <p className="truncate text-xs text-warm-500 dark:text-warm-400">
                     {user?.email}
                   </p>
+                  {isMember && user?.workspaceName && (
+                    <p className="truncate text-xs text-primary-600 dark:text-primary-400 mt-0.5">
+                      {t('team.membersOf', { workspaceName: user.workspaceName })}
+                    </p>
+                  )}
                 </div>
               )}
 

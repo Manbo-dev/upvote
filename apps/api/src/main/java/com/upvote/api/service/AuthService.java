@@ -4,6 +4,7 @@ import com.upvote.api.domain.Canal;
 import com.upvote.api.domain.PasswordResetCode;
 import com.upvote.api.domain.Plano;
 import com.upvote.api.domain.Subscription;
+import com.upvote.api.domain.TeamMember;
 import com.upvote.api.domain.User;
 import com.upvote.api.dto.AuthResponse;
 import com.upvote.api.dto.GoogleTokenInfo;
@@ -44,6 +45,8 @@ public class AuthService {
     private final EmailService emailService;
     private final EmailProducer emailProducer;
     private final PasswordResetCodeRepository codeRepository;
+    private final UserContextResolver userContextResolver;
+    private final TeamService teamService;
 
     /**
      * Registers a new user, creates default subscription and canal
@@ -68,6 +71,11 @@ public class AuthService {
                 .build();
         subscriptionRepository.save(subscription);
 
+        // Accept invite if one was provided (must happen before afterCommit so token is cleared in same tx)
+        if (request.inviteToken() != null && !request.inviteToken().isBlank()) {
+            teamService.acceptInvite(request.inviteToken(), user);
+        }
+
         // Queue welcome email — published after commit so the consumer finds the user in the DB
         final User savedUser = user;
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -78,7 +86,7 @@ public class AuthService {
         });
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getName(), user.getEmail(), Plano.FREE.name(), user.getAvatar());
+        return buildAuthResponse(token, user);
     }
 
     /**
@@ -92,12 +100,8 @@ public class AuthService {
             throw new IllegalArgumentException("Credenciais inválidas");
         }
 
-        String plano = subscriptionRepository.findByUserId(user.getId())
-                .map(sub -> sub.getPlano().name())
-                .orElse(Plano.FREE.name());
-
         String token = jwtTokenProvider.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getName(), user.getEmail(), plano, user.getAvatar());
+        return buildAuthResponse(token, user);
     }
 
     /**
@@ -116,10 +120,7 @@ public class AuthService {
         Optional<User> byGoogleId = userRepository.findByGoogleId(googleId);
         if (byGoogleId.isPresent()) {
             User user = byGoogleId.get();
-            String plano = subscriptionRepository.findByUserId(user.getId())
-                    .map(sub -> sub.getPlano().name())
-                    .orElse(Plano.FREE.name());
-            return new AuthResponse(jwtTokenProvider.generateToken(email), user.getName(), email, plano, user.getAvatar());
+            return buildAuthResponse(jwtTokenProvider.generateToken(email), user);
         }
 
         // Merge case: user registered via email/password, now signing in with same email via Google
@@ -134,10 +135,7 @@ public class AuthService {
                 user.setAvatar(tokenInfo.picture());
             }
             userRepository.save(user);
-            String plano = subscriptionRepository.findByUserId(user.getId())
-                    .map(sub -> sub.getPlano().name())
-                    .orElse(Plano.FREE.name());
-            return new AuthResponse(jwtTokenProvider.generateToken(email), user.getName(), email, plano, user.getAvatar());
+            return buildAuthResponse(jwtTokenProvider.generateToken(email), user);
         }
 
         // New user: create account without password, set avatar from Google profile
@@ -164,7 +162,7 @@ public class AuthService {
             }
         });
 
-        return new AuthResponse(jwtTokenProvider.generateToken(email), name, email, Plano.FREE.name(), user.getAvatar());
+        return buildAuthResponse(jwtTokenProvider.generateToken(email), user);
     }
 
     /**
@@ -222,5 +220,29 @@ public class AuthService {
     private String generateCode() {
         SecureRandom random = new SecureRandom();
         return String.format("%06d", random.nextInt(1_000_000));
+    }
+
+    /**
+     * Builds an AuthResponse enriched with team context.
+     * If the user is an ACTIVE member of another account, the response reflects the
+     * owner's plan, memberRole="MEMBER", and workspaceName=owner's name.
+     * Otherwise memberRole="OWNER" and workspaceName=user's own name.
+     */
+    private AuthResponse buildAuthResponse(String token, User user) {
+        Optional<TeamMember> membership = userContextResolver.findActiveMembership(user.getId());
+        if (membership.isPresent()) {
+            TeamMember m = membership.get();
+            User owner = m.getOwner();
+            String ownerPlano = subscriptionRepository.findByUserId(owner.getId())
+                    .map(sub -> sub.getPlano().name())
+                    .orElse(Plano.FREE.name());
+            return new AuthResponse(token, user.getName(), user.getEmail(),
+                    ownerPlano, user.getAvatar(), "MEMBER", owner.getName());
+        }
+        String plano = subscriptionRepository.findByUserId(user.getId())
+                .map(sub -> sub.getPlano().name())
+                .orElse(Plano.FREE.name());
+        return new AuthResponse(token, user.getName(), user.getEmail(),
+                plano, user.getAvatar(), "OWNER", user.getName());
     }
 }

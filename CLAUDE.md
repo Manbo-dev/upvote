@@ -200,10 +200,71 @@ npm install && npm run dev
 - **Documentação obrigatória**: toda alteração que mude a estrutura do projeto (novas seções de infra, novos módulos, mudança de stack, novo serviço, nova integração, mudança de formato de dados/logs) **deve** ser documentada no `CLAUDE.md` correspondente (raiz ou por app) no mesmo commit ou PR. Código sem documentação de mudança estrutural não deve ser mergeado
 
 ## Modelo de negócio
-- Plano Free: 1 canal, 20 sugestões/mês, widget básico (sem customização), sem integrações
-- Plano Starter R$49/mês: 3 canais, 500 sugestões/mês, widget básico, integrações Jira/ClickUp
-- Plano Pro R$129/mês: 20 canais, ilimitado, widget customizável (cor/posição/título/placeholder), integrações
-- Plano Business R$299/mês: ilimitado, tudo do PRO + white-label widget
+- Plano Free: 1 canal, 20 sugestões/mês, widget básico (sem customização), sem integrações, 0 membros de equipe
+- Plano Starter R$49/mês: 3 canais, 500 sugestões/mês, widget básico, integrações Jira/ClickUp, 3 membros de equipe
+- Plano Pro R$129/mês: 20 canais, ilimitado, widget customizável (cor/posição/título/placeholder), integrações, 10 membros de equipe
+- Plano Business R$299/mês: ilimitado, tudo do PRO + white-label widget, membros ilimitados
+
+## Membros de Equipe (Team Members)
+
+### Visão geral
+Proprietários de conta podem convidar colegas para compartilhar seu workspace. Membros têm acesso total de leitura/escrita aos canais e feedbacks do dono, **exceto** billing e gerenciamento de equipe.
+
+O modelo de auth permanece inalterado (JWT contém apenas `sub=email`). O proxy transparente acontece no `UserContextResolver` na camada de serviço.
+
+**Limites por plano:**
+
+| Plano    | Membros |
+|----------|---------|
+| FREE     | 0 (solo) |
+| STARTER  | 3       |
+| PRO      | 10      |
+| BUSINESS | Ilimitado |
+
+### Arquitetura
+
+- **Tabela `team_members`** — armazena convites e membros ativos. Um usuário pode ser membro ACTIVE de no máximo um workspace externo (enforced via partial unique index).
+- **`UserContextResolver`** — serviço injetado em todos os controllers protegidos. `resolveOwnerId(email)` retorna o ID do dono quando o usuário é membro ACTIVE, ou o próprio ID caso contrário.
+- **`TeamService`** — lógica de convite, listagem, remoção e aceitação.
+- **`AuthResponse`** — agora inclui `memberRole` ("OWNER"/"MEMBER") e `workspaceName`.
+
+### Fluxo de convite
+1. Dono convida por email via `POST /api/team/invite`
+2. Email é enviado com link `/invite/:token`
+3. Convidado abre o link:
+   - **Novo usuário**: vai para `/register?inviteToken=X&email=Y` — email pré-preenchido e bloqueado; backend aceita automaticamente ao registrar
+   - **Usuário existente**: faz login, vai para `/invite/:token` — aceite automático via `POST /api/team/accept`
+
+### Endpoints da API
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| POST | `/api/team/invite` | JWT (owner only) | Convida membro por email |
+| GET | `/api/team/members` | JWT (owner only) | Lista membros da equipe |
+| DELETE | `/api/team/members/{id}` | JWT (owner only) | Revoga membro |
+| POST | `/api/team/accept` | JWT | Usuário existente aceita convite |
+| GET | `/api/team/invite/{token}` | **Público** | Preview do convite |
+
+### Permissões de membro
+- **Permitido**: ler e editar canais, feedback groups, integrações do dono
+- **Bloqueado**: billing (retorna 403), gerenciar equipe (invite/remove)
+- `CanalController`, `IntegrationController` e `ReportController` usam `userContextResolver.resolveOwnerId()` para operar transparentemente no workspace do dono
+- `SubscriptionController` chama `guardOwnerOnly()` no início de cada handler
+
+### Frontend
+- **`apps/web/src/pages/TeamPage.tsx`** — rota `/dashboard/team`, somente para owners
+- **`apps/web/src/pages/InviteAcceptPage.tsx`** — rota pública `/invite/:token`
+- Sidebar: item "Equipe" visível apenas para owners; item "Assinatura" oculto para membros
+- Badge "Workspace de {nome}" exibido no perfil do sidebar para membros
+
+### Migration
+- `V20260406160000__add_team_members.sql` — cria tabela `team_members` com índices parciais únicos
+
+### Emails transacionais adicionados
+- `TEAM_INVITE` — enviado ao convidado com link de aceite (template: `team_invite.html`)
+- `TEAM_INVITE_ACCEPTED` — enviado ao dono quando membro aceita (template: `team_invite_accepted.html`)
+
+Esses emails são enviados diretamente pelo `TeamService` via `EmailService` (sem fila — envio síncrono não-bloqueante via try/catch).
 
 ## Assinaturas e Pagamentos (Stripe)
 
@@ -214,12 +275,12 @@ Plano Business é tratado pelo time comercial — não passa pelo checkout.
 
 ### Planos implementados
 
-| Plano    | Canais    | Sugestões/mês | Widget customizável | Integrações Jira/ClickUp | Preço        |
-|----------|-----------|---------------|---------------------|--------------------------|--------------|
-| FREE     | 1         | 20            | Não                 | Não                      | Grátis       |
-| STARTER  | 3         | 500           | Não                 | Sim                      | R$49/mês     |
-| PRO      | 20        | Ilimitado     | Sim                 | Sim                      | R$129/mês    |
-| BUSINESS | Ilimitado | Ilimitado     | Sim                 | Sim                      | Sob consulta |
+| Plano    | Canais    | Sugestões/mês | Widget customizável | Integrações Jira/ClickUp | Membros equipe | Preço        |
+|----------|-----------|---------------|---------------------|--------------------------|----------------|--------------|
+| FREE     | 1         | 20            | Não                 | Não                      | 0              | Grátis       |
+| STARTER  | 3         | 500           | Não                 | Sim                      | 3              | R$49/mês     |
+| PRO      | 20        | Ilimitado     | Sim                 | Sim                      | 10             | R$129/mês    |
+| BUSINESS | Ilimitado | Ilimitado     | Sim                 | Sim                      | Ilimitado      | Sob consulta |
 
 ### Arquitetura backend
 

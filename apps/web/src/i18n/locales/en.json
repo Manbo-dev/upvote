@@ -25,7 +25,8 @@
     "groupMain": "Main",
     "groupAccount": "Account",
     "profile": "Profile",
-    "uploadPhoto": "Upload photo"
+    "uploadPhoto": "Upload photo",
+    "team": "Team"
   },
   "auth": {
     "login": {
@@ -368,6 +369,50 @@
     "copyKey": "Copy key",
     "copySnippet": "Copy snippet",
     "copied": "Copied!"
+  },
+  "team": {
+    "title": "Team",
+    "description": "Invite colleagues to collaborate in your workspace.",
+    "inviteButton": "Invite member",
+    "inviteTitle": "Invite member",
+    "inviteEmailLabel": "Email",
+    "inviteEmailPlaceholder": "colleague@company.com",
+    "inviteSending": "Sending...",
+    "inviteSubmit": "Send invite",
+    "inviteSuccess": "Invite sent to {{email}}",
+    "inviteError": "Error sending invite",
+    "revokeSuccess": "Member removed",
+    "revokeConfirm": "Are you sure you want to remove this member?",
+    "statuses": {
+      "ACTIVE": "Active",
+      "PENDING": "Pending",
+      "REVOKED": "Revoked"
+    },
+    "limit": {
+      "used": "{{count}} of {{limit}} members",
+      "unlimited": "Unlimited members",
+      "reached": "Member limit reached",
+      "upgradeLink": "Upgrade plan"
+    },
+    "membersOf": "{{workspaceName}}'s workspace",
+    "noMembers": "No members yet",
+    "noMembersDescription": "Invite colleagues to collaborate in your workspace.",
+    "limitFreePlan": "Team members are available from the Starter plan.",
+    "revokeButton": "Remove",
+    "pendingBadge": "Pending",
+    "activeBadge": "Active"
+  },
+  "invite": {
+    "title": "You've been invited",
+    "description": "{{ownerName}} invited you to collaborate in their Upvote workspace.",
+    "createAccount": "Create account",
+    "signIn": "I already have an account",
+    "accepting": "Accepting invite...",
+    "accepted": "Invite accepted! Redirecting...",
+    "expired": "Invite expired",
+    "expiredDescription": "This invite link has expired. Ask the workspace owner for a new invite.",
+    "invalid": "Invalid or not found invite.",
+    "alreadyAccepted": "This invite has already been accepted."
   },
   "status": {
     "OPEN": "Open",

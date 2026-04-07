@@ -6,6 +6,8 @@ export interface AuthResponse {
   email: string;
   plano: string;
   avatar?: string;
+  memberRole: 'OWNER' | 'MEMBER';
+  workspaceName: string;
 }
 
 interface ApiResult<T> {
@@ -29,11 +31,13 @@ export async function register(
   name: string,
   email: string,
   password: string,
+  inviteToken?: string,
 ): Promise<AuthResponse> {
   const { data } = await api.post<ApiResult<AuthResponse>>('/auth/register', {
     name,
     email,
     password,
+    ...(inviteToken ? { inviteToken } : {}),
   });
   return data.data;
 }

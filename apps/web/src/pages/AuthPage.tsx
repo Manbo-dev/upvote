@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { login, register, googleLogin, forgotPassword, resetPassword } from '../services/auth';
@@ -29,6 +29,8 @@ function SocialSection({ mode, onError }: SocialSectionProps) {
       email: response.email,
       plano: response.plano,
       avatar: response.avatar,
+      memberRole: response.memberRole,
+      workspaceName: response.workspaceName,
     });
     navigate('/dashboard');
   };
@@ -86,6 +88,8 @@ function LoginForm({ showLogo = false, onForgotPassword }: LoginFormProps) {
         email: response.email,
         plano: response.plano,
         avatar: response.avatar,
+        memberRole: response.memberRole,
+        workspaceName: response.workspaceName,
       });
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -175,8 +179,11 @@ function LoginForm({ showLogo = false, onForgotPassword }: LoginFormProps) {
 
 function RegisterForm({ showLogo = false }: { showLogo?: boolean }) {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('inviteToken') ?? undefined;
+  const prefillEmail = searchParams.get('email') ?? '';
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(prefillEmail);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -188,12 +195,14 @@ function RegisterForm({ showLogo = false }: { showLogo?: boolean }) {
     setError('');
     setLoading(true);
     try {
-      const response = await register(name, email, password);
+      const response = await register(name, email, password, inviteToken);
       storeLogin(response.token, {
         name: response.name,
         email: response.email,
         plano: response.plano,
         avatar: response.avatar,
+        memberRole: response.memberRole,
+        workspaceName: response.workspaceName,
       });
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -240,6 +249,8 @@ function RegisterForm({ showLogo = false }: { showLogo?: boolean }) {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="seu@email.com"
+            readOnly={!!prefillEmail}
+            className={prefillEmail ? 'bg-warm-50 text-muted-foreground dark:bg-warm-800' : ''}
           />
         </div>
         <div className="space-y-1.5">

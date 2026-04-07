@@ -5,6 +5,8 @@ public record AuthResponse(
         String name,
         String email,
         String plano,
-        String avatar
+        String avatar,
+        String memberRole,
+        String workspaceName
 ) {
 }
