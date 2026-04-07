@@ -55,9 +55,6 @@ public class StripeService {
     @Value("${app.stripe.pro-price-id}")
     private String proPriceId;
 
-    @Value("${app.stripe.business-price-id}")
-    private String businessPriceId;
-
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
@@ -80,12 +77,7 @@ public class StripeService {
             throw new BusinessException("Você já possui uma assinatura ativa. Use o portal para gerenciá-la.");
         }
 
-        String priceId = switch (planoDesejado) {
-            case STARTER -> starterPriceId;
-            case PRO -> proPriceId;
-            case BUSINESS -> businessPriceId;
-            default -> throw new BusinessException("Plano sem price ID configurado: " + planoDesejado);
-        };
+        String priceId = planoDesejado == Plano.STARTER ? starterPriceId : proPriceId;
         log.info("[STRIPE] priceId selecionado: userId={}, plano={}, priceId={}", userId, planoDesejado, priceId);
 
         String frontendUrl = allowedOrigins.split(",")[0].trim();
@@ -465,7 +457,6 @@ public class StripeService {
     private Plano mapPriceIdToPlano(String priceId) {
         if (priceId.equals(starterPriceId)) return Plano.STARTER;
         if (priceId.equals(proPriceId)) return Plano.PRO;
-        if (priceId.equals(businessPriceId)) return Plano.BUSINESS;
         // Retorna null em vez de FREE para evitar reset silencioso do plano
         // quando as env vars não batem com o priceId real do Stripe
         log.warn("[STRIPE] priceId não reconhecido: priceId={}, starterPriceId={}, proPriceId={}",

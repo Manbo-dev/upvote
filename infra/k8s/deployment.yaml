@@ -130,11 +130,6 @@ spec:
                 secretKeyRef:
                   name: upvote-secrets
                   key: STRIPE_PRO_PRICE_ID
-            - name: STRIPE_BUSINESS_PRICE_ID
-              valueFrom:
-                secretKeyRef:
-                  name: upvote-secrets
-                  key: STRIPE_BUSINESS_PRICE_ID
             - name: GEMINI_API_KEY
               valueFrom:
                 secretKeyRef:
