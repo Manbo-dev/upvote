@@ -316,6 +316,7 @@ Plano Business é tratado pelo time comercial — não passa pelo checkout.
 - **Widget customization**: `CanalService.updateWidgetSettings()` verifica `plano.isWidgetCustomizationEnabled()` → 422 se false
 - **Integrações**: `IntegrationService.requireIntegrationAccess()` verifica `plano.isIntegrationsEnabled()` — chamado em `getJiraAuthorizationUrl`, `getClickUpAuthorizationUrl` e `pushToExternal`; **não** em `getIntegrations` nem `disconnect` (downgrade não remove acesso às integrações já conectadas)
 - **Roadmap público**: `CanalService.togglePublicBoard()` verifica `plano.isPublicBoardEnabled()` → 422 se FREE; `getPublicBoard()` retorna 404 se board desativado ou plano inválido
+- **Export PDF**: `ReportController.exportPdf()` verifica `plano.isPdfReportEnabled()` → 422 se FREE; STARTER+ têm acesso. Frontend desabilita o botão PDF com lock icon e tooltip para FREE.
 - Toda Organization recebe automaticamente uma `Subscription` FREE no registro
 
 ### Roadmap Público (/b/:slug) — STARTER+

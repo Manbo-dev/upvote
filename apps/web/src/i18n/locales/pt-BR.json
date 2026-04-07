@@ -140,6 +140,7 @@
     "export": "Exportar",
     "exportReport": "Exportar relatório",
     "exportFormat": "Formato",
+    "pdfUpgradeRequired": "Export PDF disponível a partir do plano STARTER",
     "exportStatus": "Status",
     "exportIncludeDetails": "Incluir feedbacks individuais",
     "exportActiveFilters": "Filtros ativos:",

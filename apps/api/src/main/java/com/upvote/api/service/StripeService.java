@@ -188,7 +188,8 @@ public class StripeService {
                 plano.isWidgetHabilitado(),
                 plano.isWidgetCustomizationEnabled(),
                 plano.isIntegrationsEnabled(),
-                plano.isPublicBoardEnabled()
+                plano.isPublicBoardEnabled(),
+                plano.isPdfReportEnabled()
         );
     }
 

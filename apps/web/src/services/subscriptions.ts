@@ -12,6 +12,7 @@ export interface SubscriptionInfo {
   widgetCustomizationEnabled: boolean;
   integrationsEnabled: boolean;
   publicBoardEnabled: boolean;
+  pdfReportEnabled: boolean;
 }
 
 interface ApiResult<T> {

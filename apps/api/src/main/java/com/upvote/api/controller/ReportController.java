@@ -1,25 +1,36 @@
 package com.upvote.api.controller;
 
+import com.upvote.api.exception.BusinessException;
+import com.upvote.api.repository.SubscriptionRepository;
 import com.upvote.api.service.PdfReportService;
 import com.upvote.api.service.ReportService;
+import com.upvote.api.service.UserContextResolver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 /**
  * Provides CSV and PDF export for feedback groups.
+ * PDF export requires STARTER plan or above.
  */
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ReportController {
 
     private final ReportService reportService;
     private final PdfReportService pdfReportService;
+    private final UserContextResolver userContextResolver;
+    private final SubscriptionRepository subscriptionRepository;
 
     /**
      * Exports feedback groups for a channel as a CSV file.
@@ -55,7 +66,7 @@ public class ReportController {
     }
 
     /**
-     * Exports a professional PDF report for a channel with current status, completed items and word map.
+     * Exports a professional PDF report for a channel. Requires STARTER plan or above.
      *
      * @param slug     the channel slug
      * @param status   optional status filter
@@ -69,8 +80,12 @@ public class ReportController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String from,
-            @RequestParam(required = false) String to
+            @RequestParam(required = false) String to,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
+        log.info("GET /api/canais/{}/report.pdf: user={}", slug, userDetails.getUsername());
+        requirePdfAccess(userDetails);
+
         byte[] pdf = pdfReportService.generatePdf(slug, status, category, from, to);
 
         String filename = "feedback-" + slug + "-"
@@ -83,5 +98,15 @@ public class ReportController {
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
+    }
+
+    private void requirePdfAccess(UserDetails userDetails) {
+        UUID ownerId = userContextResolver.resolveOwnerId(userDetails.getUsername());
+        boolean allowed = subscriptionRepository.findByUserId(ownerId)
+                .map(s -> s.getPlano().isPdfReportEnabled())
+                .orElse(false);
+        if (!allowed) {
+            throw new BusinessException("PDF export requires STARTER plan or above. Upgrade to access this feature.");
+        }
     }
 }

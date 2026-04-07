@@ -13,6 +13,7 @@ public record SubscriptionResponse(
         boolean widgetHabilitado,
         boolean widgetCustomizationEnabled,
         boolean integrationsEnabled,
-        boolean publicBoardEnabled
+        boolean publicBoardEnabled,
+        boolean pdfReportEnabled
 ) {
 }

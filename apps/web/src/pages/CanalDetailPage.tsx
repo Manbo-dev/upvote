@@ -273,6 +273,7 @@ export default function CanalDetailPage() {
   const canal = canais?.find((c) => c.slug === slug);
   const canCustomizeWidget = subscription?.widgetCustomizationEnabled ?? false;
   const canUsePublicBoard = subscription?.publicBoardEnabled ?? false;
+  const canExportPdf = subscription?.pdfReportEnabled ?? false;
 
   // Sync widget settings form when canal data loads
   useEffect(() => {
@@ -557,14 +558,18 @@ export default function CanalDetailPage() {
                       CSV
                     </button>
                     <button
-                      onClick={() => setExportFormat('pdf')}
-                      className={`flex-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
-                        exportFormat === 'pdf'
+                      onClick={() => canExportPdf && setExportFormat('pdf')}
+                      title={!canExportPdf ? t('canal.pdfUpgradeRequired') : undefined}
+                      className={`relative flex-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                        !canExportPdf
+                          ? 'cursor-not-allowed border-warm-200 text-warm-400 opacity-50 dark:border-warm-700 dark:text-warm-600'
+                          : exportFormat === 'pdf'
                           ? 'border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
                           : 'border-warm-200 text-warm-600 hover:bg-warm-50 dark:border-warm-700 dark:text-warm-400 dark:hover:bg-warm-800'
                       }`}
                     >
                       PDF
+                      {!canExportPdf && <span className="ml-1 text-xs">🔒</span>}
                     </button>
                   </div>
                 </div>
