@@ -14,6 +14,7 @@ public record SubscriptionResponse(
         boolean widgetCustomizationEnabled,
         boolean integrationsEnabled,
         boolean publicBoardEnabled,
-        boolean pdfReportEnabled
+        boolean pdfReportEnabled,
+        boolean cancelAtPeriodEnd
 ) {
 }

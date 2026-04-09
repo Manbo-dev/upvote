@@ -13,6 +13,7 @@ export interface SubscriptionInfo {
   integrationsEnabled: boolean;
   publicBoardEnabled: boolean;
   pdfReportEnabled: boolean;
+  cancelAtPeriodEnd: boolean;
 }
 
 interface ApiResult<T> {
@@ -39,4 +40,12 @@ export async function createPortalSession(): Promise<string> {
     '/subscriptions/portal',
   );
   return data.data.portalUrl;
+}
+
+export async function cancelSubscription(): Promise<void> {
+  await api.post('/subscriptions/cancel');
+}
+
+export async function reactivateSubscription(): Promise<void> {
+  await api.post('/subscriptions/reactivate');
 }

@@ -2,7 +2,21 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getSubscription, createCheckoutSession, createPortalSession } from '../services/subscriptions';
+import {
+  getSubscription,
+  createCheckoutSession,
+  createPortalSession,
+  cancelSubscription,
+  reactivateSubscription,
+} from '../services/subscriptions';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog';
+import { Button } from '../components/ui/button';
 
 /**
  * Subscription and billing management page.
@@ -15,6 +29,7 @@ export default function BillingPage() {
   const [error, setError] = useState('');
   const [banner, setBanner] = useState<{ type: 'success' | 'info' | 'error'; message: string } | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
@@ -62,6 +77,8 @@ export default function BillingPage() {
     return () => clearTimeout(timeout);
   }, [isPolling, subscription?.plano, t]);
 
+  const locale = i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US';
+
   const handleCheckout = async (plano: string) => {
     setLoading(plano);
     setError('');
@@ -88,6 +105,42 @@ export default function BillingPage() {
     }
   };
 
+  const handleCancel = async () => {
+    setLoading('cancel');
+    setError('');
+    try {
+      await cancelSubscription();
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      setShowCancelDialog(false);
+      setBanner({ type: 'info', message: t('billing.banners.cancellationScheduled', {
+        date: subscription?.currentPeriodEnd
+          ? new Date(subscription.currentPeriodEnd).toLocaleDateString(locale)
+          : '',
+      }) });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setError(e.response?.data?.message || t('billing.errors.cancel'));
+      setShowCancelDialog(false);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleReactivate = async () => {
+    setLoading('reactivate');
+    setError('');
+    try {
+      await reactivateSubscription();
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      setBanner({ type: 'success', message: t('billing.banners.reactivateSuccess') });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setError(e.response?.data?.message || t('billing.errors.reactivate'));
+    } finally {
+      setLoading(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -107,8 +160,6 @@ export default function BillingPage() {
     PRO: 'Pro',
     BUSINESS: 'Business',
   };
-
-  const locale = i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US';
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -141,6 +192,28 @@ export default function BillingPage() {
         </div>
       )}
 
+      {/* Cancellation scheduled banner */}
+      {subscription.cancelAtPeriodEnd && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+          <div className="flex items-center justify-between gap-4">
+            <span>
+              {t('billing.banners.cancellationScheduled', {
+                date: subscription.currentPeriodEnd
+                  ? new Date(subscription.currentPeriodEnd).toLocaleDateString(locale)
+                  : '',
+              })}
+            </span>
+            <button
+              onClick={handleReactivate}
+              disabled={loading === 'reactivate'}
+              className="shrink-0 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-50 disabled:opacity-50 dark:border-amber-700 dark:bg-transparent dark:text-amber-300 dark:hover:bg-amber-900/30"
+            >
+              {loading === 'reactivate' ? t('billing.loading') : t('billing.reactivate')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Current plan */}
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
@@ -166,13 +239,23 @@ export default function BillingPage() {
             )}
           </div>
           {isPago && (
-            <button
-              onClick={handlePortal}
-              disabled={loading === 'portal'}
-              className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-50"
-            >
-              {loading === 'portal' ? t('billing.opening') : t('billing.manageSubscription')}
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              <button
+                onClick={handlePortal}
+                disabled={loading === 'portal'}
+                className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-50"
+              >
+                {loading === 'portal' ? t('billing.opening') : t('billing.manageSubscription')}
+              </button>
+              {!subscription.cancelAtPeriodEnd && (
+                <button
+                  onClick={() => setShowCancelDialog(true)}
+                  className="text-xs text-muted-foreground underline-offset-2 hover:text-destructive hover:underline"
+                >
+                  {t('billing.cancelSubscription')}
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -321,6 +404,39 @@ export default function BillingPage() {
           </div>
         </div>
       )}
+
+      {/* Cancel subscription dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('billing.cancelConfirmTitle')}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {t('billing.cancelConfirmBody', {
+              plan: planoLabels[planoAtual] || planoAtual,
+              date: subscription.currentPeriodEnd
+                ? new Date(subscription.currentPeriodEnd).toLocaleDateString(locale)
+                : '',
+            })}
+          </p>
+          <DialogFooter className="mt-4 flex-col gap-2 sm:flex-row">
+            <Button
+              variant="outline"
+              onClick={() => setShowCancelDialog(false)}
+              disabled={loading === 'cancel'}
+            >
+              {t('billing.keepSubscription')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={loading === 'cancel'}
+            >
+              {loading === 'cancel' ? t('common.loading') : t('billing.cancelConfirmAction')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

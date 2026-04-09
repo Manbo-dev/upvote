@@ -277,9 +277,17 @@
     "manageSubscription": "Gerenciar assinatura",
     "opening": "Abrindo...",
     "renewsOn": "Renova em",
+    "cancelSubscription": "Cancelar assinatura",
+    "cancelConfirmTitle": "Cancelar assinatura?",
+    "cancelConfirmBody": "Você terá acesso completo ao plano {{plan}} até {{date}}. Após isso, sua conta voltará automaticamente para o plano Free.",
+    "cancelConfirmAction": "Confirmar cancelamento",
+    "keepSubscription": "Manter assinatura",
+    "reactivate": "Desfazer cancelamento",
+    "loading": "Aguarde...",
     "stripeStatus": {
       "ACTIVE": "Ativa",
-      "PAST_DUE": "Pagamento pendente"
+      "PAST_DUE": "Pagamento pendente",
+      "CANCELED": "Cancelada"
     },
     "plans": {
       "starter": {
@@ -301,11 +309,15 @@
       "success": "Assinatura ativada com sucesso! Atualizando dados...",
       "successFinal": "Assinatura ativada com sucesso!",
       "canceled": "Checkout cancelado. Você pode tentar novamente quando quiser.",
-      "processing": "Processando assinatura... Atualize a página em alguns instantes."
+      "processing": "Processando assinatura... Atualize a página em alguns instantes.",
+      "cancellationScheduled": "Sua assinatura será cancelada em {{date}}. Você tem acesso completo até lá.",
+      "reactivateSuccess": "Assinatura reativada com sucesso!"
     },
     "errors": {
       "checkout": "Erro ao iniciar checkout",
-      "portal": "Erro ao abrir portal"
+      "portal": "Erro ao abrir portal",
+      "cancel": "Erro ao cancelar assinatura",
+      "reactivate": "Erro ao reativar assinatura"
     }
   },
   "settings": {

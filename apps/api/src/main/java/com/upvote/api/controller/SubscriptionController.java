@@ -72,6 +72,30 @@ public class SubscriptionController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /**
+     * Schedules the subscription to cancel at period end. Blocked for team members.
+     */
+    @PostMapping("/cancel")
+    public ResponseEntity<ApiResponse<Void>> cancelSubscription(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        guardOwnerOnly(userDetails);
+        log.info("[SUBSCRIPTION] Cancel requested: user={}", userDetails.getUsername());
+        stripeService.cancelSubscription(getUserId(userDetails));
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    /**
+     * Reactivates a subscription scheduled for cancellation. Blocked for team members.
+     */
+    @PostMapping("/reactivate")
+    public ResponseEntity<ApiResponse<Void>> reactivateSubscription(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        guardOwnerOnly(userDetails);
+        log.info("[SUBSCRIPTION] Reactivate requested: user={}", userDetails.getUsername());
+        stripeService.reactivateSubscription(getUserId(userDetails));
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
     private UUID getUserId(UserDetails userDetails) {
         return userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalStateException("Usuário não encontrado"))

@@ -5,6 +5,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.*;
 import com.stripe.model.billingportal.Session;
 import com.stripe.net.Webhook;
+import com.stripe.param.SubscriptionUpdateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.upvote.api.domain.Plano;
 import com.upvote.api.domain.StripeStatus;
@@ -144,6 +145,69 @@ public class StripeService {
     }
 
     /**
+     * Schedules the subscription to be canceled at the end of the current billing period.
+     */
+    public void cancelSubscription(UUID userId) {
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Assinatura não encontrada"));
+
+        if (subscription.getStripeSubscriptionId() == null) {
+            throw new BusinessException("Nenhuma assinatura ativa encontrada.");
+        }
+        if (subscription.getStripeStatus() != StripeStatus.ACTIVE) {
+            throw new BusinessException("Somente assinaturas ativas podem ser canceladas.");
+        }
+        if (subscription.isCancelAtPeriodEnd()) {
+            throw new BusinessException("Assinatura já está agendada para cancelamento.");
+        }
+
+        try {
+            com.stripe.model.Subscription stripeSub =
+                    com.stripe.model.Subscription.retrieve(subscription.getStripeSubscriptionId());
+            stripeSub.update(SubscriptionUpdateParams.builder()
+                    .setCancelAtPeriodEnd(true)
+                    .build());
+        } catch (StripeException e) {
+            log.error("[STRIPE] userId={} Failed to schedule subscription cancellation", userId, e);
+            throw new BusinessException("Erro ao cancelar assinatura. Tente novamente.", e);
+        }
+
+        subscription.setCancelAtPeriodEnd(true);
+        subscriptionRepository.save(subscription);
+        log.info("[STRIPE] userId={} Subscription scheduled for cancellation at period end", userId);
+    }
+
+    /**
+     * Reactivates a subscription that was previously scheduled for cancellation.
+     */
+    public void reactivateSubscription(UUID userId) {
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Assinatura não encontrada"));
+
+        if (subscription.getStripeSubscriptionId() == null) {
+            throw new BusinessException("Nenhuma assinatura encontrada.");
+        }
+        if (!subscription.isCancelAtPeriodEnd()) {
+            throw new BusinessException("Assinatura não está agendada para cancelamento.");
+        }
+
+        try {
+            com.stripe.model.Subscription stripeSub =
+                    com.stripe.model.Subscription.retrieve(subscription.getStripeSubscriptionId());
+            stripeSub.update(SubscriptionUpdateParams.builder()
+                    .setCancelAtPeriodEnd(false)
+                    .build());
+        } catch (StripeException e) {
+            log.error("[STRIPE] userId={} Failed to reactivate subscription", userId, e);
+            throw new BusinessException("Erro ao reativar assinatura. Tente novamente.", e);
+        }
+
+        subscription.setCancelAtPeriodEnd(false);
+        subscriptionRepository.save(subscription);
+        log.info("[STRIPE] userId={} Subscription reactivated", userId);
+    }
+
+    /**
      * Processa webhook do Stripe com verificação de assinatura
      */
     @Transactional
@@ -197,7 +261,8 @@ public class StripeService {
                 plano.isWidgetCustomizationEnabled(),
                 plano.isIntegrationsEnabled(),
                 plano.isPublicBoardEnabled(),
-                plano.isPdfReportEnabled()
+                plano.isPdfReportEnabled(),
+                subscription.isCancelAtPeriodEnd()
         );
     }
 
@@ -378,6 +443,7 @@ public class StripeService {
                 .ifPresent(subscription -> {
                     Plano previousPlano = subscription.getPlano();
                     subscription.setStripeStatus(mapStripeStatus(stripeSub.getStatus()));
+                    subscription.setCancelAtPeriodEnd(Boolean.TRUE.equals(stripeSub.getCancelAtPeriodEnd()));
 
                     Plano newPlano = subscription.getPlano();
                     if (!stripeSub.getItems().getData().isEmpty()) {

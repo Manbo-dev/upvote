@@ -277,9 +277,17 @@
     "manageSubscription": "Manage subscription",
     "opening": "Opening...",
     "renewsOn": "Renews on",
+    "cancelSubscription": "Cancel subscription",
+    "cancelConfirmTitle": "Cancel subscription?",
+    "cancelConfirmBody": "You will have full access to the {{plan}} plan until {{date}}. After that, your account will automatically revert to the Free plan.",
+    "cancelConfirmAction": "Confirm cancellation",
+    "keepSubscription": "Keep subscription",
+    "reactivate": "Undo cancellation",
+    "loading": "Please wait...",
     "stripeStatus": {
       "ACTIVE": "Active",
-      "PAST_DUE": "Payment overdue"
+      "PAST_DUE": "Payment overdue",
+      "CANCELED": "Canceled"
     },
     "plans": {
       "starter": {
@@ -301,11 +309,15 @@
       "success": "Subscription activated successfully! Updating data...",
       "successFinal": "Subscription activated successfully!",
       "canceled": "Checkout canceled. You can try again whenever you want.",
-      "processing": "Processing subscription... Please refresh the page in a few moments."
+      "processing": "Processing subscription... Please refresh the page in a few moments.",
+      "cancellationScheduled": "Your subscription will be canceled on {{date}}. You have full access until then.",
+      "reactivateSuccess": "Subscription reactivated successfully!"
     },
     "errors": {
       "checkout": "Error starting checkout",
-      "portal": "Error opening portal"
+      "portal": "Error opening portal",
+      "cancel": "Error canceling subscription",
+      "reactivate": "Error reactivating subscription"
     }
   },
   "settings": {
