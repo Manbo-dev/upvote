@@ -56,6 +56,18 @@ public class Canal {
     @Builder.Default
     private String widgetMode = "FLOATING";
 
+    @Column(name = "widget_theme", length = 10)
+    @Builder.Default
+    private String widgetTheme = "auto";
+
+    @Column(name = "widget_language", length = 10)
+    @Builder.Default
+    private String widgetLanguage = "pt-BR";
+
+    @Column(name = "widget_button_style", length = 20)
+    @Builder.Default
+    private String widgetButtonStyle = "CIRCLE";
+
     @Column(name = "public_board_enabled", nullable = false)
     @Builder.Default
     private boolean publicBoardEnabled = false;

@@ -33,6 +33,27 @@ public record WidgetSettingsRequest(
                 regexp = "^(FLOATING|SIDEBAR|INLINE)$",
                 message = "Mode must be one of: FLOATING, SIDEBAR, INLINE"
         )
-        String mode
+        String mode,
+
+        @NotNull
+        @Pattern(
+                regexp = "^(light|dark|auto)$",
+                message = "Theme must be one of: light, dark, auto"
+        )
+        String theme,
+
+        @NotNull
+        @Pattern(
+                regexp = "^(pt-BR|en)$",
+                message = "Language must be one of: pt-BR, en"
+        )
+        String language,
+
+        @NotNull
+        @Pattern(
+                regexp = "^(CIRCLE|SQUARE|PILL|PILL_LABEL|HANDLE|BUBBLE|GRADIENT|PILL_COUNTER)$",
+                message = "Button style must be one of: CIRCLE, SQUARE, PILL, PILL_LABEL, HANDLE, BUBBLE, GRADIENT, PILL_COUNTER"
+        )
+        String buttonStyle
 ) {
 }

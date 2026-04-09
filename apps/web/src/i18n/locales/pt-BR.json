@@ -207,12 +207,33 @@
       "customTitlePlaceholder": "Ex: Envie seu feedback",
       "placeholder": "Placeholder do campo de texto",
       "placeholderPlaceholder": "Ex: Descreva seu problema ou sugestão...",
+      "theme": "Tema",
+      "themes": {
+        "auto": "Automático (segue dispositivo)",
+        "light": "Claro",
+        "dark": "Escuro"
+      },
+      "language": "Idioma",
+      "languages": {
+        "pt-BR": "Português",
+        "en": "English"
+      },
+      "buttonStyle": "Estilo do botão",
       "save": "Salvar configurações",
       "saveSuccess": "Salvo com sucesso!",
       "upgradeRequired": "Disponível no plano PRO",
       "upgradeDescription": "Personalize a cor, modo, posição, título e placeholder do widget no seu plano PRO ou superior.",
       "upgradeLink": "Fazer upgrade de plano"
     },
+    "widgetPreviewLabel": "Preview em tempo real",
+    "buttonStyleCircle": "Círculo",
+    "buttonStyleSquare": "Quadrado",
+    "buttonStylePill": "Pílula",
+    "buttonStylePillLabel": "Label pill",
+    "buttonStyleHandle": "Alça",
+    "buttonStyleBubble": "Balão",
+    "buttonStyleGradient": "Gradiente",
+    "buttonStylePillCounter": "Com contador",
     "praise": {
       "subtitle": "Feedbacks positivos recebidos",
       "emptyTitle": "Nenhum elogio ainda",

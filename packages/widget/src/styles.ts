@@ -1,11 +1,68 @@
 /**
- * Estilos CSS-in-JS para o widget Upvote
- * Todos os estilos são injetados via JS para evitar conflitos com a página host
- * Usa prefixo 'upvote-' em todas as classes para isolamento
+ * CSS-in-JS styles for the Upvote widget.
+ * All styles are injected via JS to avoid conflicts with the host page.
+ * Uses 'upvote-' prefix on all classes for isolation.
+ * Uses CSS custom properties for theming (light/dark).
  */
 export function getStyles(color: string): string {
   return `
-    /* Botão flutuante (modo FLOATING) */
+    /* ---- CSS variables (light theme defaults) ---- */
+    .upvote-widget-btn,
+    .upvote-widget-panel,
+    .upvote-widget-inline,
+    .upvote-sidebar-tab {
+      --upvote-primary: ${color};
+      --upvote-surface: #ffffff;
+      --upvote-on-surface: #1e293b;
+      --upvote-on-surface-muted: #64748b;
+      --upvote-input-bg: #f8fafc;
+      --upvote-input-bg-focus: #ffffff;
+      --upvote-border: #e2e8f0;
+      --upvote-consent: #94a3b8;
+      --upvote-success-text: #1e293b;
+      --upvote-followup-bg: #f1f5f9;
+      --upvote-error: #ef4444;
+    }
+
+    /* ---- Dark theme override (forced) ---- */
+    .upvote-theme-dark.upvote-widget-btn,
+    .upvote-theme-dark.upvote-widget-panel,
+    .upvote-theme-dark.upvote-widget-inline,
+    .upvote-theme-dark.upvote-sidebar-tab,
+    .upvote-theme-dark .upvote-widget-panel,
+    .upvote-theme-dark .upvote-widget-inline {
+      --upvote-surface: #1e293b;
+      --upvote-on-surface: #f1f5f9;
+      --upvote-on-surface-muted: #94a3b8;
+      --upvote-input-bg: #0f172a;
+      --upvote-input-bg-focus: #1e293b;
+      --upvote-border: #334155;
+      --upvote-consent: #64748b;
+      --upvote-success-text: #f1f5f9;
+      --upvote-followup-bg: #0f172a;
+    }
+
+    /* ---- Dark theme via OS preference (auto) ---- */
+    @media (prefers-color-scheme: dark) {
+      .upvote-theme-auto.upvote-widget-btn,
+      .upvote-theme-auto.upvote-widget-panel,
+      .upvote-theme-auto.upvote-widget-inline,
+      .upvote-theme-auto.upvote-sidebar-tab,
+      .upvote-theme-auto .upvote-widget-panel,
+      .upvote-theme-auto .upvote-widget-inline {
+        --upvote-surface: #1e293b;
+        --upvote-on-surface: #f1f5f9;
+        --upvote-on-surface-muted: #94a3b8;
+        --upvote-input-bg: #0f172a;
+        --upvote-input-bg-focus: #1e293b;
+        --upvote-border: #334155;
+        --upvote-consent: #64748b;
+        --upvote-success-text: #f1f5f9;
+        --upvote-followup-bg: #0f172a;
+      }
+    }
+
+    /* ---- Floating trigger button (FLOATING mode) ---- */
     .upvote-widget-btn {
       position: fixed;
       bottom: 24px;
@@ -23,6 +80,7 @@ export function getStyles(color: string): string {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       z-index: 99998;
       padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     .upvote-widget-btn:hover {
@@ -34,16 +92,104 @@ export function getStyles(color: string): string {
       width: 24px;
       height: 24px;
       fill: white;
+      flex-shrink: 0;
     }
 
-    /* Painel de feedback (modos FLOATING e SIDEBAR) */
+    /* -- Button style variants -- */
+
+    /* SQUARE: rounded square instead of circle */
+    .upvote-btn-square {
+      border-radius: 14px !important;
+    }
+
+    /* PILL: wide pill with icon + label text */
+    .upvote-btn-pill {
+      border-radius: 100px !important;
+      width: auto !important;
+      height: 48px !important;
+      padding: 0 20px !important;
+      gap: 8px;
+      min-width: 130px;
+    }
+    .upvote-btn-pill .upvote-btn-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+    }
+
+    /* PILL_LABEL: smaller pill, text-first layout */
+    .upvote-btn-pill-label {
+      border-radius: 100px !important;
+      width: auto !important;
+      height: 44px !important;
+      padding: 0 16px !important;
+      gap: 8px;
+    }
+    .upvote-btn-pill-label svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
+    .upvote-btn-pill-label .upvote-btn-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+    }
+
+    /* HANDLE: wide but short, horizontal handle shape */
+    .upvote-btn-handle {
+      border-radius: 100px !important;
+      width: 72px !important;
+      height: 36px !important;
+    }
+    .upvote-btn-handle svg {
+      width: 20px !important;
+      height: 20px !important;
+    }
+
+    /* BUBBLE: speech-bubble shape (bottom-left corner cut) */
+    .upvote-btn-bubble {
+      border-radius: 50% 50% 50% 6px !important;
+    }
+
+    /* GRADIENT: circle with 2-tone gradient */
+    .upvote-btn-gradient {
+      background: linear-gradient(135deg, ${color}, var(--upvote-primary-dark, ${color})) !important;
+    }
+
+    /* PILL_COUNTER: pill with icon + label + count badge */
+    .upvote-btn-pill-counter {
+      border-radius: 100px !important;
+      width: auto !important;
+      height: 48px !important;
+      padding: 0 16px !important;
+      gap: 8px;
+    }
+    .upvote-btn-pill-counter .upvote-btn-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+    }
+    .upvote-btn-counter-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+      border-radius: 100px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    /* ---- Feedback panel (FLOATING + SIDEBAR modes) ---- */
     .upvote-widget-panel {
       position: fixed;
       bottom: 92px;
       right: 24px;
       width: 360px;
       max-height: 480px;
-      background: #ffffff;
+      background: var(--upvote-surface);
       border-radius: 16px;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
       z-index: 99999;
@@ -63,9 +209,8 @@ export function getStyles(color: string): string {
       pointer-events: auto;
     }
 
-    /* ---- Modo SIDEBAR ---- */
+    /* ---- SIDEBAR mode ---- */
 
-    /* Tab clicável colada na borda */
     .upvote-sidebar-tab {
       position: fixed;
       right: 0;
@@ -91,7 +236,6 @@ export function getStyles(color: string): string {
       padding: 12px 18px;
     }
 
-    /* Tab no lado esquerdo */
     .upvote-sidebar-tab.upvote-sidebar-left {
       right: auto;
       left: 0;
@@ -99,7 +243,6 @@ export function getStyles(color: string): string {
       box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
     }
 
-    /* Painel no modo sidebar — desliza da borda direita */
     .upvote-widget-panel.upvote-mode-sidebar {
       top: 0;
       right: 0;
@@ -120,7 +263,6 @@ export function getStyles(color: string): string {
       pointer-events: auto;
     }
 
-    /* Painel sidebar no lado esquerdo */
     .upvote-widget-panel.upvote-mode-sidebar.upvote-sidebar-left {
       right: auto;
       left: 0;
@@ -131,18 +273,18 @@ export function getStyles(color: string): string {
       transform: translateX(0);
     }
 
-    /* ---- Modo INLINE ---- */
+    /* ---- INLINE mode ---- */
 
     .upvote-widget-inline {
       width: 100%;
-      background: #ffffff;
+      background: var(--upvote-surface);
       border-radius: 16px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Cabeçalho — compartilhado por todos os modos */
+    /* ---- Header (shared by all modes) ---- */
     .upvote-widget-header {
       display: flex;
       align-items: center;
@@ -182,7 +324,7 @@ export function getStyles(color: string): string {
       background: rgba(255, 255, 255, 0.35);
     }
 
-    /* Corpo do painel */
+    /* ---- Panel body ---- */
     .upvote-widget-body {
       padding: 16px 20px;
       display: flex;
@@ -190,22 +332,23 @@ export function getStyles(color: string): string {
       gap: 12px;
       flex: 1;
       overflow-y: auto;
+      background: var(--upvote-surface);
     }
 
-    /* Área de texto */
+    /* ---- Textarea ---- */
     .upvote-widget-textarea {
       width: 100%;
       min-height: 100px;
       padding: 12px;
-      border: 1.5px solid #e2e8f0;
+      border: 1.5px solid var(--upvote-border);
       border-radius: 10px;
       font-family: inherit;
       font-size: 14px;
       line-height: 1.5;
-      color: #1e293b;
-      background: #f8fafc;
+      color: var(--upvote-on-surface);
+      background: var(--upvote-input-bg);
       resize: vertical;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
       box-sizing: border-box;
       outline: none;
     }
@@ -213,14 +356,14 @@ export function getStyles(color: string): string {
     .upvote-widget-textarea:focus {
       border-color: ${color};
       box-shadow: 0 0 0 3px ${color}22;
-      background: #ffffff;
+      background: var(--upvote-input-bg-focus);
     }
 
     .upvote-widget-textarea::placeholder {
-      color: #94a3b8;
+      color: var(--upvote-consent);
     }
 
-    /* Botão de enviar */
+    /* ---- Submit button ---- */
     .upvote-widget-submit {
       width: 100%;
       padding: 10px 16px;
@@ -253,7 +396,7 @@ export function getStyles(color: string): string {
       cursor: not-allowed;
     }
 
-    /* Spinner de loading */
+    /* ---- Loading spinner ---- */
     .upvote-widget-spinner {
       width: 16px;
       height: 16px;
@@ -263,17 +406,17 @@ export function getStyles(color: string): string {
       animation: upvote-spin 0.6s linear infinite;
     }
 
-    /* Texto de consentimento */
+    /* ---- Consent text ---- */
     .upvote-widget-consent {
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--upvote-consent);
       text-align: center;
       line-height: 1.4;
       margin: 0;
       padding: 0 4px;
     }
 
-    /* Mensagem de sucesso */
+    /* ---- Success state ---- */
     .upvote-widget-success {
       display: flex;
       flex-direction: column;
@@ -303,32 +446,32 @@ export function getStyles(color: string): string {
     .upvote-widget-success-text {
       font-size: 15px;
       font-weight: 600;
-      color: #1e293b;
+      color: var(--upvote-success-text);
       margin: 0;
     }
 
-    /* Mensagem de erro */
+    /* ---- Error message ---- */
     .upvote-widget-error {
       font-size: 13px;
-      color: #ef4444;
+      color: var(--upvote-error);
       text-align: center;
       margin: 0;
       padding: 4px 0;
     }
 
-    /* Pergunta de follow-up */
+    /* ---- Follow-up question ---- */
     .upvote-widget-followup-question {
       font-size: 14px;
-      color: #334155;
+      color: var(--upvote-on-surface);
       line-height: 1.5;
       margin: 0;
       padding: 8px 12px;
-      background: #f1f5f9;
+      background: var(--upvote-followup-bg);
       border-radius: 8px;
       border-left: 3px solid ${color};
     }
 
-    /* Responsividade mobile */
+    /* ---- Mobile responsive ---- */
     @media (max-width: 480px) {
       .upvote-widget-panel:not(.upvote-mode-sidebar) {
         bottom: 0;
@@ -350,7 +493,7 @@ export function getStyles(color: string): string {
       }
     }
 
-    /* Powered by Upvote branding */
+    /* ---- Powered by Upvote branding ---- */
     .upvote-widget-branding {
       display: flex;
       align-items: center;
@@ -361,7 +504,7 @@ export function getStyles(color: string): string {
 
     .upvote-widget-branding a {
       font-size: 10px;
-      color: #94a3b8;
+      color: var(--upvote-consent);
       text-decoration: none;
       display: flex;
       align-items: center;
@@ -373,12 +516,12 @@ export function getStyles(color: string): string {
       color: ${color};
     }
 
-    /* Animação de rotação */
+    /* ---- Animations ---- */
     @keyframes upvote-spin {
       to { transform: rotate(360deg); }
     }
 
-    /* Position overrides (modo FLOATING) — default (BOTTOM_RIGHT) já está no base CSS */
+    /* ---- Position overrides (FLOATING mode) ---- */
     .upvote-widget-btn.upvote-pos-bottom-left {
       right: auto;
       left: 24px;

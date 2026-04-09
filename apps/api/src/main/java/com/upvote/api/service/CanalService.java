@@ -159,6 +159,9 @@ public class CanalService {
         canal.setWidgetTitle(request.title());
         canal.setWidgetPlaceholder(request.placeholder());
         canal.setWidgetMode(request.mode());
+        canal.setWidgetTheme(request.theme());
+        canal.setWidgetLanguage(request.language());
+        canal.setWidgetButtonStyle(request.buttonStyle());
         canal = canalRepository.save(canal);
         return toResponse(canal);
     }
@@ -235,12 +238,20 @@ public class CanalService {
         boolean whiteLabel = subscriptionRepository.findByUserId(canal.getUser().getId())
                 .map(s -> s.getPlano().isWhiteLabelEnabled())
                 .orElse(false);
+        // Only query feedback count when needed (PILL_COUNTER button style)
+        Integer feedbackCount = "PILL_COUNTER".equals(canal.getWidgetButtonStyle())
+                ? (int) feedbackGroupRepository.countByCanalId(canal.getId())
+                : null;
         return new WidgetConfigResponse(
                 canal.getWidgetColor(),
                 canal.getWidgetPosition(),
                 canal.getWidgetTitle(),
                 canal.getWidgetPlaceholder(),
                 canal.getWidgetMode(),
+                canal.getWidgetTheme(),
+                canal.getWidgetLanguage(),
+                canal.getWidgetButtonStyle(),
+                feedbackCount,
                 whiteLabel
         );
     }
@@ -256,6 +267,9 @@ public class CanalService {
                 canal.getWidgetTitle(),
                 canal.getWidgetPlaceholder(),
                 canal.getWidgetMode(),
+                canal.getWidgetTheme(),
+                canal.getWidgetLanguage(),
+                canal.getWidgetButtonStyle(),
                 canal.isPublicBoardEnabled(),
                 canal.getCreatedAt()
         );

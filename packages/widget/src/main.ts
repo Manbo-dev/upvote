@@ -2,24 +2,33 @@ import { getStyles } from './styles';
 import { iniciarRastreamento, coletarContexto } from './context';
 
 /**
- * Widget Upvote — captura minimalista de feedback
+ * Widget Upvote — minimalista feedback capture
  *
- * Modos de exibição:
- *   FLOATING (padrão) — botão circular fixo no canto que abre painel popup
- *   SIDEBAR           — tab colada na borda da tela que desliza painel lateral
- *   INLINE            — form embedado diretamente no elemento alvo (data-container)
+ * Display modes:
+ *   FLOATING (default) — fixed circular button that opens a popup panel
+ *   SIDEBAR            — vertical tab stuck to the screen edge that slides in a panel
+ *   INLINE             — form embedded directly in the target element (data-container)
  *
- * Uso básico:
+ * Button styles (FLOATING only):
+ *   CIRCLE (default), SQUARE, PILL, PILL_LABEL, HANDLE, BUBBLE, GRADIENT, PILL_COUNTER
+ *
+ * Theming:
+ *   data-theme="auto"  (default) — follows OS prefers-color-scheme
+ *   data-theme="light" — forces light mode
+ *   data-theme="dark"  — forces dark mode
+ *
+ * Basic usage:
  * <script
- *   src="https://cdn.upvote.com/widget.js"
+ *   src="https://api.upvote.com/widget.js"
  *   data-api-key="upv_sua_chave_aqui"
  *   data-color="#6366f1"
  *   data-base-url="https://api.upvote.com"
  *   data-trigger="button"
  *   data-mode="floating"
+ *   data-theme="auto"
  * ></script>
  *
- * Modo inline:
+ * Inline mode:
  * <script ... data-mode="inline" data-container="#meu-container"></script>
  */
 
@@ -32,6 +41,94 @@ declare global {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Locales
+// ---------------------------------------------------------------------------
+
+const LOCALES = {
+  'pt-BR': {
+    placeholder: 'Descreva seu feedback, bug ou sugestão...',
+    submit: 'Enviar feedback',
+    sending: 'Enviando...',
+    consent: 'Ao enviar, você concorda com nossa política de feedback',
+    success: 'Feedback enviado! Obrigado.',
+    error: 'Erro ao enviar. Tente novamente.',
+    closeLabel: 'Fechar',
+    openLabel: 'Abrir feedback',
+    followUpPlaceholder: 'Sua resposta (opcional)...',
+    followUpSubmit: 'Enviar resposta',
+    followUpSkip: 'Pular',
+  },
+  en: {
+    placeholder: 'Describe your feedback, bug or suggestion...',
+    submit: 'Send feedback',
+    sending: 'Sending...',
+    consent: 'By submitting, you agree to our feedback policy',
+    success: 'Feedback sent! Thank you.',
+    error: 'Error sending. Please try again.',
+    closeLabel: 'Close',
+    openLabel: 'Open feedback',
+    followUpPlaceholder: 'Your answer (optional)...',
+    followUpSubmit: 'Send answer',
+    followUpSkip: 'Skip',
+  },
+} as const;
+
+type Locale = typeof LOCALES['pt-BR'];
+
+// ---------------------------------------------------------------------------
+// Utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Darkens a hex color by reducing its HSL lightness by the given amount.
+ * Used for gradient button style.
+ */
+function darkenColor(hex: string, amount: number): string {
+  const clean = hex.replace('#', '');
+  const r = parseInt(clean.substring(0, 2), 16) / 255;
+  const g = parseInt(clean.substring(2, 4), 16) / 255;
+  const b = parseInt(clean.substring(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      case b: h = ((r - g) / d + 4) / 6; break;
+    }
+  }
+  const newL = Math.max(0, l - amount / 100);
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+  };
+  let rr, gg, bb;
+  if (s === 0) {
+    rr = gg = bb = newL;
+  } else {
+    const q = newL < 0.5 ? newL * (1 + s) : newL + s - newL * s;
+    const p = 2 * newL - q;
+    rr = hue2rgb(p, q, h + 1/3);
+    gg = hue2rgb(p, q, h);
+    bb = hue2rgb(p, q, h - 1/3);
+  }
+  const toHex = (v: number) => Math.round(v * 255).toString(16).padStart(2, '0');
+  return `#${toHex(rr)}${toHex(gg)}${toHex(bb)}`;
+}
+
+// ---------------------------------------------------------------------------
+// IIFE
+// ---------------------------------------------------------------------------
+
 (function () {
   const currentScript = document.currentScript as HTMLScriptElement;
   if (!currentScript) return;
@@ -42,23 +139,32 @@ declare global {
   const triggerAttr = currentScript.getAttribute('data-trigger') || 'button';
   const modeAttr = (currentScript.getAttribute('data-mode') || 'floating').toUpperCase();
   const containerSelector = currentScript.getAttribute('data-container') || null;
+  const themeAttr = currentScript.getAttribute('data-theme') || 'auto';
 
   if (!apiKeyAttr) {
-    console.error('[Upvote Widget] Atributo data-api-key é obrigatório');
+    console.error('[Upvote Widget] data-api-key attribute is required');
     return;
   }
 
   const apiKey: string = apiKeyAttr;
 
-  // Mutable config — initialized from script tag attrs, overridden by backend fetch
+  // ---- Mutable config — initialized from script attrs, overridden by backend fetch ----
   let configColor = color;
   let configPosition = 'BOTTOM_RIGHT';
   let configTitle: string | null = null;
   let configPlaceholder: string | null = null;
   let configWhiteLabel = false;
+  let configTheme: 'light' | 'dark' | 'auto' = (['light', 'dark', 'auto'].includes(themeAttr)
+    ? themeAttr
+    : 'auto') as 'light' | 'dark' | 'auto';
+  let configLanguage: keyof typeof LOCALES = 'pt-BR';
+  let configButtonStyle: string = 'CIRCLE';
+  let configFeedbackCount: number | null = null;
   let configMode: 'FLOATING' | 'SIDEBAR' | 'INLINE' = (
     ['FLOATING', 'SIDEBAR', 'INLINE'].includes(modeAttr) ? modeAttr : 'FLOATING'
   ) as 'FLOATING' | 'SIDEBAR' | 'INLINE';
+
+  let strings: Locale = LOCALES['pt-BR'];
 
   iniciarRastreamento();
 
@@ -66,18 +172,19 @@ declare global {
   styleEl.textContent = getStyles(color);
   document.head.appendChild(styleEl);
 
-  // Widget state
+  // ---- Widget state ----
   let isOpen = false;
   let isSubmitting = false;
   let currentTriggerType: 'button' | 'event' | 'always_visible' =
     triggerAttr === 'always' ? 'always_visible' : 'button';
 
-  // DOM element refs — set/cleared by initWidgetDOM / destroyWidgetDOM
+  // ---- DOM element refs — set/cleared by initWidgetDOM / destroyWidgetDOM ----
   let floatingBtn: HTMLButtonElement | null = null;
   let sidebarTab: HTMLButtonElement | null = null;
   let panel: HTMLDivElement | null = null;
   let bodyContainer: HTMLDivElement | null = null;
   let titleEl: HTMLHeadingElement | null = null;
+  let inlineWrapper: HTMLDivElement | null = null;
 
   const chatIconSvg = `
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -91,7 +198,102 @@ declare global {
     </svg>
   `;
 
-  // Creates the shared panel element (header + body container) used by FLOATING and SIDEBAR modes.
+  // ---- Theme application ----
+
+  /**
+   * Applies the current theme class to all root widget elements.
+   * Forces dark/light or uses media query (auto).
+   */
+  function applyTheme(): void {
+    const elements: (HTMLElement | null)[] = [floatingBtn, panel, sidebarTab, inlineWrapper];
+    elements.forEach(el => {
+      if (!el) return;
+      el.classList.remove('upvote-theme-dark', 'upvote-theme-auto', 'upvote-theme-light');
+      if (configTheme === 'dark') {
+        el.classList.add('upvote-theme-dark');
+      } else if (configTheme === 'auto') {
+        el.classList.add('upvote-theme-auto');
+      }
+      // 'light' is the CSS default — no extra class needed
+    });
+  }
+
+  // ---- Button creation by style ----
+
+  /**
+   * Creates the floating trigger button for the given style.
+   * SIDEBAR mode ignores buttonStyle and uses its own tab.
+   */
+  function createTriggerButton(): HTMLButtonElement {
+    const btn = document.createElement('button');
+    btn.setAttribute('aria-label', strings.openLabel);
+    btn.setAttribute('data-upvote-widget', 'true');
+
+    const style = configButtonStyle;
+    const darkColor = darkenColor(configColor, 20);
+
+    // Set CSS variable for gradient
+    btn.style.setProperty('--upvote-primary-dark', darkColor);
+
+    // Base class
+    btn.className = 'upvote-widget-btn';
+
+    if (style === 'SQUARE') {
+      btn.classList.add('upvote-btn-square');
+      btn.innerHTML = chatIconSvg;
+
+    } else if (style === 'PILL') {
+      btn.classList.add('upvote-btn-pill');
+      const label = document.createElement('span');
+      label.className = 'upvote-btn-label';
+      label.textContent = configTitle || strings.submit;
+      btn.appendChild(document.createRange().createContextualFragment(chatIconSvg));
+      btn.appendChild(label);
+
+    } else if (style === 'PILL_LABEL') {
+      btn.classList.add('upvote-btn-pill-label');
+      const label = document.createElement('span');
+      label.className = 'upvote-btn-label';
+      label.textContent = configTitle || strings.submit;
+      btn.appendChild(label);
+      btn.appendChild(document.createRange().createContextualFragment(chatIconSvg));
+
+    } else if (style === 'HANDLE') {
+      btn.classList.add('upvote-btn-handle');
+      btn.innerHTML = chatIconSvg;
+
+    } else if (style === 'BUBBLE') {
+      btn.classList.add('upvote-btn-bubble');
+      btn.innerHTML = chatIconSvg;
+
+    } else if (style === 'GRADIENT') {
+      btn.classList.add('upvote-btn-gradient');
+      btn.innerHTML = chatIconSvg;
+
+    } else if (style === 'PILL_COUNTER') {
+      btn.classList.add('upvote-btn-pill-counter');
+      btn.appendChild(document.createRange().createContextualFragment(chatIconSvg));
+      const label = document.createElement('span');
+      label.className = 'upvote-btn-label';
+      label.textContent = configTitle || strings.submit;
+      btn.appendChild(label);
+      if (configFeedbackCount !== null && configFeedbackCount > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'upvote-btn-counter-badge';
+        badge.textContent = String(configFeedbackCount);
+        btn.appendChild(badge);
+      }
+
+    } else {
+      // CIRCLE (default)
+      btn.innerHTML = chatIconSvg;
+    }
+
+    return btn;
+  }
+
+  // ---- Panel creation ----
+
   function createPanel(): HTMLDivElement {
     const p = document.createElement('div');
     p.className = 'upvote-widget-panel';
@@ -106,7 +308,7 @@ declare global {
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'upvote-widget-close';
-    closeBtn.setAttribute('aria-label', 'Fechar');
+    closeBtn.setAttribute('aria-label', strings.closeLabel);
     closeBtn.innerHTML = '&times;';
     closeBtn.addEventListener('click', fecharWidget);
     header.appendChild(closeBtn);
@@ -120,14 +322,10 @@ declare global {
     return p;
   }
 
-  // --- Mode-specific init functions ---
+  // ---- Mode-specific init functions ----
 
   function initFloating(): void {
-    floatingBtn = document.createElement('button');
-    floatingBtn.className = 'upvote-widget-btn';
-    floatingBtn.setAttribute('aria-label', 'Enviar feedback');
-    floatingBtn.setAttribute('data-upvote-widget', 'true');
-    floatingBtn.innerHTML = chatIconSvg;
+    floatingBtn = createTriggerButton();
     document.body.appendChild(floatingBtn);
 
     panel = createPanel();
@@ -155,7 +353,7 @@ declare global {
 
     sidebarTab = document.createElement('button');
     sidebarTab.className = `upvote-sidebar-tab${isLeft ? ' upvote-sidebar-left' : ''}`;
-    sidebarTab.setAttribute('aria-label', 'Abrir feedback');
+    sidebarTab.setAttribute('aria-label', strings.openLabel);
     sidebarTab.setAttribute('data-upvote-widget', 'true');
     sidebarTab.textContent = configTitle || 'Feedback';
     document.body.appendChild(sidebarTab);
@@ -175,7 +373,7 @@ declare global {
 
   function initInline(): void {
     if (!containerSelector) {
-      console.warn('[Upvote Widget] Modo INLINE requer o atributo data-container. Usando FLOATING como fallback.');
+      console.warn('[Upvote Widget] INLINE mode requires the data-container attribute. Falling back to FLOATING.');
       configMode = 'FLOATING';
       initFloating();
       return;
@@ -183,15 +381,15 @@ declare global {
 
     const target = document.querySelector(containerSelector);
     if (!target) {
-      console.warn(`[Upvote Widget] Container "${containerSelector}" não encontrado. Usando FLOATING como fallback.`);
+      console.warn(`[Upvote Widget] Container "${containerSelector}" not found. Falling back to FLOATING.`);
       configMode = 'FLOATING';
       initFloating();
       return;
     }
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'upvote-widget-inline';
-    wrapper.setAttribute('data-upvote-widget', 'true');
+    inlineWrapper = document.createElement('div');
+    inlineWrapper.className = 'upvote-widget-inline';
+    inlineWrapper.setAttribute('data-upvote-widget', 'true');
 
     const header = document.createElement('div');
     header.className = 'upvote-widget-header';
@@ -200,15 +398,14 @@ declare global {
     titleEl.textContent = configTitle || 'Feedback';
     header.appendChild(titleEl);
 
-    wrapper.appendChild(header);
+    inlineWrapper.appendChild(header);
 
     bodyContainer = document.createElement('div');
     bodyContainer.className = 'upvote-widget-body';
-    wrapper.appendChild(bodyContainer);
+    inlineWrapper.appendChild(bodyContainer);
 
-    target.appendChild(wrapper);
+    target.appendChild(inlineWrapper);
 
-    // Inline form is always visible
     isOpen = true;
     renderizarFormulario();
   }
@@ -226,14 +423,16 @@ declare global {
     panel = null;
     bodyContainer = null;
     titleEl = null;
+    inlineWrapper = null;
     isOpen = false;
     isSubmitting = false;
   }
 
   initWidgetDOM();
+  applyTheme();
 
-  // Applies a corner-position class to the floating button and panel.
-  // Only applies in FLOATING mode — BOTTOM_RIGHT is the CSS default (no class needed).
+  // ---- Position application ----
+
   function applyPosition(pos: string): void {
     if (configMode !== 'FLOATING' || !floatingBtn || !panel) return;
     const posClass = `upvote-pos-${pos.toLowerCase().replace(/_/g, '-')}`;
@@ -246,8 +445,8 @@ declare global {
     }
   }
 
-  // Fetches widget configuration from the backend and applies it.
-  // Fire-and-forget — does not block initial render. Silently falls back to defaults on error.
+  // ---- Config fetch ----
+
   async function fetchConfig(): Promise<void> {
     try {
       const res = await fetch(`${baseUrl}/api/widget/config`, {
@@ -278,17 +477,36 @@ declare global {
       if (typeof cfg.whiteLabel === 'boolean') {
         configWhiteLabel = cfg.whiteLabel;
       }
-
-      // Apply mode from backend — re-init the entire DOM if mode changed
-      if (cfg.mode) {
-        const newMode = cfg.mode as 'FLOATING' | 'SIDEBAR' | 'INLINE';
-        if (newMode !== configMode && ['FLOATING', 'SIDEBAR', 'INLINE'].includes(newMode)) {
-          configMode = newMode;
-          destroyWidgetDOM();
-          initWidgetDOM();
-          applyPosition(configPosition);
-        }
+      if (cfg.language && cfg.language in LOCALES) {
+        configLanguage = cfg.language as keyof typeof LOCALES;
+        strings = LOCALES[configLanguage];
       }
+      if (cfg.feedbackCount !== null && cfg.feedbackCount !== undefined) {
+        configFeedbackCount = cfg.feedbackCount;
+      }
+
+      // Apply theme from backend if it changed
+      if (cfg.theme && cfg.theme !== configTheme) {
+        configTheme = cfg.theme as 'light' | 'dark' | 'auto';
+        applyTheme();
+      }
+
+      // Button style or mode change — rebuild DOM
+      const buttonStyleChanged = cfg.buttonStyle && cfg.buttonStyle !== configButtonStyle;
+      const modeChanged = cfg.mode &&
+        ['FLOATING', 'SIDEBAR', 'INLINE'].includes(cfg.mode) &&
+        cfg.mode !== configMode;
+
+      if (modeChanged) configMode = cfg.mode as 'FLOATING' | 'SIDEBAR' | 'INLINE';
+      if (buttonStyleChanged) configButtonStyle = cfg.buttonStyle;
+
+      if (modeChanged || buttonStyleChanged) {
+        destroyWidgetDOM();
+        initWidgetDOM();
+        applyPosition(configPosition);
+        applyTheme();
+      }
+
     } catch {
       // Network error or invalid response — silently use defaults
     }
@@ -296,7 +514,7 @@ declare global {
 
   fetchConfig();
 
-  // --- Open / close ---
+  // ---- Open / close ----
 
   function abrirWidget(trigger?: 'button' | 'event' | 'always_visible') {
     if (isOpen || configMode === 'INLINE') return;
@@ -322,7 +540,7 @@ declare global {
     if (e.key === 'Escape') fecharWidget();
   });
 
-  // --- Form rendering ---
+  // ---- Form rendering ----
 
   function renderizarFormulario() {
     if (!bodyContainer) return;
@@ -330,7 +548,7 @@ declare global {
 
     const textarea = document.createElement('textarea');
     textarea.className = 'upvote-widget-textarea';
-    textarea.placeholder = configPlaceholder || 'Descreva seu feedback, bug ou sugestão...';
+    textarea.placeholder = configPlaceholder || strings.placeholder;
     textarea.setAttribute('rows', '4');
 
     const errorMsg = document.createElement('p');
@@ -339,7 +557,7 @@ declare global {
 
     const submitBtn = document.createElement('button');
     submitBtn.className = 'upvote-widget-submit';
-    submitBtn.textContent = 'Enviar feedback';
+    submitBtn.textContent = strings.submit;
     submitBtn.addEventListener('click', () => enviarFeedback(textarea, submitBtn, errorMsg));
 
     textarea.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -350,7 +568,7 @@ declare global {
 
     const consent = document.createElement('p');
     consent.className = 'upvote-widget-consent';
-    consent.textContent = 'Ao enviar, você concorda com nossa política de feedback';
+    consent.textContent = strings.consent;
 
     bodyContainer.appendChild(textarea);
     bodyContainer.appendChild(errorMsg);
@@ -370,7 +588,7 @@ declare global {
     }
   }
 
-  // --- Feedback submission ---
+  // ---- Feedback submission ----
 
   async function enviarFeedback(
     textarea: HTMLTextAreaElement,
@@ -390,7 +608,7 @@ declare global {
     isSubmitting = true;
 
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="upvote-widget-spinner"></span> Enviando...';
+    submitBtn.innerHTML = `<span class="upvote-widget-spinner"></span> ${strings.sending}`;
     errorMsg.style.display = 'none';
 
     const contexto = coletarContexto(currentTriggerType);
@@ -418,13 +636,13 @@ declare global {
     } catch (_err) {
       isSubmitting = false;
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Enviar feedback';
-      errorMsg.textContent = 'Erro ao enviar. Tente novamente.';
+      submitBtn.textContent = strings.submit;
+      errorMsg.textContent = strings.error;
       errorMsg.style.display = 'block';
     }
   }
 
-  // --- Follow-up rendering ---
+  // ---- Follow-up rendering ----
 
   function renderizarFollowUp(question: string, feedbackId: string) {
     if (!bodyContainer) return;
@@ -436,7 +654,7 @@ declare global {
 
     const textarea = document.createElement('textarea');
     textarea.className = 'upvote-widget-textarea';
-    textarea.placeholder = 'Sua resposta (opcional)...';
+    textarea.placeholder = strings.followUpPlaceholder;
     textarea.setAttribute('rows', '3');
 
     const errorMsg = document.createElement('p');
@@ -445,7 +663,7 @@ declare global {
 
     const submitBtn = document.createElement('button');
     submitBtn.className = 'upvote-widget-submit';
-    submitBtn.textContent = 'Enviar resposta';
+    submitBtn.textContent = strings.followUpSubmit;
     submitBtn.addEventListener('click', () =>
       enviarFollowUp(textarea, submitBtn, errorMsg, feedbackId)
     );
@@ -461,7 +679,7 @@ declare global {
     skipBtn.style.background = 'transparent';
     skipBtn.style.color = '#64748b';
     skipBtn.style.fontWeight = '400';
-    skipBtn.textContent = 'Pular';
+    skipBtn.textContent = strings.followUpSkip;
     skipBtn.addEventListener('click', () => renderizarSucesso());
 
     bodyContainer.appendChild(questionEl);
@@ -475,7 +693,7 @@ declare global {
     }
   }
 
-  // --- Follow-up submission ---
+  // ---- Follow-up submission ----
 
   async function enviarFollowUp(
     textarea: HTMLTextAreaElement,
@@ -490,26 +708,29 @@ declare global {
     }
 
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="upvote-widget-spinner"></span> Enviando...';
+    submitBtn.innerHTML = `<span class="upvote-widget-spinner"></span> ${strings.sending}`;
     errorMsg.style.display = 'none';
 
     try {
       const response = await fetch(`${baseUrl}/api/widget/feedback/${feedbackId}/follow-up`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
         body: JSON.stringify({ answer }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       renderizarSucesso();
     } catch (_err) {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Enviar resposta';
-      errorMsg.textContent = 'Erro ao enviar. Tente novamente.';
+      submitBtn.textContent = strings.followUpSubmit;
+      errorMsg.textContent = strings.error;
       errorMsg.style.display = 'block';
     }
   }
 
-  // --- Success state ---
+  // ---- Success state ----
 
   function renderizarSucesso() {
     if (!bodyContainer) return;
@@ -524,7 +745,7 @@ declare global {
 
     const text = document.createElement('p');
     text.className = 'upvote-widget-success-text';
-    text.textContent = 'Feedback enviado! Obrigado.';
+    text.textContent = strings.success;
 
     container.appendChild(iconContainer);
     container.appendChild(text);
@@ -541,7 +762,7 @@ declare global {
     }
   }
 
-  // --- Public API ---
+  // ---- Public API ----
 
   window.UpvoteWidget = {
     open: () => abrirWidget('event'),

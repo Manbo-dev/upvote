@@ -34,6 +34,8 @@ import FeedbackGroupCard from '../components/FeedbackGroupCard';
 import FeedbackGroupDetailModal from '../components/FeedbackGroupDetailModal';
 import KanbanColumn from '../components/KanbanColumn';
 import PraiseGrid from '../components/PraiseGrid';
+import { WidgetPreview } from '../components/WidgetPreview';
+import { ButtonStylePicker } from '../components/ButtonStylePicker';
 import { getCanais, updateWidgetSettings, togglePublicBoard } from '../services/canais';
 import { Switch } from '../components/ui/switch';
 import { getSubscription } from '../services/subscriptions';
@@ -202,6 +204,9 @@ export default function CanalDetailPage() {
   const [widgetMode, setWidgetMode] = useState('FLOATING');
   const [widgetTitle, setWidgetTitle] = useState('');
   const [widgetPlaceholder, setWidgetPlaceholder] = useState('');
+  const [widgetTheme, setWidgetTheme] = useState('auto');
+  const [widgetLanguage, setWidgetLanguage] = useState('pt-BR');
+  const [widgetButtonStyle, setWidgetButtonStyle] = useState('CIRCLE');
   const [widgetSaveSuccess, setWidgetSaveSuccess] = useState(false);
   const [publicBoardCopied, setPublicBoardCopied] = useState(false);
   const [activeCategory, setActiveCategory] = useState<FeedbackCategory | 'ALL'>('ALL');
@@ -283,6 +288,9 @@ export default function CanalDetailPage() {
       setWidgetMode(canal.widgetMode ?? 'FLOATING');
       setWidgetTitle(canal.widgetTitle ?? '');
       setWidgetPlaceholder(canal.widgetPlaceholder ?? '');
+      setWidgetTheme(canal.widgetTheme ?? 'auto');
+      setWidgetLanguage(canal.widgetLanguage ?? 'pt-BR');
+      setWidgetButtonStyle(canal.widgetButtonStyle ?? 'CIRCLE');
     }
   }, [canal]);
 
@@ -294,6 +302,9 @@ export default function CanalDetailPage() {
         mode: widgetMode,
         title: widgetTitle || null,
         placeholder: widgetPlaceholder || null,
+        theme: widgetTheme,
+        language: widgetLanguage,
+        buttonStyle: widgetButtonStyle,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['canais'] });
@@ -992,91 +1003,147 @@ export default function CanalDetailPage() {
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-5 rounded-xl border border-border bg-card p-6">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    {t('canal.widget.title')}
-                  </h2>
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  {/* Left column — controls */}
+                  <div className="space-y-5 rounded-xl border border-border bg-card p-6">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      {t('canal.widget.title')}
+                    </h2>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="widget-mode">{t('canal.widget.mode')}</Label>
-                    <Select value={widgetMode} onValueChange={setWidgetMode}>
-                      <SelectTrigger id="widget-mode">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="FLOATING">{t('canal.widget.modes.FLOATING')}</SelectItem>
-                        <SelectItem value="SIDEBAR">{t('canal.widget.modes.SIDEBAR')}</SelectItem>
-                        <SelectItem value="INLINE">{t('canal.widget.modes.INLINE')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {widgetMode === 'INLINE' && (
-                      <p className="text-xs text-muted-foreground">{t('canal.widget.inlineContainerHelp')}</p>
-                    )}
-                  </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="widget-mode">{t('canal.widget.mode')}</Label>
+                      <Select value={widgetMode} onValueChange={setWidgetMode}>
+                        <SelectTrigger id="widget-mode">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="FLOATING">{t('canal.widget.modes.FLOATING')}</SelectItem>
+                          <SelectItem value="SIDEBAR">{t('canal.widget.modes.SIDEBAR')}</SelectItem>
+                          <SelectItem value="INLINE">{t('canal.widget.modes.INLINE')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {widgetMode === 'INLINE' && (
+                        <p className="text-xs text-muted-foreground">{t('canal.widget.inlineContainerHelp')}</p>
+                      )}
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="widget-color">{t('canal.widget.color')}</Label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        id="widget-color"
-                        type="color"
-                        value={widgetColor}
-                        onChange={(e) => setWidgetColor(e.target.value)}
-                        className="h-9 w-16 cursor-pointer rounded-md border border-input bg-card p-0.5"
+                    <div className="space-y-1.5">
+                      <Label htmlFor="widget-color">{t('canal.widget.color')}</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          id="widget-color"
+                          type="color"
+                          value={widgetColor}
+                          onChange={(e) => setWidgetColor(e.target.value)}
+                          className="h-9 w-16 cursor-pointer rounded-md border border-input bg-card p-0.5"
+                        />
+                        <span className="font-mono text-sm text-muted-foreground">{widgetColor}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="widget-position">{t('canal.widget.position')}</Label>
+                      <Select value={widgetPosition} onValueChange={setWidgetPosition}>
+                        <SelectTrigger id="widget-position">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="BOTTOM_RIGHT">{t('canal.widget.positions.BOTTOM_RIGHT')}</SelectItem>
+                          <SelectItem value="BOTTOM_LEFT">{t('canal.widget.positions.BOTTOM_LEFT')}</SelectItem>
+                          <SelectItem value="TOP_RIGHT">{t('canal.widget.positions.TOP_RIGHT')}</SelectItem>
+                          <SelectItem value="TOP_LEFT">{t('canal.widget.positions.TOP_LEFT')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="widget-theme">{t('canal.widget.theme')}</Label>
+                      <Select value={widgetTheme} onValueChange={setWidgetTheme}>
+                        <SelectTrigger id="widget-theme">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="auto">{t('canal.widget.themes.auto')}</SelectItem>
+                          <SelectItem value="light">{t('canal.widget.themes.light')}</SelectItem>
+                          <SelectItem value="dark">{t('canal.widget.themes.dark')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="widget-language">{t('canal.widget.language')}</Label>
+                      <Select value={widgetLanguage} onValueChange={setWidgetLanguage}>
+                        <SelectTrigger id="widget-language">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pt-BR">{t('canal.widget.languages.pt-BR')}</SelectItem>
+                          <SelectItem value="en">{t('canal.widget.languages.en')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="widget-custom-title">{t('canal.widget.customTitle')}</Label>
+                      <Input
+                        id="widget-custom-title"
+                        value={widgetTitle}
+                        onChange={(e) => setWidgetTitle(e.target.value)}
+                        placeholder={t('canal.widget.customTitlePlaceholder')}
+                        maxLength={100}
                       />
-                      <span className="font-mono text-sm text-muted-foreground">{widgetColor}</span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="widget-placeholder">{t('canal.widget.placeholder')}</Label>
+                      <Input
+                        id="widget-placeholder"
+                        value={widgetPlaceholder}
+                        onChange={(e) => setWidgetPlaceholder(e.target.value)}
+                        placeholder={t('canal.widget.placeholderPlaceholder')}
+                        maxLength={200}
+                      />
+                    </div>
+
+                    {/* Button style picker (only for FLOATING mode) */}
+                    {widgetMode === 'FLOATING' && (
+                      <div className="space-y-2">
+                        <Label>{t('canal.widget.buttonStyle')}</Label>
+                        <ButtonStylePicker
+                          value={widgetButtonStyle}
+                          onChange={setWidgetButtonStyle}
+                          color={widgetColor}
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3">
+                      <Button
+                        onClick={() => widgetMutation.mutate()}
+                        disabled={widgetMutation.isPending || !canal}
+                      >
+                        {widgetMutation.isPending ? t('common.loading') : t('canal.widget.save')}
+                      </Button>
+                      {widgetSaveSuccess && (
+                        <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                          {t('canal.widget.saveSuccess')}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="widget-position">{t('canal.widget.position')}</Label>
-                    <Select value={widgetPosition} onValueChange={setWidgetPosition}>
-                      <SelectTrigger id="widget-position">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="BOTTOM_RIGHT">{t('canal.widget.positions.BOTTOM_RIGHT')}</SelectItem>
-                        <SelectItem value="BOTTOM_LEFT">{t('canal.widget.positions.BOTTOM_LEFT')}</SelectItem>
-                        <SelectItem value="TOP_RIGHT">{t('canal.widget.positions.TOP_RIGHT')}</SelectItem>
-                        <SelectItem value="TOP_LEFT">{t('canal.widget.positions.TOP_LEFT')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="widget-custom-title">{t('canal.widget.customTitle')}</Label>
-                    <Input
-                      id="widget-custom-title"
-                      value={widgetTitle}
-                      onChange={(e) => setWidgetTitle(e.target.value)}
-                      placeholder={t('canal.widget.customTitlePlaceholder')}
-                      maxLength={100}
+                  {/* Right column — live preview */}
+                  <div className="rounded-xl border border-border bg-card p-6">
+                    <WidgetPreview
+                      color={widgetColor}
+                      position={widgetPosition}
+                      mode={widgetMode}
+                      title={widgetTitle || null}
+                      placeholder={widgetPlaceholder || null}
+                      theme={widgetTheme}
+                      language={widgetLanguage}
+                      buttonStyle={widgetButtonStyle}
                     />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="widget-placeholder">{t('canal.widget.placeholder')}</Label>
-                    <Input
-                      id="widget-placeholder"
-                      value={widgetPlaceholder}
-                      onChange={(e) => setWidgetPlaceholder(e.target.value)}
-                      placeholder={t('canal.widget.placeholderPlaceholder')}
-                      maxLength={200}
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Button
-                      onClick={() => widgetMutation.mutate()}
-                      disabled={widgetMutation.isPending || !canal}
-                    >
-                      {widgetMutation.isPending ? t('common.loading') : t('canal.widget.save')}
-                    </Button>
-                    {widgetSaveSuccess && (
-                      <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                        {t('canal.widget.saveSuccess')}
-                      </span>
-                    )}
                   </div>
                 </div>
               )}

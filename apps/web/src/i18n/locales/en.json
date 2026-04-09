@@ -207,12 +207,33 @@
       "customTitlePlaceholder": "E.g. Send your feedback",
       "placeholder": "Text field placeholder",
       "placeholderPlaceholder": "E.g. Describe your issue or suggestion...",
+      "theme": "Theme",
+      "themes": {
+        "auto": "Automatic (follows device)",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "language": "Language",
+      "languages": {
+        "pt-BR": "Português",
+        "en": "English"
+      },
+      "buttonStyle": "Button style",
       "save": "Save settings",
       "saveSuccess": "Saved successfully!",
       "upgradeRequired": "Available on PRO plan",
       "upgradeDescription": "Customize the widget's color, mode, position, title, and placeholder on your PRO plan or above.",
       "upgradeLink": "Upgrade plan"
     },
+    "widgetPreviewLabel": "Live preview",
+    "buttonStyleCircle": "Circle",
+    "buttonStyleSquare": "Square",
+    "buttonStylePill": "Pill",
+    "buttonStylePillLabel": "Label pill",
+    "buttonStyleHandle": "Handle",
+    "buttonStyleBubble": "Bubble",
+    "buttonStyleGradient": "Gradient",
+    "buttonStylePillCounter": "With counter",
     "praise": {
       "subtitle": "Positive feedback received",
       "emptyTitle": "No praise yet",

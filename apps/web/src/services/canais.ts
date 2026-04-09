@@ -10,6 +10,9 @@ export interface CanalResponse {
   widgetTitle: string | null;
   widgetPlaceholder: string | null;
   widgetMode: string;
+  widgetTheme: string;
+  widgetLanguage: string;
+  widgetButtonStyle: string;
   publicBoardEnabled: boolean;
   createdAt: string;
 }
@@ -20,6 +23,9 @@ export interface WidgetSettingsRequest {
   title?: string | null;
   placeholder?: string | null;
   mode: string;
+  theme: string;
+  language: string;
+  buttonStyle: string;
 }
 
 interface ApiResult<T> {

@@ -342,23 +342,41 @@ Parceiros no plano STARTER+ podem ativar um board público com o status dos feed
 Parceiros no plano PRO ou BUSINESS podem personalizar o widget diretamente no dashboard.
 
 **Backend:**
-- `PATCH /api/canais/{id}/widget` (JWT) — salva cor, posição, modo, título e placeholder; verifica plano
+- `PATCH /api/canais/{id}/widget` (JWT) — salva cor, posição, modo, título, placeholder, tema, idioma e estilo do botão; verifica plano
 - `GET /api/widget/config` (público, `X-API-Key` header) — retorna `WidgetConfigResponse`; sem check de plano (leitura é pública para todos os widgets)
-- Campos na tabela `canais`: `widget_position VARCHAR(20) DEFAULT 'BOTTOM_RIGHT'`, `widget_title VARCHAR(100)`, `widget_placeholder VARCHAR(200)`, `widget_mode VARCHAR(20) DEFAULT 'FLOATING'` (migrations `V20260406120000` e `V20260407100000`)
+- Campos na tabela `canais`: `widget_color`, `widget_position VARCHAR(20) DEFAULT 'BOTTOM_RIGHT'`, `widget_title VARCHAR(100)`, `widget_placeholder VARCHAR(200)`, `widget_mode VARCHAR(20) DEFAULT 'FLOATING'`, `widget_theme VARCHAR(10) DEFAULT 'auto'`, `widget_language VARCHAR(10) DEFAULT 'pt-BR'`, `widget_button_style VARCHAR(20) DEFAULT 'CIRCLE'` (migrations `V20260406120000`, `V20260407100000`, `V20260409100000`)
 - `SubscriptionResponse` expõe `widgetCustomizationEnabled` e `integrationsEnabled`
+- `WidgetConfigResponse` retorna: `color`, `position`, `title`, `placeholder`, `mode`, `theme`, `language`, `buttonStyle`, `feedbackCount` (nullable, só quando `buttonStyle=PILL_COUNTER`), `whiteLabel`
 
 **Widget (`packages/widget/src/main.ts`) — 3 modos de exibição:**
 - Após render inicial (síncrono, com fallbacks dos atributos do script tag), dispara `fetchConfig()` fire-and-forget
-- Atributos do script tag: `data-mode` (floating|sidebar|inline), `data-container` (seletor CSS, somente inline)
-- **FLOATING** (padrão): botão circular fixo no canto; posições `BOTTOM_RIGHT`, `BOTTOM_LEFT`, `TOP_RIGHT`, `TOP_LEFT`
+- Atributos do script tag: `data-mode` (floating|sidebar|inline), `data-container` (seletor CSS, somente inline), `data-theme` (light|dark|auto, default: auto)
+- **FLOATING** (padrão): botão trigger fixo no canto; posições `BOTTOM_RIGHT`, `BOTTOM_LEFT`, `TOP_RIGHT`, `TOP_LEFT`
 - **SIDEBAR**: tab vertical colada na borda da tela (deriva lado do `position`); painel desliza com `transform: translateX`
 - **INLINE**: form embedado diretamente no elemento `data-container`; sempre visível; reseta após sucesso em 3s; fallback para FLOATING se container não encontrado
-- Backend pode alterar o modo → widget destrói e reconstrói o DOM automaticamente
+- Backend pode alterar o modo ou estilo do botão → widget destrói e reconstrói o DOM automaticamente
 - **White-label (BUSINESS)**: `WidgetConfigResponse.whiteLabel=true` remove o rodapé "Powered by Upvote"; `Plano.whiteLabelEnabled` — apenas BUSINESS=true
 
+**Estilos do botão trigger (somente FLOATING mode):**
+- `CIRCLE` (default), `SQUARE`, `PILL` (ícone + título), `PILL_LABEL` (título + ícone), `HANDLE` (alça horizontal), `BUBBLE` (balão de fala), `GRADIENT` (gradiente 2 tons), `PILL_COUNTER` (pílula com badge de contagem de feedbacks do canal)
+
+**Dark mode no widget:**
+- CSS custom properties para todos os valores de cor não-primária (`--upvote-surface`, `--upvote-on-surface`, `--upvote-input-bg`, `--upvote-border`, etc.)
+- Classe `.upvote-theme-dark` força dark; `.upvote-theme-auto` usa `@media (prefers-color-scheme: dark)`
+- Configurável via `data-theme` no script tag ou `widgetTheme` no backend
+
+**Internacionalização do widget:**
+- Objeto `LOCALES` em `main.ts` com `pt-BR` e `en` — todas as strings da UI
+- Idioma selecionado via `widgetLanguage` na config do backend
+- Strings customizadas (`widgetTitle`, `widgetPlaceholder`) sobrescrevem as do locale
+
 **Frontend:**
-- Aba "Configurações" em `CanalDetailPage.tsx` — seletor de modo, color picker, Select de posição, Input de título e placeholder
+- Aba "Configurações" em `CanalDetailPage.tsx` — layout dois colunas: controles + live preview
+- Controles: modo, cor, posição, tema, idioma, título, placeholder, estilo do botão (grade visual via `ButtonStylePicker`)
+- Preview ao vivo: componente `WidgetPreview` renderiza mockup do widget com os valores atuais em tempo real
 - Estado bloqueado para FREE/STARTER: card com Lock icon e CTA para `/dashboard/billing`
+- **`apps/web/src/components/WidgetPreview.tsx`** — preview visual do widget (FLOATING, SIDEBAR, INLINE)
+- **`apps/web/src/components/ButtonStylePicker.tsx`** — grade de 8 estilos com mini-previews clicáveis
 
 ### Frontend
 - **`BillingPage.tsx`** — página de gerenciamento de assinatura com cards de planos, métricas de uso e botões de upgrade/gerenciar

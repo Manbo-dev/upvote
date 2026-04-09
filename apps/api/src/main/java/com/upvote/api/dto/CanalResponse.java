@@ -13,6 +13,9 @@ public record CanalResponse(
         String widgetTitle,
         String widgetPlaceholder,
         String widgetMode,
+        String widgetTheme,
+        String widgetLanguage,
+        String widgetButtonStyle,
         boolean publicBoardEnabled,
         LocalDateTime createdAt
 ) {

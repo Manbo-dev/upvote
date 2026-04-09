@@ -18,6 +18,8 @@ public interface FeedbackGroupRepository extends JpaRepository<FeedbackGroup, UU
 
     List<FeedbackGroup> findByCanalIdOrderByVoteCountDesc(UUID canalId);
 
+    long countByCanalId(UUID canalId);
+
     List<FeedbackGroup> findByCanalIdAndStatusNotInOrderByVoteCountDesc(UUID canalId, List<FeedbackGroupStatus> excludedStatuses);
 
     List<FeedbackGroup> findByCanalIdAndStatusOrderByVoteCountDesc(UUID canalId, FeedbackGroupStatus status);
