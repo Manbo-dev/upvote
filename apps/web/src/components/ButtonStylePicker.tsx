@@ -20,16 +20,16 @@ const BUTTON_STYLES = [
 
 type StyleId = (typeof BUTTON_STYLES)[number]['id'];
 
-function ButtonStylePreview({ id, color }: { id: StyleId; color: string }) {
-  const ChatIcon = () => (
-    <svg
-      viewBox="0 0 24 24"
-      style={{ width: '14px', height: '14px', fill: 'white', flexShrink: 0 }}
-    >
-      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-    </svg>
-  );
+const ChatIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    style={{ width: '12px', height: '12px', fill: 'white', flexShrink: 0 }}
+  >
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+  </svg>
+);
 
+function ButtonStylePreview({ id, color }: { id: StyleId; color: string }) {
   const base: React.CSSProperties = {
     background: color,
     color: 'white',
@@ -38,44 +38,43 @@ function ButtonStylePreview({ id, color }: { id: StyleId; color: string }) {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-    flexShrink: 0,
     pointerEvents: 'none',
+    maxWidth: '100%',
   };
 
   if (id === 'SQUARE') {
     return (
-      <div style={{ ...base, width: '36px', height: '36px', borderRadius: '10px' }}>
+      <div style={{ ...base, width: '30px', height: '30px', borderRadius: '8px', flexShrink: 0 }}>
         <ChatIcon />
       </div>
     );
   }
   if (id === 'PILL') {
     return (
-      <div style={{ ...base, borderRadius: '100px', height: '32px', padding: '0 10px', gap: '4px' }}>
+      <div style={{ ...base, borderRadius: '100px', height: '26px', padding: '0 8px', gap: '3px', fontSize: '8px', fontWeight: 600, whiteSpace: 'nowrap' }}>
         <ChatIcon />
-        <span style={{ fontSize: '9px', fontWeight: 600 }}>Feedback</span>
+        <span>Feedback</span>
       </div>
     );
   }
   if (id === 'PILL_LABEL') {
     return (
-      <div style={{ ...base, borderRadius: '100px', height: '30px', padding: '0 10px', gap: '4px' }}>
-        <span style={{ fontSize: '9px', fontWeight: 600 }}>Feedback</span>
+      <div style={{ ...base, borderRadius: '100px', height: '26px', padding: '0 8px', gap: '3px', fontSize: '8px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+        <span>Feedback</span>
         <ChatIcon />
       </div>
     );
   }
   if (id === 'HANDLE') {
     return (
-      <div style={{ ...base, borderRadius: '100px', width: '48px', height: '24px' }}>
+      <div style={{ ...base, borderRadius: '100px', width: '40px', height: '20px', flexShrink: 0 }}>
         <ChatIcon />
       </div>
     );
   }
   if (id === 'BUBBLE') {
     return (
-      <div style={{ ...base, width: '36px', height: '36px', borderRadius: '50% 50% 50% 4px' }}>
+      <div style={{ ...base, width: '30px', height: '30px', borderRadius: '50% 50% 50% 4px', flexShrink: 0 }}>
         <ChatIcon />
       </div>
     );
@@ -85,9 +84,10 @@ function ButtonStylePreview({ id, color }: { id: StyleId; color: string }) {
       <div
         style={{
           ...base,
-          width: '36px',
-          height: '36px',
+          width: '30px',
+          height: '30px',
           borderRadius: '50%',
+          flexShrink: 0,
           background: `linear-gradient(135deg, ${color}, color-mix(in srgb, ${color} 60%, black))`,
         }}
       >
@@ -97,15 +97,15 @@ function ButtonStylePreview({ id, color }: { id: StyleId; color: string }) {
   }
   if (id === 'PILL_COUNTER') {
     return (
-      <div style={{ ...base, borderRadius: '100px', height: '32px', padding: '0 8px', gap: '4px' }}>
+      <div style={{ ...base, borderRadius: '100px', height: '26px', padding: '0 6px', gap: '3px', fontSize: '8px', fontWeight: 600, whiteSpace: 'nowrap' }}>
         <ChatIcon />
-        <span style={{ fontSize: '9px', fontWeight: 600 }}>Feedback</span>
+        <span>Feed</span>
         <span
           style={{
-            background: 'rgba(255,255,255,0.25)',
+            background: 'rgba(255,255,255,0.3)',
             borderRadius: '100px',
-            padding: '1px 5px',
-            fontSize: '8px',
+            padding: '0 4px',
+            fontSize: '7px',
             fontWeight: 700,
           }}
         >
@@ -116,7 +116,7 @@ function ButtonStylePreview({ id, color }: { id: StyleId; color: string }) {
   }
   // CIRCLE default
   return (
-    <div style={{ ...base, width: '36px', height: '36px', borderRadius: '50%' }}>
+    <div style={{ ...base, width: '30px', height: '30px', borderRadius: '50%', flexShrink: 0 }}>
       <ChatIcon />
     </div>
   );
@@ -135,17 +135,18 @@ export function ButtonStylePicker({ value, onChange, color }: ButtonStylePickerP
             type="button"
             onClick={() => onChange(id)}
             className={cn(
-              'flex flex-col items-center gap-2 rounded-xl border p-3 transition-all',
+              'flex flex-col items-center gap-1.5 rounded-xl border px-1.5 py-2.5 transition-all',
               'hover:border-primary/50 hover:bg-accent/50',
               selected
                 ? 'border-primary bg-primary/5 ring-1 ring-primary'
                 : 'border-border bg-card'
             )}
           >
-            <div className="flex h-12 w-full items-center justify-center">
+            {/* Fixed-height container, clip overflow so pills don't bleed */}
+            <div className="flex h-10 w-full items-center justify-center overflow-hidden">
               <ButtonStylePreview id={id} color={color} />
             </div>
-            <span className="text-center text-[10px] leading-tight text-muted-foreground">
+            <span className="w-full text-center text-[9px] leading-tight text-muted-foreground">
               {t(labelKey)}
             </span>
           </button>

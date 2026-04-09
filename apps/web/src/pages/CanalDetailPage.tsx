@@ -1132,8 +1132,8 @@ export default function CanalDetailPage() {
                     </div>
                   </div>
 
-                  {/* Right column — live preview */}
-                  <div className="rounded-xl border border-border bg-card p-6">
+                  {/* Right column — live preview (sticky so it doesn't scroll away) */}
+                  <div className="sticky top-6 self-start rounded-xl border border-border bg-card p-6">
                     <WidgetPreview
                       color={widgetColor}
                       position={widgetPosition}
