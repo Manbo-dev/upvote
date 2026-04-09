@@ -61,12 +61,12 @@ export function WidgetPreview({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        width: '220px',
+        width: '170px',
         background: surface,
-        borderRadius: '12px',
+        borderRadius: '10px',
         overflow: 'hidden',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-        fontSize: '11px',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.13)',
+        fontSize: '10px',
       }}
     >
       {/* Header */}
@@ -74,25 +74,25 @@ export function WidgetPreview({
         style={{
           background: color,
           color: 'white',
-          padding: '10px 14px',
+          padding: '8px 10px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
-        <span style={{ fontWeight: 600, fontSize: '12px' }}>
+        <span style={{ fontWeight: 600, fontSize: '11px' }}>
           {title || strings.feedbackLabel}
         </span>
         <span
           style={{
             background: 'rgba(255,255,255,0.2)',
-            borderRadius: '4px',
-            width: '18px',
-            height: '18px',
+            borderRadius: '3px',
+            width: '16px',
+            height: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '12px',
+            fontSize: '11px',
             cursor: 'default',
           }}
         >
@@ -100,19 +100,19 @@ export function WidgetPreview({
         </span>
       </div>
       {/* Body */}
-      <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <textarea
           readOnly
           placeholder={placeholder || strings.placeholder}
-          rows={3}
+          rows={2}
           style={{
             width: '100%',
             background: inputBg,
             border: `1.5px solid ${border}`,
-            borderRadius: '7px',
+            borderRadius: '6px',
             color: onSurface,
-            fontSize: '10px',
-            padding: '7px 8px',
+            fontSize: '9px',
+            padding: '5px 7px',
             resize: 'none',
             fontFamily: 'inherit',
             boxSizing: 'border-box',
@@ -124,16 +124,16 @@ export function WidgetPreview({
             background: color,
             color: 'white',
             border: 'none',
-            borderRadius: '7px',
-            padding: '7px',
+            borderRadius: '6px',
+            padding: '5px',
             fontWeight: 600,
-            fontSize: '10px',
+            fontSize: '9px',
             cursor: 'default',
           }}
         >
           {strings.submit}
         </button>
-        <span style={{ color: muted, fontSize: '9px', textAlign: 'center', lineHeight: 1.4 }}>
+        <span style={{ color: muted, fontSize: '8px', textAlign: 'center', lineHeight: 1.4 }}>
           {strings.consent}
         </span>
       </div>
@@ -279,7 +279,7 @@ export function WidgetPreview({
             background: frameBackground,
             border: `1px solid ${frameBorder}`,
             borderRadius: '12px',
-            height: '240px',
+            height: '200px',
             position: 'relative',
             overflow: 'hidden',
           }}
@@ -337,6 +337,10 @@ export function WidgetPreview({
   const isLeft = position === 'BOTTOM_LEFT' || position === 'TOP_LEFT';
   const isTop = position === 'TOP_RIGHT' || position === 'TOP_LEFT';
 
+  // Determine how far to offset the panel from the trigger button
+  const TRIGGER_SIZE = 48; // approximate trigger height including margin
+  const PANEL_OFFSET = TRIGGER_SIZE + 8;
+
   return (
     <div>
       <p className="text-xs text-muted-foreground mb-3">{t('canal.widgetPreviewLabel')}</p>
@@ -345,23 +349,24 @@ export function WidgetPreview({
           background: frameBackground,
           border: `1px solid ${frameBorder}`,
           borderRadius: '12px',
-          height: '240px',
+          height: '280px',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Mock page content */}
-        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', opacity: 0.35 }}>
-          <div style={{ height: '8px', background: onSurface, borderRadius: '4px', width: '60%' }} />
-          <div style={{ height: '6px', background: onSurface, borderRadius: '4px', width: '80%' }} />
-          <div style={{ height: '6px', background: onSurface, borderRadius: '4px', width: '45%' }} />
+        {/* Mock page skeleton */}
+        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '7px', opacity: 0.3 }}>
+          <div style={{ height: '7px', background: onSurface, borderRadius: '4px', width: '55%' }} />
+          <div style={{ height: '5px', background: onSurface, borderRadius: '4px', width: '75%' }} />
+          <div style={{ height: '5px', background: onSurface, borderRadius: '4px', width: '40%' }} />
+          <div style={{ height: '5px', background: onSurface, borderRadius: '4px', width: '60%', marginTop: '4px' }} />
         </div>
 
         {/* Panel — open by default in preview */}
         <div
           style={{
             position: 'absolute',
-            [isTop ? 'top' : 'bottom']: isTop ? '56px' : '56px',
+            [isTop ? 'top' : 'bottom']: `${PANEL_OFFSET}px`,
             [isLeft ? 'left' : 'right']: '12px',
           }}
         >
