@@ -99,12 +99,13 @@ export default function BillingPage() {
   if (!subscription) return null;
 
   const planoAtual = subscription.plano;
-  const isPago = planoAtual === 'STARTER' || planoAtual === 'PRO';
+  const isPago = planoAtual === 'STARTER' || planoAtual === 'PRO' || planoAtual === 'BUSINESS';
 
   const planoLabels: Record<string, string> = {
     FREE: 'Free',
     STARTER: 'Starter',
     PRO: 'Pro',
+    BUSINESS: 'Business',
   };
 
   const locale = i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US';
@@ -296,22 +297,30 @@ export default function BillingPage() {
       )}
 
       {/* Business plan */}
-      <div className="rounded-xl border border-border bg-card p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-bold text-foreground">Business</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t('billing.plans.business.description')}
-            </p>
+      {planoAtual !== 'BUSINESS' && (
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Business</h3>
+              <p className="mt-1 text-3xl font-bold text-foreground">
+                R$299<span className="text-base font-normal text-muted-foreground">{t('billing.perMonth')}</span>
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t('billing.plans.business.description')}
+              </p>
+            </div>
+            <button
+              onClick={isPago ? handlePortal : () => handleCheckout('BUSINESS')}
+              disabled={isPago ? loading === 'portal' : loading === 'BUSINESS'}
+              className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
+            >
+              {isPago
+                ? (loading === 'portal' ? t('billing.opening') : t('billing.upgradeViaPortal'))
+                : (loading === 'BUSINESS' ? t('billing.redirecting') : `${t('billing.subscribeTo')} Business`)}
+            </button>
           </div>
-          <a
-            href="mailto:contato@upvote.com"
-            className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            {t('billing.plans.business.contact')}
-          </a>
         </div>
-      </div>
+      )}
     </div>
   );
 }
