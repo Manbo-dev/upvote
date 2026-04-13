@@ -913,7 +913,7 @@ export default function CanalDetailPage() {
           </TabsContent>
 
           <TabsContent value="settings">
-            <div className="max-w-lg space-y-4">
+            <div className="space-y-6">
               {/* Public Board */}
               {!canUsePublicBoard ? (
                 <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center">
@@ -1003,7 +1003,7 @@ export default function CanalDetailPage() {
                   </Link>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
                   {/* Left column — controls */}
                   <div className="space-y-5 rounded-xl border border-border bg-card p-6">
                     <h2 className="text-lg font-semibold text-foreground">

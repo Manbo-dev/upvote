@@ -61,7 +61,7 @@ export function WidgetPreview({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        width: '170px',
+        width: '200px',
         background: surface,
         borderRadius: '10px',
         overflow: 'hidden',
@@ -279,7 +279,7 @@ export function WidgetPreview({
             background: frameBackground,
             border: `1px solid ${frameBorder}`,
             borderRadius: '12px',
-            height: '200px',
+            height: '240px',
             position: 'relative',
             overflow: 'hidden',
           }}
@@ -349,7 +349,7 @@ export function WidgetPreview({
           background: frameBackground,
           border: `1px solid ${frameBorder}`,
           borderRadius: '12px',
-          height: '280px',
+          height: '340px',
           position: 'relative',
           overflow: 'hidden',
         }}
