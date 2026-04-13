@@ -205,7 +205,7 @@ jobs:
         run: kubectl apply -f infra/k8s/pod-monitor.yaml
 
       - name: Aguardar rollout da API
-        run: kubectl rollout status deployment/api -n ${{ env.NAMESPACE }} --timeout=300s
+        run: kubectl rollout status deployment/api -n ${{ env.NAMESPACE }} --timeout=600s
 
       - name: Exibir status dos pods
         if: always()
