@@ -116,18 +116,17 @@ export function ButtonStylePicker({ value, onChange, color }: ButtonStylePickerP
             type="button"
             onClick={() => onChange(id)}
             className={cn(
-              'flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all text-left',
+              'flex flex-col items-center gap-2 rounded-xl border px-3 py-3 transition-all',
               'hover:border-primary/50 hover:bg-accent/50',
               selected
                 ? 'border-primary bg-primary/5 ring-1 ring-primary'
                 : 'border-border bg-card'
             )}
           >
-            {/* Preview — fixed width so the label aligns consistently */}
-            <div className="flex w-14 shrink-0 items-center justify-center">
+            <div className="flex h-10 w-full items-center justify-center overflow-hidden">
               <ButtonStylePreview id={id} color={color} />
             </div>
-            <span className="text-xs font-medium text-foreground">
+            <span className="text-xs font-medium text-foreground leading-tight text-center">
               {t(labelKey)}
             </span>
           </button>
